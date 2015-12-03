@@ -2,21 +2,37 @@
 #include "ActiveWindowTracker.h"
 #include <iostream>
 
-int main(){
-	ActiveWindowTracker awt;
-	awt.setCallback([](HWND hwnd){
-		if(!hwnd)
-			std::wcout << L"No foreground window detected\n";
-		else{
-			WindowInfo wi(hwnd);
-            std::cout << "Foreground window title is \"" //<< wi.getTitle()
-				<< "\" from process name \"" //<< wi.getProcessName()
-				<< "\" running from file \"" //<< wi.getProcessFilename()
-                << "\"\n";
-		}
-	});
+int main()
+{
+    SetConsoleOutputCP(65001);
 
-	MSG msg;
-    while (GetMessage(&msg, NULL, 0, 0)){DispatchMessage(&msg);}
-	return 0;
+    ActiveWindowTracker awt;
+    awt.setCallback([](HWND hwnd){
+        try
+        {
+            if (!hwnd)
+                std::wcout << L"No foreground window detected\n";
+            else
+            {
+                WindowInfo wi(hwnd);
+                std::wcout << L"Foreground window title is \"" << wi.getTitle()
+                    << L"\" from process name \"" << wi.getProcessName()
+                    << L"\" running from file \"" << wi.getProcessFilename()
+                    << L"\"\n";
+            }
+        } catch (std::exception& ee)
+        {
+            std::cerr << ee.what() << "\n";
+        } catch (...)
+        {
+            std::cerr << "Unknown exception raised\n";
+        }
+    });
+
+    MSG msg;
+    while (GetMessage(&msg, NULL, 0, 0))
+    {
+        DispatchMessage(&msg);
+    }
+    return 0;
 }

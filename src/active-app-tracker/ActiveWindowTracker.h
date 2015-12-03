@@ -14,6 +14,7 @@ public:
 	void setCallback(OnWindowChanged_t const& callback);
 private:
 	HWND activeHWND = NULL;
+    std::wstring lastWindowTitle;
 	OnWindowChanged_t callback;
 	UINT_PTR timerHandle;
 	static ActiveWindowTracker* _this; // to pass to timer proc
