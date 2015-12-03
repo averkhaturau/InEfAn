@@ -22,7 +22,7 @@ inline std::wstring readProcessSomething(HWND hwnd, Fn_t fn){
     if (!procHandle)
         throw std::runtime_error("Cannot OpenProcess with error: " + std::to_string(GetLastError()));
 
-    return readFromFuncAndResizeIfNeeded([&](std::wstring& s){return fn(procHandle, NULL, (LPWSTR)s.data(), s.size()); });
+    return readFromFuncAndResizeIfNeeded([&](std::wstring& s){return fn(procHandle, NULL, (LPWSTR)s.data(), static_cast<DWORD>(s.size())); });
 }
 
 
