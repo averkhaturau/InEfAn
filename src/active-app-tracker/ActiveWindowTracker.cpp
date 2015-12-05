@@ -24,11 +24,10 @@ void ActiveWindowTracker::checkChanges()
 {
     const HWND currentFW = GetForegroundWindow();
     const std::wstring currentTitle = WindowInfo(currentFW).getTitle();
-   // track window changes and title changes
-    if (activeHWND != currentFW || lastWindowTitle != currentTitle)
-    {
+    // track window changes and title changes
+    if (activeHWND != currentFW || lastWindowTitle != currentTitle) {
         activeHWND = currentFW;
-       lastWindowTitle = currentTitle;
+        lastWindowTitle = currentTitle;
         if (callback)
             callback(currentFW);
     }

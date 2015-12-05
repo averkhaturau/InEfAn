@@ -18,28 +18,26 @@ void __cdecl setCallbacks(Keypressed_t& k, Mouse_t& m, HHOOK kh, HHOOK mh)
 
 extern "C" __declspec(dllexport)
 LRESULT __cdecl keyboardCallback(
-_In_ int    nCode,
-_In_ WPARAM wParam,
-_In_ LPARAM lParam
+    _In_ int    nCode,
+    _In_ WPARAM wParam,
+    _In_ LPARAM lParam
 )
 {
-	if (nCode >= 0 && onKeyPressed) try{
-		onKeyPressed(wParam, *reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam));
-	}
-	catch (...){/*too late to handle here*/}
+    if (nCode >= 0 && onKeyPressed) try {
+            onKeyPressed(wParam, *reinterpret_cast<KBDLLHOOKSTRUCT*>(lParam));
+        } catch (...) {/*too late to handle here*/}
     return CallNextHookEx(keyboardHook, nCode, wParam, lParam);
 }
 
 extern "C" __declspec(dllexport)
 LRESULT __cdecl mouseCallback(
-_In_ int    nCode,
-_In_ WPARAM wParam,
-_In_ LPARAM lParam
+    _In_ int    nCode,
+    _In_ WPARAM wParam,
+    _In_ LPARAM lParam
 )
 {
-	if (nCode >= 0 && onMouse) try{
-		onMouse(wParam, *reinterpret_cast<MSLLHOOKSTRUCT*>(lParam));
-	}
-	catch (...){/*too late to handle here*/ }
+    if (nCode >= 0 && onMouse) try {
+            onMouse(wParam, *reinterpret_cast<MSLLHOOKSTRUCT*>(lParam));
+        } catch (...) {/*too late to handle here*/ }
     return CallNextHookEx(mouseHook, nCode, wParam, lParam);
 }

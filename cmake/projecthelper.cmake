@@ -26,6 +26,7 @@ macro(DEFINE_DEFAULT_DEFINITIONS)
 		-D_CRT_NONSTDC_NO_WARNINGS 
 		-D__STDC_CONSTANT_MACROS
 		-DWIN32_LEAN_AND_MEAN # remove obsolete things from windows headers
+		-DUNICODE -D_UNICODE
 	)
 
 	add_definitions(
@@ -65,7 +66,7 @@ macro(SETUP_COMPILER_SETTINGS IS_DYNAMIC)
 	set(IS_DYNAMIC ${IS_DYNAMIC})
 
 	string(REPLACE ";" " " cmake_cl_release_init_str "${ADDITIONAL_CL_OPTIMIZATION_OPTIONS} /D NDEBUG /EHsc")
-	string(REPLACE ";" " " cmake_linker_release_init_str "${ADDITIONAL_LINKER_OPTIMIZATION_OPTIONS}")
+	string(REPLACE ";" " " cmake_linker_release_init_str "${ADDITIONAL_LINKER_OPTIMIZATION_OPTIONS} /opt:ref /opt:icf")
 		
 	if(IS_DYNAMIC)
 
@@ -73,7 +74,7 @@ macro(SETUP_COMPILER_SETTINGS IS_DYNAMIC)
 
 			if(WIN32)
 
-				set(CMAKE_C_FLAGS_DEBUG_INIT 			\"/D_DEBUG /MDd /Zi /Ob0 /Od /RTC1\")
+				set(CMAKE_C_FLAGS_DEBUG_INIT 		\"/D_DEBUG /MDd /Zi /Ob0 /Od /RTC1\")
 				set(CMAKE_C_FLAGS_MINSIZEREL_INIT     	\"/MD /O1 /Ob1 /D NDEBUG\")
 				set(CMAKE_C_FLAGS_RELEASE_INIT       	\"/MD /O2 /Ob2 /D NDEBUG\")
 				set(CMAKE_C_FLAGS_RELWITHDEBINFO_INIT 	\"/MD /Zi /O2 /Ob1 /D NDEBUG\")
@@ -83,8 +84,8 @@ macro(SETUP_COMPILER_SETTINGS IS_DYNAMIC)
 				set(CMAKE_CXX_FLAGS_RELEASE_INIT        \"/MD /O2 ${cmake_cl_release_init_str}\")
 				set(CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT \"/MD /Zi /O2 /Ob1 /D NDEBUG /EHsc\")
 
-				set(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL_INIT		\"${cmake_linker_release_init_str}\")
-				set(CMAKE_EXE_LINKER_FLAGS_RELEASE_INIT			\"${cmake_linker_release_init_str}\")
+				set(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL_INIT	\"${cmake_linker_release_init_str}\")
+				set(CMAKE_EXE_LINKER_FLAGS_RELEASE_INIT		\"${cmake_linker_release_init_str}\")
 				set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO_INIT	\"${cmake_linker_release_init_str}\")
 
 			endif(WIN32)

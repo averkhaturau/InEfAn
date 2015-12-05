@@ -15,20 +15,21 @@ inline std::wstring readFromFuncAndResizeIfNeeded(std::function<size_t(std::wstr
 }
 
 template<class Fn_t>
-inline std::wstring readProcessSomething(HWND hwnd, Fn_t fn){
+inline std::wstring readProcessSomething(HWND hwnd, Fn_t fn)
+{
     DWORD procID = 0;
     DWORD threadId = GetWindowThreadProcessId(hwnd, &procID);
     HANDLE procHandle = OpenProcess(PROCESS_ALL_ACCESS, FALSE, procID);
     if (!procHandle)
         throw std::runtime_error("Cannot OpenProcess with error: " + std::to_string(GetLastError()));
 
-    return readFromFuncAndResizeIfNeeded([&](std::wstring& s){return fn(procHandle, NULL, (LPWSTR)s.data(), static_cast<DWORD>(s.size())); });
+    return readFromFuncAndResizeIfNeeded([&](std::wstring & s) {return fn(procHandle, NULL, (LPWSTR)s.data(), static_cast<DWORD>(s.size())); });
 }
 
 
 std::wstring WindowInfo::getTitle() const
 {
-    return readFromFuncAndResizeIfNeeded([this](std::wstring& s){return static_cast<size_t>(GetWindowTextW(myHWND, (LPWSTR)s.data(), static_cast<int>(s.size())));});
+    return readFromFuncAndResizeIfNeeded([this](std::wstring & s) {return static_cast<size_t>(GetWindowTextW(myHWND, (LPWSTR)s.data(), static_cast<int>(s.size())));});
 }
 
 std::wstring WindowInfo::getProcessName() const
