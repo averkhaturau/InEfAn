@@ -14,7 +14,8 @@ inline std::string toUtf8(const char* s) { return std::string(s); };
 // next are custom typed to convert to utf8
 std::string toUtf8(std::wstring arg);
 std::string toUtf8(const wchar_t* arg);
-// template<unsigned N> inline std::string toUtf8(const wchar_t(&arg)[N]) { return toUtf8(std::wstring(arg)); }
+std::string toUtf8(wchar_t* arg);
+//template<unsigned N> inline std::string toUtf8(const wchar_t(&arg)[N]) { return toUtf8(std::wstring(arg)); }
 
 template<class Arg_t> inline std::string toUtf8(Arg_t* arg)
 {
@@ -38,4 +39,4 @@ template<> inline std::string toUtf8(unsigned short arg) { return std::to_string
 template<> inline std::string toUtf8(float arg) { return std::to_string(arg); }
 template<> inline std::string toUtf8(bool arg) { return arg ? "true" : "false"; }
 
-std::string timestamp(std::pair<time_t, unsigned short> const&);
+std::string timestamp(std::chrono::system_clock::time_point const&);

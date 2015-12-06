@@ -15,7 +15,6 @@ public:
     template <class Arg_t>
     Log2File& operator<<(Arg_t&& mess)
     {
-        std::lock_guard<std::mutex> scopeProtecter(lock);
         if (isEnabled())
             logfile << toUtf8(mess);
         return *this;

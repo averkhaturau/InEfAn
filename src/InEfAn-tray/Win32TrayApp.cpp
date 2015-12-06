@@ -8,7 +8,7 @@
 
 #include <windows.h>
 #include <filesystem>
-#include "../logger/log2file.h"
+#include "../logger/logger.h"
 #include <tchar.h>
 
 
@@ -29,6 +29,10 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 
 
+void onAppStart()
+{
+}
+
 int APIENTRY _tWinMain(
     _In_ HINSTANCE hInstance,
     _In_opt_ HINSTANCE hPrevInstance,
@@ -37,19 +41,17 @@ int APIENTRY _tWinMain(
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
 
-    char logfileDir[MAX_PATH] = {};
-    GetTempPathA(MAX_PATH, logfileDir);
-
     MSG msg = {};
     LimitSingleInstance siLock(L"Local\\" _T(VER_SZ_PRODUCTNAME));
 
     try {
-        Log2File logfile(std::tr2::sys::path(logfileDir) / std::tr2::sys::path("logfile.txt"));
 
         if (siLock.IsAnotherInstanceRunning()) {
-
             return 1;
         }
+
+        Logger::instance() << "Starting InEfAn";
+        onAppStart();
 
         MyRegisterClass(hInstance);
 
@@ -68,13 +70,9 @@ int APIENTRY _tWinMain(
 
         BOOL bSuccess = Shell_NotifyIconW(NIM_ADD, &traydata);
 
-        // Main message loop:
         while (GetMessage(&msg, NULL, 0, 0)) {
-            //if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-            //{
             TranslateMessage(&msg);
             DispatchMessage(&msg);
-            //}
         }
 
         if (hContext) {
@@ -82,9 +80,11 @@ int APIENTRY _tWinMain(
             hContext = NULL;
         }
 
-        Shell_NotifyIconW(NIM_DELETE, &traydata);
+        Logger::instance() << "Exiting InEfAn";
 
     } catch (...) {}
+
+    Shell_NotifyIconW(NIM_DELETE, &traydata);
     siLock.Release();
 
     return (int) msg.wParam;
@@ -119,10 +119,14 @@ void PopulateMenu(HWND hWnd)
     }
     HMENU contextMenu = GetSubMenu(hContext, 0);
 
-    if (true/*logger.enabled()*/) {
-        RemoveMenu(contextMenu, ID_TRAYMENU_RESUME, MF_BYCOMMAND);
+
+    if (Logger::instance().isEnabled()) {
+        EnableMenuItem(contextMenu, ID_TRAYMENU_PAUSE, MF_BYCOMMAND | MF_ENABLED);
+        EnableMenuItem(contextMenu, ID_TRAYMENU_RESUME, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+
     } else {
-        RemoveMenu(contextMenu, ID_TRAYMENU_PAUSE, MF_BYCOMMAND);
+        EnableMenuItem(contextMenu, ID_TRAYMENU_PAUSE, MF_BYCOMMAND | MF_DISABLED | MF_GRAYED);
+        EnableMenuItem(contextMenu, ID_TRAYMENU_RESUME, MF_BYCOMMAND | MF_ENABLED);
     }
 
     POINT CursorPos;
@@ -155,8 +159,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         ShellExecuteW(NULL, L"open", L"http://" _T(VER_SZ_DOMAIN) L"/", NULL, NULL, SW_SHOWNORMAL);
                         break;
                     case ID_TRAYMENU_PAUSE:
+                        Logger::instance().enable(false);
                         break;
                     case ID_TRAYMENU_RESUME:
+                        Logger::instance().enable(true);
                         break;
                     case ID_TRAYMENU_SENDLOGFILES: {
                         //                        bool result = postLogfiles();
@@ -188,7 +194,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
 
     } catch (std::exception& ee) {
-        MessageBoxA(hWnd, ee.what(), PROJECT_FULLNAME, MB_ICONERROR);
+        MessageBoxA(hWnd, ee.what(), BRAND_FULLNAME, MB_ICONERROR);
     }
     return 0;
 }

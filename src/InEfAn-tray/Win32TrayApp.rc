@@ -18,11 +18,13 @@ BEGIN
     POPUP "Tray Menu"
     BEGIN
 		MENUITEM "О InEfAn...",        ID_TRAYMENU_ABOUT
-#ifdef DEVELOPER_FEATURES
+
 		MENUITEM SEPARATOR
+		MENUITEM "Приостановить логгирование", ID_TRAYMENU_PAUSE
+		MENUITEM "Продолжить логгирование", ID_TRAYMENU_RESUME
         MENUITEM "Отправить отчёт разработчикам", ID_TRAYMENU_SENDLOGFILES
 		MENUITEM SEPARATOR
-#endif
+
         MENUITEM "Выйти",                        ID_TRAYMENU_EXIT
     END
 END
@@ -57,11 +59,13 @@ BEGIN
     POPUP "Tray Menu"
     BEGIN
 		MENUITEM "About InEfAn...",    ID_TRAYMENU_ABOUT
-#ifdef DEVELOPER_FEATURES
+
 		MENUITEM SEPARATOR
+		MENUITEM "Pause logging", ID_TRAYMENU_PAUSE
+		MENUITEM "Resume logging", ID_TRAYMENU_RESUME
         MENUITEM "Send report to developers",    ID_TRAYMENU_SENDLOGFILES
 		MENUITEM SEPARATOR
-#endif
+
         MENUITEM "Exit",                         ID_TRAYMENU_EXIT
     END
 END
