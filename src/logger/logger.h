@@ -4,6 +4,7 @@
 #include <Windows.h>
 #include <Shlobj.h>
 #include <filesystem>
+#include <mutex>
 
 class Logger : public Log2File
 {
@@ -22,16 +23,20 @@ public:
     class LogRecord
     {
     public:
-        LogRecord(Log2File& l2f) : my_l2f(l2f) { my_l2f << timestamp(std::chrono::system_clock::now()); };
+		LogRecord(Log2File& l2f) : my_l2f(l2f) { m.lock(); my_l2f << timestamp(std::chrono::system_clock::now()); };
         template <class Arg_t>
         LogRecord& operator<<(Arg_t&& mess)
         {
             my_l2f << mess;
             return *this;
         }
-        ~LogRecord() { my_l2f << "\n"; my_l2f.flush(); }
+		~LogRecord() { my_l2f << "\n"; my_l2f.flush(); m.unlock(); }
     private:
+		LogRecord() = delete;
+		LogRecord(LogRecord const&) = delete;
+		LogRecord(LogRecord &&) = delete;
         Log2File& my_l2f;
+		std::mutex m;
     };
 
     template <class Arg_t>

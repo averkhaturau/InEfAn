@@ -24,7 +24,7 @@ set(SRCS
 
 add_executable(${PROJECT_NAME} WIN32 ${SRCS})
 
-target_link_libraries(${PROJECT_NAME} ${ADDITIONAL_LIBS} logger)
+target_link_libraries(${PROJECT_NAME} ${ADDITIONAL_LIBS} logger ActiveAppTracker InputHooker_)
 
 #==== setting version =====
 
