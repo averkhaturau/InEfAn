@@ -23,24 +23,25 @@ public:
     class LogRecord
     {
     public:
-		LogRecord(Log2File& l2f) : my_l2f(l2f) { m.lock(); my_l2f << timestamp(std::chrono::system_clock::now()); };
+        LogRecord(Log2File& l2f) : my_l2f(l2f) { my_l2f << timestamp(std::chrono::system_clock::now()); };
+        LogRecord(LogRecord&& a) : my_l2f(a.my_l2f) { a.shouldFlush = false; };
         template <class Arg_t>
-        LogRecord& operator<<(Arg_t&& mess)
+        LogRecord&& operator<<(Arg_t&& mess)
         {
             my_l2f << mess;
-            return *this;
+            return std::move(*this);
         }
-		~LogRecord() { my_l2f << "\n"; my_l2f.flush(); m.unlock(); }
+        ~LogRecord() { if (shouldFlush) { my_l2f << "\n"; my_l2f.flush(); } }
     private:
-		LogRecord() = delete;
-		LogRecord(LogRecord const&) = delete;
-		LogRecord(LogRecord &&) = delete;
+        LogRecord() = delete;
+        LogRecord(LogRecord const&) = delete;
+
         Log2File& my_l2f;
-		std::mutex m;
+        bool shouldFlush = true;
     };
 
     template <class Arg_t>
-    LogRecord& operator<<(Arg_t&& mess)
+    LogRecord operator<<(Arg_t&& mess)
     {
         return LogRecord(*this) << mess;
     }

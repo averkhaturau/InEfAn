@@ -35,39 +35,38 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 
 
 
-void logEvent(InputEvent && ie){ 
-	//Logger::instance() << "\t" << ie.inputDevice() << "\t" << ie.description();
+void logEvent(InputEvent&& ie)
+{
+    //Logger::instance() << "\t" << ie.inputDevice() << "\t" << ie.description();
 };
 
 void onAppStart()
 {
-	// Start listen to input devices
-	InputHooker::instance().setHooks(
-		[](WPARAM wparam, KBDLLHOOKSTRUCT kbsrtuct) {logEvent(KeyboardEvent(wparam, kbsrtuct)); },
-		[](WPARAM wparam, MSLLHOOKSTRUCT mstruct) {logEvent(MouseEvent(wparam, mstruct)); });
-//	InputHooker::instance().startHook();
+    // Start listen to input devices
+    InputHooker::instance().setHooks(
+    [](WPARAM wparam, KBDLLHOOKSTRUCT kbsrtuct) {logEvent(KeyboardEvent(wparam, kbsrtuct)); },
+    [](WPARAM wparam, MSLLHOOKSTRUCT mstruct) {logEvent(MouseEvent(wparam, mstruct)); });
+    //  InputHooker::instance().startHook();
 
-	// Start tracking foreground window
-	static ActiveWindowTracker awt;
-	awt.setCallback([](HWND hwnd) {
-		try {
-			if (!hwnd)
-				Logger::instance() << L"No foreground window detected\n";
-			else {
-				WindowInfo wi(hwnd);
-				Logger::instance() << L"Foreground window title is \"" << wi.getTitle()
-					<< L"\" from process name \"" << wi.getProcessName()
-					<< L"\" running from file \"" << wi.getProcessFilename()
-					<< L"\"\n";
-			}
-		}
-		catch (std::exception& ee) {
-			Logger::instance() << ee.what() << "\n";
-		}
-		catch (...) {
-		//	std::cerr << "Unknown exception raised\n";
-		}
-	});
+    // Start tracking foreground window
+    static ActiveWindowTracker awt;
+    awt.setCallback([](HWND hwnd) {
+        try {
+            if (!hwnd)
+                Logger::instance() << L"No foreground window detected";
+            else {
+                WindowInfo wi(hwnd);
+                (Logger::instance() << L"Foreground window title is \"") << wi.getTitle()
+                        << L"\" from process name \"" << wi.getProcessName()
+                        << L"\" running from file \"" << wi.getProcessFilename()
+                        << L"\"";
+            }
+        } catch (std::exception& ee) {
+            Logger::instance() << ee.what() << "\n";
+        } catch (...) {
+            //  std::cerr << "Unknown exception raised\n";
+        }
+    });
 }
 
 int APIENTRY _tWinMain(
