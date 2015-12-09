@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.1)
 
 project(InEfAn)
 
-set(BINARY_INSTALL_DIR bin)
+set(CMAKE_INSTALL_PREFIX bin)
 
 set(BRAND_NAME "${PROJECT_NAME}" CACHE STRING "Utility name")
 set(BRAND_FULLNAME "Plezir ${PROJECT_NAME}" CACHE STRING "Full name of the product")

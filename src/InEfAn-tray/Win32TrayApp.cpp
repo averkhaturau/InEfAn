@@ -37,7 +37,7 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 
 void logEvent(InputEvent&& ie)
 {
-    //Logger::instance() << "\t" << ie.inputDevice() << "\t" << ie.description();
+    Logger::instance() << "\t" << ie.inputDevice() << "\t" << ie.description();
 };
 
 void onAppStart()
@@ -46,7 +46,7 @@ void onAppStart()
     InputHooker::instance().setHooks(
     [](WPARAM wparam, KBDLLHOOKSTRUCT kbsrtuct) {logEvent(KeyboardEvent(wparam, kbsrtuct)); },
     [](WPARAM wparam, MSLLHOOKSTRUCT mstruct) {logEvent(MouseEvent(wparam, mstruct)); });
-    //  InputHooker::instance().startHook();
+    InputHooker::instance().startHook();
 
     // Start tracking foreground window
     static ActiveWindowTracker awt;

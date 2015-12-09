@@ -54,10 +54,10 @@ void Log2File::openFile(const std::tr2::sys::path& filename)
     if (logfile.is_open() && this->filename == filename)
         return;
     this->filename = filename;
-    if (std::tr2::sys::exists(filename) ||
-        std::tr2::sys::create_directories(filename.parent_path()))
+    if (!std::tr2::sys::exists(filename))
+        std::tr2::sys::create_directories(filename.parent_path());
 
-        logfile.open(filename, std::ios::app);
+    logfile.open(filename, std::ios::app);
 
     //   writeLogHeader();
 }
