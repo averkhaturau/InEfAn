@@ -26,9 +26,12 @@ add_executable(${PROJECT_NAME} WIN32 ${SRCS})
 
 target_link_libraries(${PROJECT_NAME} ${ADDITIONAL_LIBS} logger ActiveAppTracker InputHooker_)
 
-#==== setting version =====
-
 VersionConf(${PROJECT_NAME} ${VERS_CONF} ${VERS_FILE})
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+	COMMAND 
+		mt -manifest "${CMAKE_CURRENT_SOURCE_DIR}/win.manifest" -outputresource:"$<TARGET_FILE:${PROJECT_NAME}>"
+)
 
 # ====== installer settings ======
 

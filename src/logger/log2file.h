@@ -38,4 +38,6 @@ private:
 
     std::tr2::sys::path filename;
     std::fstream logfile;
+
+    void writeLogHeader();
 };

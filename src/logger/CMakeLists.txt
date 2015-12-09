@@ -1,5 +1,7 @@
 project(logger)
 
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
 set(SRC
 	logger.h
 	log2file.cpp

@@ -1,6 +1,40 @@
 #include "log2file.h"
 
 #include <time.h>
+#include <Windows.h>
+#include "../InEfAn-tray/Version.inl"
+
+namespace
+{
+    std::string pcType()
+    {
+        SYSTEM_POWER_STATUS powerStatus = {};
+        GetSystemPowerStatus(&powerStatus);
+        if (powerStatus.BatteryFlag == 128)
+            return "desktop";
+        else
+            return "laptop";
+    }
+
+    std::string osName()
+    {
+#if defined(_WIN64)
+        return "win64";  // 64-bit programs run only on Win64
+#elif defined(_WIN32)
+        // 32-bit programs run on both 32-bit and 64-bit Windows
+        // so must sniff
+        BOOL f64 = FALSE;
+        return (IsWow64Process(GetCurrentProcess(), &f64) && f64 ? "win64" : "win32");
+#endif
+    }
+
+    std::string osVer()
+    {
+        OSVERSIONINFO osvi = { sizeof(OSVERSIONINFO) };
+        GetVersionEx(&osvi);
+        return std::to_string(osvi.dwMajorVersion) + "." + std::to_string(osvi.dwMinorVersion);
+    }
+}
 
 void Log2File::enable(bool makeEnabled)
 {
@@ -59,10 +93,18 @@ void Log2File::openFile(const std::tr2::sys::path& filename)
 
     logfile.open(filename, std::ios::app);
 
-    //   writeLogHeader();
+    writeLogHeader();
 }
 
 Log2File::~Log2File()
 {
     close();
+}
+
+void Log2File::writeLogHeader()
+{
+    logfile << "========================================\n"
+            "InEfAn version " << VER_SZ_PRODUCTVERSION << " built " << __TIMESTAMP__
+            << "\nis running on " << pcType() << " powered by " << osName() << " " << osVer()
+            << "\n========================================\n";
 }
