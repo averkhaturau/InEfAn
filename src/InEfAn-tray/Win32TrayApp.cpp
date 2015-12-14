@@ -35,9 +35,15 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 
 
 
-void logEvent(InputEvent&& ie)
+void logEvent(InputDeviceEvent&& ie)
 {
-    Logger::instance() << "\t" << ie.inputDevice() << "\t" << ie.description();
+    try {
+        Logger::instance() << "\t" << ie.inputDevice() << "\t" << ie.description();
+    } catch (std::exception& ee) {
+        Logger::instance() << ee.what();
+    } catch (...) {
+        Logger::instance() << "Unknown exception raised";
+    }
 };
 
 void onAppStart()
@@ -45,7 +51,7 @@ void onAppStart()
     // Start listen to input devices
     InputHooker::instance().setHooks(
     [](WPARAM wparam, KBDLLHOOKSTRUCT kbsrtuct) {logEvent(KeyboardEvent(wparam, kbsrtuct)); },
-    [](WPARAM wparam, MSLLHOOKSTRUCT mstruct) {logEvent(MouseEvent(wparam, mstruct)); });
+	[](WPARAM wparam, MSLLHOOKSTRUCT mstruct) {logEvent(MouseAnyEvent(wparam, mstruct)); });
     InputHooker::instance().startHook();
 
     // Start tracking foreground window
@@ -56,15 +62,15 @@ void onAppStart()
                 Logger::instance() << L"No foreground window detected";
             else {
                 WindowInfo wi(hwnd);
-                (Logger::instance() << L"Foreground window title is \"") << wi.getTitle()
-                        << L"\" from process name \"" << wi.getProcessName()
-                        << L"\" running from file \"" << wi.getProcessFilename()
-                        << L"\"";
+                Logger::instance() << L"Foreground window title is \"" << wi.getTitle()
+                                   << L"\" from process name \"" << wi.getProcessName()
+                                   << L"\" running from file \"" << wi.getProcessFilename()
+                                   << L"\"";
             }
         } catch (std::exception& ee) {
-            Logger::instance() << ee.what() << "\n";
+            Logger::instance() << ee.what();
         } catch (...) {
-            //  std::cerr << "Unknown exception raised\n";
+            Logger::instance() << "Unknown exception raised";
         }
     });
 }

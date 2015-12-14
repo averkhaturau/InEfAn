@@ -16,7 +16,7 @@ int main()
             //std::cout << vKeyCodes[kbsrtuct.vkCode] << (wparam == WM_KEYDOWN || wparam == WM_SYSKEYDOWN ? " down" : " up") << " at " << kbsrtuct.time << "\n";
         },
         [&el](WPARAM wparam, MSLLHOOKSTRUCT mstruct) {
-            el.log(MouseEvent(wparam, mstruct));
+            el.log(MouseAnyEvent(wparam, mstruct));
             //std::cout << "Mouse ";
             //switch (wparam){
             //case WM_LBUTTONDOWN: std::cout << "left down"; break;

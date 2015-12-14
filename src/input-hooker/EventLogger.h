@@ -7,7 +7,7 @@ class EventLogger
 {
 public:
     EventLogger(std::ostream& out): outstream(out) {}
-    void log(InputEvent const& ie)
+    void log(InputDeviceEvent const& ie)
     {
         outstream << ie.time() << "\t" << ie.inputDevice() << "\t" << ie.description() << "\n";
     }

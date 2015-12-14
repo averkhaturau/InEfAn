@@ -22,15 +22,17 @@ ActiveWindowTracker* ActiveWindowTracker::_this = nullptr;
 
 void ActiveWindowTracker::checkChanges()
 {
-    const HWND currentFW = GetForegroundWindow();
-    const std::wstring currentTitle = WindowInfo(currentFW).getTitle();
-    // track window changes and title changes
-    if (activeHWND != currentFW || lastWindowTitle != currentTitle) {
-        activeHWND = currentFW;
-        lastWindowTitle = currentTitle;
-        if (callback)
-            callback(currentFW);
-    }
+    try {
+        const HWND currentFW = GetForegroundWindow();
+        const std::wstring currentTitle = WindowInfo(currentFW).getTitle();
+        // track window changes and title changes
+        if (activeHWND != currentFW || lastWindowTitle != currentTitle) {
+            activeHWND = currentFW;
+            lastWindowTitle = currentTitle;
+            if (callback)
+                callback(currentFW);
+        }
+    } catch (...) {/*too late to handle here*/}
 }
 
 void CALLBACK ActiveWindowTracker::timerProc(HWND, UINT, UINT_PTR, DWORD dwTime)
