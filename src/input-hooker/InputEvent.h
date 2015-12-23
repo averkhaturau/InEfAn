@@ -20,14 +20,22 @@ public:
     virtual std::string description()const override
     {
         switch (wparam) {
-            case WM_LBUTTONDOWN: return "left down"; break;
-            case WM_LBUTTONUP:   return "left up"; break;
-            case WM_MOUSEMOVE:   return "moved"; break;
-            case WM_MOUSEWHEEL:  return "wheeled"; break;
-            case WM_MOUSEHWHEEL: return "h-wheeled"; break;
-            case WM_RBUTTONDOWN: return "right down"; break;
-            case WM_RBUTTONUP:   return "right up"; break;
-            default:             return "undefined action"; break;
+            case WM_LBUTTONDOWN:   return "left down"; break;
+            case WM_LBUTTONUP:     return "left up"; break;
+            case WM_LBUTTONDBLCLK: return "left dblclick"; break;
+            case WM_MOUSEMOVE:     return "moved"; break;
+            case WM_MOUSEWHEEL:    return "wheeled"; break;
+            case WM_MOUSEHWHEEL:   return "h-wheeled"; break;
+            case WM_RBUTTONDOWN:   return "right down"; break;
+            case WM_RBUTTONUP:     return "right up"; break;
+            case WM_RBUTTONDBLCLK: return "right dblclick"; break;
+            case WM_MBUTTONDOWN:   return "middle down"; break;
+            case WM_MBUTTONUP:     return "middle up"; break;
+            case WM_MBUTTONDBLCLK: return "middle dblclick"; break;
+            case WM_XBUTTONDOWN:   return "X down"; break;
+            case WM_XBUTTONUP:     return "X up"; break;
+            case WM_XBUTTONDBLCLK: return "X dblclick"; break;
+            default:               return "undefined action"; break;
         }
     };
     virtual std::string inputDevice()const override { return "mouse"; };

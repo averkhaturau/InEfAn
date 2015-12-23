@@ -2,7 +2,13 @@ project(InputHooker)
 
 set(DLL_NAME ${PROJECT_NAME})
 
-set(SRC input-hooker.h input-hooker.cpp)
+set(SRC
+	input-hooker.h
+	input-hooker.cpp
+	EventLogger.h
+	InputEvent.h
+	keycodes.h
+)
 
 add_definitions(-DDLL_NAME=${DLL_NAME})
 

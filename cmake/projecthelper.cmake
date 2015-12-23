@@ -51,10 +51,10 @@ macro(DEFINE_DEFAULT_DEFINITIONS)
 	# support WindowsXP
 	if(MSVC OR MSVC_IDE)
 		if(MSVC_VERSION EQUAL 1700)  # VC11/VS2012
-			add_definitions(-D_USING_V110_SDK71 -D_USING_V110_SDK71_)
+			add_definitions(-D_USING_V110_SDK71_)
 			set(CMAKE_GENERATOR_TOOLSET "v110_xp" CACHE STRING "Platform Toolset" FORCE)
 		elseif(MSVC_VERSION EQUAL 1800) # VC12/VS2013
-			add_definitions(-D_USING_V120_SDK71 -D_USING_V120_SDK71_)
+			add_definitions(-D_USING_V120_SDK71_)
 			set(CMAKE_GENERATOR_TOOLSET "v120_xp" CACHE STRING "Platform Toolset" FORCE)
 		endif()
 	endif(MSVC OR MSVC_IDE)
