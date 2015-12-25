@@ -7,6 +7,7 @@ set(SRC
 	input-hooker.cpp
 	EventLogger.h
 	InputEvent.h
+	InputEventTypes.h
 	keycodes.h
 )
 
