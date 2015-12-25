@@ -15,7 +15,7 @@ public:
 class MouseAnyEvent : public InputDeviceEvent
 {
 public:
-	MouseAnyEvent(WPARAM wp, MSLLHOOKSTRUCT const& me) : wparam(wp) { memcpy(&eventData, &me, sizeof(me)); }
+    MouseAnyEvent(WPARAM wp, MSLLHOOKSTRUCT const& me) : wparam(wp) { memcpy(&eventData, &me, sizeof(me)); }
     virtual DWORD time()const override { return eventData.time; };
     virtual std::string description()const override
     {
@@ -111,8 +111,8 @@ public:
     MouseEvent(MouseEvent&&) = delete;
     MouseEvent() = delete;
 
-	long x()const{ return x_; }
-	long y()const{ return y_; }
+    long x()const { return x_; }
+    long y()const { return y_; }
 };
 
 class MouseMoveEvent : public MouseEvent
@@ -124,6 +124,24 @@ public:
     explicit MouseMoveEvent(MSLLHOOKSTRUCT const& eventData) : MouseEvent(eventData) {}
 };
 
+class MouseMoveStartEvent : public MouseMoveEvent
+{
+public:
+    MouseMoveStartEvent() = delete;
+    MouseMoveStartEvent(MouseMoveStartEvent&&) = delete;
+    MouseMoveStartEvent(MouseMoveStartEvent const& e) : MouseMoveEvent(e) {}
+    explicit MouseMoveStartEvent(MSLLHOOKSTRUCT const& eventData) : MouseMoveEvent(eventData) {}
+};
+
+class MouseMoveFinishEvent : public MouseMoveEvent
+{
+public:
+    MouseMoveFinishEvent() = delete;
+    MouseMoveFinishEvent(MouseMoveFinishEvent&&) = delete;
+    MouseMoveFinishEvent(MouseMoveFinishEvent const& e) : MouseMoveEvent(e) {}
+    explicit MouseMoveFinishEvent(MSLLHOOKSTRUCT const& eventData) : MouseMoveEvent(eventData) {}
+};
+
 class MouseWheelEvent : public MouseEvent
 {
 public:
@@ -133,6 +151,24 @@ public:
     explicit MouseWheelEvent(MSLLHOOKSTRUCT const& eventData) : MouseEvent(eventData) {}
 };
 
+class MouseWheelStartEvent : public MouseWheelEvent
+{
+public:
+    MouseWheelStartEvent() = delete;
+    MouseWheelStartEvent(MouseWheelStartEvent&&) = delete;
+    MouseWheelStartEvent(MouseWheelStartEvent const& e) : MouseWheelEvent(e) {}
+    explicit MouseWheelStartEvent(MSLLHOOKSTRUCT const& eventData) : MouseWheelEvent(eventData) {}
+};
+
+class MouseWheelFinishEvent : public MouseWheelEvent
+{
+public:
+    MouseWheelFinishEvent() = delete;
+    MouseWheelFinishEvent(MouseWheelFinishEvent&&) = delete;
+    MouseWheelFinishEvent(MouseWheelFinishEvent const& e) : MouseWheelEvent(e) {}
+    explicit MouseWheelFinishEvent(MSLLHOOKSTRUCT const& eventData) : MouseWheelEvent(eventData) {}
+};
+
 class MouseHorWheelEvent : public MouseEvent
 {
 public:
@@ -140,6 +176,24 @@ public:
     MouseHorWheelEvent(MouseHorWheelEvent&&) = delete;
     MouseHorWheelEvent(MouseHorWheelEvent const& e) : MouseEvent(e) {}
     explicit MouseHorWheelEvent(MSLLHOOKSTRUCT const& eventData) : MouseEvent(eventData) {}
+};
+
+class MouseHorWheelStartEvent : public MouseHorWheelEvent
+{
+public:
+    MouseHorWheelStartEvent() = delete;
+    MouseHorWheelStartEvent(MouseHorWheelStartEvent&&) = delete;
+    MouseHorWheelStartEvent(MouseHorWheelStartEvent const& e) : MouseHorWheelEvent(e) {}
+    explicit MouseHorWheelStartEvent(MSLLHOOKSTRUCT const& eventData) : MouseHorWheelEvent(eventData) {}
+};
+
+class MouseHorWheelFinishEvent : public MouseHorWheelEvent
+{
+public:
+    MouseHorWheelFinishEvent() = delete;
+    MouseHorWheelFinishEvent(MouseHorWheelFinishEvent&&) = delete;
+    MouseHorWheelFinishEvent(MouseHorWheelFinishEvent const& e) : MouseHorWheelEvent(e) {}
+    explicit MouseHorWheelFinishEvent(MSLLHOOKSTRUCT const& eventData) : MouseHorWheelEvent(eventData) {}
 };
 
 class MouseLeftUpEvent : public MouseEvent

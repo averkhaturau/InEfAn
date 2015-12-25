@@ -33,9 +33,7 @@ namespace
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 
-
-
-void logEvent(InputDeviceEvent&& ie)
+void logEvent(InputDeviceEvent const& ie)
 {
     try {
         Logger::instance() << "\t" << ie.inputDevice() << "\t" << ie.description();
@@ -46,12 +44,25 @@ void logEvent(InputDeviceEvent&& ie)
     }
 };
 
+template<class Ev_t>
+class EventPreanalyser
+{
+    EventPreanalyser() = delete;
+    EventPreanalyser(EventPreanalyser const&) = delete;
+    EventPreanalyser(EventPreanalyser&&) = delete;
+public:
+    explicit EventPreanalyser(Ev_t&& ev) : ie(ev) {}
+    void operator()() { logEvent(ie); }
+private:
+    Ev_t ie;
+};
+
 void onAppStart()
 {
     // Start listen to input devices
     InputHooker::instance().setHooks(
-    [](WPARAM wparam, KBDLLHOOKSTRUCT kbsrtuct) {logEvent(KeyboardEvent(wparam, kbsrtuct)); },
-	[](WPARAM wparam, MSLLHOOKSTRUCT mstruct) {logEvent(MouseAnyEvent(wparam, mstruct)); });
+    [](WPARAM wparam, KBDLLHOOKSTRUCT kbsrtuct) {EventPreanalyser<KeyboardEvent>(KeyboardEvent(wparam, kbsrtuct))(); },
+    [](WPARAM wparam, MSLLHOOKSTRUCT mstruct) {EventPreanalyser<MouseAnyEvent>(MouseAnyEvent(wparam, mstruct))(); });
     InputHooker::instance().startHook();
 
     // Start tracking foreground window
