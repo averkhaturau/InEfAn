@@ -15,7 +15,7 @@
 #include "../input-hooker/InputEvent.h"
 #include "../active-app-tracker/ActiveWindowTracker.h"
 #include "../active-app-tracker/WindowInfo.h"
-
+#include <future>
 
 // handle with care
 #define SECONDS *1000
@@ -33,14 +33,14 @@ namespace
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 
-void logEvent(InputDeviceEvent const& ie)
+Logger::LogRecord logEvent(InputDeviceEvent const& ie)
 {
     try {
-        Logger::instance() << "\t" << ie.inputDevice() << "\t" << ie.description();
+        return Logger::instance() << "\t" << ie.inputDevice() << "\t" << ie.description();
     } catch (std::exception& ee) {
-        Logger::instance() << ee.what();
+        return Logger::instance() << ee.what();
     } catch (...) {
-        Logger::instance() << "Unknown exception raised";
+        return Logger::instance() << "Unknown exception raised";
     }
 };
 
@@ -52,10 +52,46 @@ class EventPreanalyser
     EventPreanalyser(EventPreanalyser&&) = delete;
 public:
     explicit EventPreanalyser(Ev_t&& ev) : ie(ev) {}
-    void operator()() { logEvent(ie); }
+    void operator()()
+    {
+        logEvent(ie);
+    }
 private:
     Ev_t ie;
 };
+
+template<>
+class EventPreanalyser<MouseAnyEvent>
+{
+    EventPreanalyser() = delete;
+    EventPreanalyser(EventPreanalyser const&) = delete;
+    EventPreanalyser(EventPreanalyser&&) = delete;
+public:
+    explicit EventPreanalyser(MouseAnyEvent&& ev) : ie(ev) {}
+    void operator()()
+    {
+        if (lastEvent.isRepeatable())
+            if(lastEvent.eventType() != ie.eventType())
+                logEvent(lastEvent) << " finished";
+            else {
+                // log nothing
+                lastEvent = ie;
+                return;
+            }
+
+        if (ie.isRepeatable())
+            logEvent(ie) << " started";
+        else
+            logEvent(ie);
+
+        lastEvent = ie;
+    }
+private:
+    MouseAnyEvent ie;
+    static MouseAnyEvent lastEvent;
+};
+
+MouseAnyEvent EventPreanalyser<MouseAnyEvent>::lastEvent(WM_MOUSEFIRST, {});
 
 void onAppStart()
 {

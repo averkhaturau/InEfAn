@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Windows.h>
+
 class InputEvent
 {
     /*std::chrono::system_clock::time_point*/ DWORD time_;
@@ -8,9 +10,13 @@ public:
     InputEvent(InputEvent&&) = delete;
     InputEvent(InputEvent const& ie) : time_(ie.time_) {}
     explicit InputEvent(DWORD t) : time_(t) {}
+    virtual ~InputEvent() = 0;
 
     DWORD time()const { return time_; }
 };
+
+inline InputEvent::~InputEvent() {}
+
 
 class KeyEvent : public InputEvent
 {
@@ -20,9 +26,12 @@ public:
     KeyEvent(KeyEvent const& ke) : InputEvent(ke), vkCode_(ke.vkCode_) {}
     KeyEvent() = delete;
     KeyEvent(KeyEvent&&) = delete;
+    virtual ~KeyEvent() = 0;
 
     DWORD keyCode()const { return vkCode_; }
 };
+
+inline KeyEvent::~KeyEvent() {};
 
 class KeyDownEvent : public KeyEvent
 {

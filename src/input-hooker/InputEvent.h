@@ -10,13 +10,18 @@ public:
     virtual DWORD time()const = 0;
     virtual std::string description()const = 0;
     virtual std::string inputDevice()const = 0;
+
+    virtual WPARAM eventType()const { return wparam; }
+    virtual bool isRepeatable()const = 0;
+protected:
+    WPARAM wparam;
 };
 
 
 class MouseAnyEvent : public InputDeviceEvent
 {
 public:
-    MouseAnyEvent(WPARAM wp, MSLLHOOKSTRUCT const& me) : wparam(wp) { memcpy(&eventData, &me, sizeof(me)); }
+    MouseAnyEvent(WPARAM wp, MSLLHOOKSTRUCT const& me) { wparam = wp; memcpy(&eventData, &me, sizeof(me)); }
     virtual DWORD time()const override { return eventData.time; };
     virtual std::string description()const override
     {
@@ -41,20 +46,21 @@ public:
     };
     virtual std::string inputDevice()const override { return "mouse"; };
 
+    bool isRepeatable()const override { return wparam == WM_MOUSEMOVE || wparam == WM_MOUSEWHEEL || wparam == WM_MOUSEHWHEEL; }
+
 private:
-    WPARAM wparam;
     MSLLHOOKSTRUCT eventData;
 };
 
 class KeyboardEvent : public InputDeviceEvent
 {
 public:
-    KeyboardEvent(WPARAM wp, KBDLLHOOKSTRUCT const& me) : wparam(wp) { memcpy(&eventData, &me, sizeof(me)); }
+    KeyboardEvent(WPARAM wp, KBDLLHOOKSTRUCT const& me) { wparam = wp; memcpy(&eventData, &me, sizeof(me)); }
     virtual DWORD time()const override { return eventData.time; };
     virtual std::string description()const override { return std::string(wparam == WM_KEYDOWN || wparam == WM_SYSKEYDOWN ? "down " : "up ") + vKeyCodes[eventData.vkCode % sizeof(vKeyCodes)]; };
     virtual std::string inputDevice()const override { return "keyboard"; };
 
+    bool isRepeatable()const override { return false; }
 private:
-    WPARAM wparam;
     KBDLLHOOKSTRUCT eventData;
 };
