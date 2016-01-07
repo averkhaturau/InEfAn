@@ -22,6 +22,8 @@ class MouseAnyEvent : public InputDeviceEvent
 {
 public:
     MouseAnyEvent(WPARAM wp, MSLLHOOKSTRUCT const& me) { wparam = wp; memcpy(&eventData, &me, sizeof(me)); }
+    MouseAnyEvent(MouseAnyEvent const& a) { wparam = a.wparam; memcpy(&eventData, &a.eventData, sizeof(eventData)); }
+    MouseAnyEvent& operator =(MouseAnyEvent const& a) { wparam = a.wparam; memcpy(&eventData, &a.eventData, sizeof(eventData)); return *this; }
     virtual DWORD time()const override { return eventData.time; };
     virtual std::string description()const override
     {
@@ -29,9 +31,9 @@ public:
             case WM_LBUTTONDOWN:   return "left down"; break;
             case WM_LBUTTONUP:     return "left up"; break;
             case WM_LBUTTONDBLCLK: return "left dblclick"; break;
-            case WM_MOUSEMOVE:     return "moved"; break;
-            case WM_MOUSEWHEEL:    return "wheeled"; break;
-            case WM_MOUSEHWHEEL:   return "h-wheeled"; break;
+            case WM_MOUSEMOVE:     return "move"; break;
+            case WM_MOUSEWHEEL:    return "wheel"; break;
+            case WM_MOUSEHWHEEL:   return "h-wheel"; break;
             case WM_RBUTTONDOWN:   return "right down"; break;
             case WM_RBUTTONUP:     return "right up"; break;
             case WM_RBUTTONDBLCLK: return "right dblclick"; break;

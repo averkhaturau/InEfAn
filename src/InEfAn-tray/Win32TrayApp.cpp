@@ -70,28 +70,38 @@ public:
     explicit EventPreanalyser(MouseAnyEvent&& ev) : ie(ev) {}
     void operator()()
     {
-        if (lastEvent.isRepeatable())
-            if(lastEvent.eventType() != ie.eventType())
-                logEvent(lastEvent) << " finished";
-            else {
-                // log nothing
-                lastEvent = ie;
-                return;
+        if (ie.isRepeatable()) {
+            const bool isTheSameEvent = ie.eventType() == lastEvent.eventType();
+
+            if (!isTheSameEvent) {
+                if (lastEvent.eventType() != 0)
+                    logEvent(lastEvent) << " finished";
+                logEvent(ie) << " started";
             }
 
-        if (ie.isRepeatable())
-            logEvent(ie) << " started";
-        else
-            logEvent(ie);
+            if (timerHandle)
+                KillTimer(NULL, timerHandle);
 
-        lastEvent = ie;
+            lastEvent = ie;
+
+            timerHandle = SetTimer(NULL, 0, 200/*ms*/, static_cast<TIMERPROC>([](HWND, UINT, UINT_PTR, DWORD) {
+                KillTimer(NULL, timerHandle);
+                logEvent(lastEvent) << " finished";
+                lastEvent = MouseAnyEvent(0, {});
+            }));
+
+
+        } else
+            logEvent(ie);
     }
 private:
     MouseAnyEvent ie;
     static MouseAnyEvent lastEvent;
+    static UINT_PTR timerHandle;
 };
 
-MouseAnyEvent EventPreanalyser<MouseAnyEvent>::lastEvent(WM_MOUSEFIRST, {});
+MouseAnyEvent EventPreanalyser<MouseAnyEvent>::lastEvent(0, {});
+UINT_PTR EventPreanalyser<MouseAnyEvent>::timerHandle(0);
 
 void onAppStart()
 {
