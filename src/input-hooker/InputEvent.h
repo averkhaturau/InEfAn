@@ -1,8 +1,8 @@
 #pragma once
 
 #include <Windows.h>
-#include "keycodes.h"
 #include "InputEventTypes.h"
+#include "keycodes-anonimized.h"
 
 class InputDeviceEvent
 {
@@ -59,7 +59,7 @@ class KeyboardEvent : public InputDeviceEvent
 public:
     KeyboardEvent(WPARAM wp, KBDLLHOOKSTRUCT const& me) { wparam = wp; memcpy(&eventData, &me, sizeof(me)); }
     virtual DWORD time()const override { return eventData.time; };
-    virtual std::string description()const override { return std::string(wparam == WM_KEYDOWN || wparam == WM_SYSKEYDOWN ? "down " : "up ") + vKeyCodes[eventData.vkCode % sizeof(vKeyCodes)]; };
+    virtual std::string description()const override{ return std::string(wparam == WM_KEYDOWN || wparam == WM_SYSKEYDOWN ? "down " : "up ") + vKeyCodesAnonimized[eventData.vkCode % sizeof(vKeyCodesAnonimized)]; };
     virtual std::string inputDevice()const override { return "keyboard"; };
 
     bool isRepeatable()const override { return false; }

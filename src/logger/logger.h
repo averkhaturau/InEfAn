@@ -23,7 +23,7 @@ public:
     class LogRecord
     {
     public:
-        LogRecord(Log2File& l2f) : my_l2f(l2f) { my_l2f << timestamp(std::chrono::system_clock::now()); };
+        explicit LogRecord(Log2File& l2f) : my_l2f(l2f) { my_l2f << timestamp(std::chrono::system_clock::now()); };
         LogRecord(LogRecord&& a) : my_l2f(a.my_l2f) { a.shouldFlush = false; };
         template <class Arg_t>
         LogRecord&& operator<<(Arg_t&& mess)

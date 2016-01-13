@@ -56,6 +56,9 @@ macro(DEFINE_DEFAULT_DEFINITIONS)
 		elseif(MSVC_VERSION EQUAL 1800) # VC12/VS2013
 			add_definitions(-D_USING_V120_SDK71_)
 			set(CMAKE_GENERATOR_TOOLSET "v120_xp" CACHE STRING "Platform Toolset" FORCE)
+		elseif(MSVC_VERSION EQUAL 1900) # VC14/VS2015
+			add_definitions(-D_USING_V140_SDK71_)
+			set(CMAKE_GENERATOR_TOOLSET "v140_xp" CACHE STRING "Platform Toolset" FORCE)
 		endif()
 	endif(MSVC OR MSVC_IDE)
 

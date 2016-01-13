@@ -180,7 +180,8 @@ int APIENTRY _tWinMain(
         }
 
         Logger::instance() << "Exiting InEfAn";
-
+    } catch (std::exception &ee){
+        Logger::instance() << ee.what() << " exiting...";
     } catch (...) {}
 
     Shell_NotifyIconW(NIM_DELETE, &traydata);

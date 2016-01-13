@@ -9,6 +9,7 @@ set(SRC
 	InputEvent.h
 	InputEventTypes.h
 	keycodes.h
+	keycodes-anonimized.h
 )
 
 add_definitions(-DDLL_NAME=${DLL_NAME})
