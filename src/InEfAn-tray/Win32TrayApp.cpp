@@ -8,20 +8,11 @@
 
 #include <windows.h>
 #include <filesystem>
-#include "../logger/logger.h"
+#include "logger/logger.h"
 #include <tchar.h>
 
-#include "../input-hooker/input-hooker.h"
-#include "../input-hooker/InputEvent.h"
-#include "../active-app-tracker/ActiveWindowTracker.h"
-#include "../active-app-tracker/WindowInfo.h"
-#include <future>
-
-// handle with care
-#define SECONDS *1000
-#define MINUTES *(60 SECONDS)
-#define HOURS   *(60 MINUTES)
-#define DAYS    *(24 HOURS)
+#include "input-hooker/input-hooker.h"
+#include "events-logging.h"
 
 namespace
 {
@@ -29,108 +20,11 @@ namespace
     HMENU hContext = NULL;
     const WCHAR szWindowClass[] = L"InEfAnTrayApp";
 }
+
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 
-Logger::LogRecord logEvent(InputDeviceEvent const& ie)
-{
-    try {
-        return Logger::instance() << "\t" << ie.inputDevice() << "\t" << ie.description();
-    } catch (std::exception& ee) {
-        return Logger::instance() << ee.what();
-    } catch (...) {
-        return Logger::instance() << "Unknown exception raised";
-    }
-};
-
-template<class Ev_t>
-class EventPreanalyser
-{
-    EventPreanalyser() = delete;
-    EventPreanalyser(EventPreanalyser const&) = delete;
-    EventPreanalyser(EventPreanalyser&&) = delete;
-public:
-    explicit EventPreanalyser(Ev_t&& ev) : ie(ev) {}
-    void operator()()
-    {
-        logEvent(ie);
-    }
-private:
-    Ev_t ie;
-};
-
-template<>
-class EventPreanalyser<MouseAnyEvent>
-{
-    EventPreanalyser() = delete;
-    EventPreanalyser(EventPreanalyser const&) = delete;
-    EventPreanalyser(EventPreanalyser&&) = delete;
-public:
-    explicit EventPreanalyser(MouseAnyEvent&& ev) : ie(ev) {}
-    void operator()()
-    {
-        if (ie.isRepeatable()) {
-            const bool isTheSameEvent = ie.eventType() == lastEvent.eventType();
-
-            if (!isTheSameEvent) {
-                if (lastEvent.eventType() != 0)
-                    logEvent(lastEvent) << " finished";
-                logEvent(ie) << " started";
-            }
-
-            if (timerHandle)
-                KillTimer(NULL, timerHandle);
-
-            lastEvent = ie;
-
-            timerHandle = SetTimer(NULL, 0, 200/*ms*/, static_cast<TIMERPROC>([](HWND, UINT, UINT_PTR, DWORD) {
-                KillTimer(NULL, timerHandle);
-                logEvent(lastEvent) << " finished";
-                lastEvent = MouseAnyEvent(0, {});
-            }));
-
-
-        } else
-            logEvent(ie);
-    }
-private:
-    MouseAnyEvent ie;
-    static MouseAnyEvent lastEvent;
-    static UINT_PTR timerHandle;
-};
-
-MouseAnyEvent EventPreanalyser<MouseAnyEvent>::lastEvent(0, {});
-UINT_PTR EventPreanalyser<MouseAnyEvent>::timerHandle(0);
-
-void onAppStart()
-{
-    // Start listen to input devices
-    InputHooker::instance().setHooks(
-    [](WPARAM wparam, KBDLLHOOKSTRUCT kbsrtuct) {EventPreanalyser<KeyboardEvent>(KeyboardEvent(wparam, kbsrtuct))(); },
-    [](WPARAM wparam, MSLLHOOKSTRUCT mstruct) {EventPreanalyser<MouseAnyEvent>(MouseAnyEvent(wparam, mstruct))(); });
-    InputHooker::instance().startHook();
-
-    // Start tracking foreground window
-    static ActiveWindowTracker awt;
-    awt.setCallback([](HWND hwnd) {
-        try {
-            if (!hwnd)
-                Logger::instance() << L"No foreground window detected";
-            else {
-                WindowInfo wi(hwnd);
-                Logger::instance() << L"Foreground window title is \"" << wi.getTitle()
-                                   << L"\" from process name \"" << wi.getProcessName()
-                                   << L"\" running from file \"" << wi.getProcessFilename()
-                                   << L"\"";
-            }
-        } catch (std::exception& ee) {
-            Logger::instance() << ee.what();
-        } catch (...) {
-            Logger::instance() << "Unknown exception raised";
-        }
-    });
-}
 
 int APIENTRY _tWinMain(
     _In_ HINSTANCE hInstance,
@@ -143,14 +37,14 @@ int APIENTRY _tWinMain(
     MSG msg = {};
     LimitSingleInstance siLock(L"Local\\" _T(VER_SZ_PRODUCTNAME));
 
-    try {
+    try {   
 
         if (siLock.IsAnotherInstanceRunning()) {
             return 1;
         }
 
         Logger::instance() << "Starting InEfAn";
-        onAppStart();
+        initEventsListening();
 
         MyRegisterClass(hInstance);
 
@@ -180,7 +74,7 @@ int APIENTRY _tWinMain(
         }
 
         Logger::instance() << "Exiting InEfAn";
-    } catch (std::exception &ee){
+    } catch (std::exception& ee) {
         Logger::instance() << ee.what() << " exiting...";
     } catch (...) {}
 
@@ -260,13 +154,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         break;
                     case ID_TRAYMENU_PAUSE:
                         Logger::instance().enable(false);
+                        trayNotify(IDC_LOGGING_PAUSED);
                         break;
                     case ID_TRAYMENU_RESUME:
                         Logger::instance().enable(true);
+                        trayNotify(IDC_LOGGING_RESUMED);
                         break;
                     case ID_TRAYMENU_SENDLOGFILES: {
-                        //                        bool result = postLogfiles();
-                        //                      MessageBoxW(hWnd, loadStdWStringFromRC(result ? IDC_LOGFILES_SENT : IDC_LOGFILES_NOTSENT).c_str(), _T(VER_SZ_PRODUCTNAME), MB_OK);
+                        //  bool result = postLogfiles();
+                        //  MessageBoxW(hWnd, loadStdWStringFromRC(result ? IDC_LOGFILES_SENT : IDC_LOGFILES_NOTSENT).c_str(), _T(VER_SZ_PRODUCTNAME), MB_OK);
+                        trayNotify(IDC_LOGFILES_NOTSENT);
                     }
                     break;
                     default:

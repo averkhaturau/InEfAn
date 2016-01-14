@@ -11,6 +11,8 @@ set(VERS_FILE ${CMAKE_CURRENT_BINARY_DIR}/Version.inl)
 
 
 set(SRCS
+	events-logging.h
+	events-logging.cpp
 	resource-App.h
 	single-instance.h
 	tray-helpers.cpp

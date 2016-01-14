@@ -2,42 +2,6 @@
 #include "Version.inl"
 #include <windows.h>
 
-/////////////////////////////////////////////////////////////////////////////
-// Russian (Russia) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
-LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Menu
-//
-
-IDR_MENU1 MENU
-BEGIN
-    POPUP "Tray Menu"
-    BEGIN
-		MENUITEM "О InEfAn...",        ID_TRAYMENU_ABOUT
-
-		MENUITEM SEPARATOR
-		MENUITEM "Приостановить логгирование", ID_TRAYMENU_PAUSE
-		MENUITEM "Продолжить логгирование", ID_TRAYMENU_RESUME
-        MENUITEM "Отправить отчёт разработчикам", ID_TRAYMENU_SENDLOGFILES
-		MENUITEM SEPARATOR
-
-        MENUITEM "Выйти",                        ID_TRAYMENU_EXIT
-    END
-END
-
-
-STRINGTABLE
-BEGIN
-    IDC_LOGFILES_SENT                            "Логфайлы были отправлены разработчикам."
-    IDC_LOGFILES_NOTSENT                         "Логфайлы не были отправлены разработчикам."
-END
-
-#endif    // Russian (Russia) resources
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -48,8 +12,45 @@ END
 // remains consistent on all systems.
 IDI_MAINICON            ICON                    "..\\..\\resources\\mainIcon.ico"
 
-/////////////////////////////////////////////////////////////////////////////
 
+/////////////////////////////////////////////////////////////////////////////
+// Russian (Russia) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_RUS)
+LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
+
+
+IDR_MENU1 MENU
+BEGIN
+    POPUP "Tray Menu"
+    BEGIN
+		MENUITEM "О InEfAn...",        ID_TRAYMENU_ABOUT
+
+		MENUITEM SEPARATOR
+		MENUITEM "Приостановить логгирование", ID_TRAYMENU_PAUSE
+		MENUITEM "Продолжить логгирование", ID_TRAYMENU_RESUME
+		MENUITEM "Отправить отчёт разработчикам", ID_TRAYMENU_SENDLOGFILES
+		MENUITEM SEPARATOR
+
+		MENUITEM "Выйти",                        ID_TRAYMENU_EXIT
+    END
+END
+
+
+STRINGTABLE
+BEGIN
+    IDC_LOGFILES_SENT                            "Логфайлы были отправлены разработчикам."
+    IDC_LOGFILES_NOTSENT                         "Логфайлы не были отправлены разработчикам."
+    IDC_LOGGING_PAUSED                           "Инефан приостановлен"
+    IDC_LOGGING_RESUMED                          "Инефан продолжил работу"
+END
+
+#endif    // Russian (Russia) resources
+
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (US) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
@@ -63,26 +64,55 @@ BEGIN
 		MENUITEM SEPARATOR
 		MENUITEM "Pause logging", ID_TRAYMENU_PAUSE
 		MENUITEM "Resume logging", ID_TRAYMENU_RESUME
-        MENUITEM "Send report to developers",    ID_TRAYMENU_SENDLOGFILES
+		MENUITEM "Send report to developers",    ID_TRAYMENU_SENDLOGFILES
 		MENUITEM SEPARATOR
 
-        MENUITEM "Exit",                         ID_TRAYMENU_EXIT
+		MENUITEM "Exit",                         ID_TRAYMENU_EXIT
     END
 END
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// String Table
-//
 
 STRINGTABLE
 BEGIN
     IDC_LOGFILES_SENT                            "Your log files were sent to the developers."
     IDC_LOGFILES_NOTSENT                         "Your log files were not sent to the developers."
+    IDC_LOGGING_PAUSED                           "InEfAn paused"
+    IDC_LOGGING_RESUMED                          "InEfAn resumed"
 END
 
-#endif    // English (United States) resources
+#endif  // English US resources
+
+
 /////////////////////////////////////////////////////////////////////////////
+// Belarusian (BY) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+LANGUAGE LANG_BELARUSIAN, SUBLANG_BELARUSIAN_BELARUS
+
+IDR_MENU1 MENU
+BEGIN
+    POPUP "Tray Menu"
+    BEGIN
+		MENUITEM "Аб Iнафане...",    ID_TRAYMENU_ABOUT
+
+		MENUITEM SEPARATOR
+		MENUITEM "Прыпынiць лагiраванне", ID_TRAYMENU_PAUSE
+		MENUITEM "Працягнуць лагiраванне", ID_TRAYMENU_RESUME
+		MENUITEM "Адправiць справасдачу распрацоўнiкам",    ID_TRAYMENU_SENDLOGFILES
+		MENUITEM SEPARATOR
+
+		MENUITEM "Выйсцi",                         ID_TRAYMENU_EXIT
+    END
+END
+
+STRINGTABLE
+BEGIN
+    IDC_LOGFILES_SENT                            "Логфайлы адправiлiся распрацоўнiкам"
+    IDC_LOGFILES_NOTSENT                         "Логфайлы не былi адправлены распрацоўнiкам"
+    IDC_LOGGING_PAUSED                           "Iнефан прыпынен"
+    IDC_LOGGING_RESUMED                          "Iнефан працягвае сваю працу"
+END
+
+#endif  // English US resources
 
 
 VS_VERSION_INFO VERSIONINFO

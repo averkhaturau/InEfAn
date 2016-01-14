@@ -23,7 +23,7 @@ template<class Arg_t> inline std::string toUtf8(Arg_t* arg)
 #pragma warning(push)
 #pragma warning(disable:4996)
     // warning C4996 : 'itoa' : The POSIX name for this item is deprecated.Instead, use the ISO C++ conformant name : _itoa.See online help for details.
-    return std::string("0x") + itoa(reinterpret_cast<size_t>(arg), buff, 16);
+    return std::string("0x") + itoa(reinterpret_cast<int>(arg), buff, 16);
 #pragma warning(pop)
 }
 template<class Arg_t> inline std::_Smanip<Arg_t> toUtf8(std::_Smanip<Arg_t> arg) { return arg; }

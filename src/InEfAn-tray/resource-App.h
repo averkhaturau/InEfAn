@@ -14,7 +14,8 @@
 #define ID_TRAYMENU_SENDLOGFILES    32778
 #define ID_TRAYMENU_PAUSE           32779
 #define ID_TRAYMENU_RESUME          32780
-
+#define IDC_LOGGING_PAUSED          32781
+#define IDC_LOGGING_RESUMED         32782
 //Do not use values from this range for other purposes
 #define ID_SERVERS_LIST_BEGIN       33000
 #define ID_SERVERS_LIST_END         33200

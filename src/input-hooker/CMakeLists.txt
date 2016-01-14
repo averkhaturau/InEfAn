@@ -5,9 +5,10 @@ set(DLL_NAME ${PROJECT_NAME})
 set(SRC
 	input-hooker.h
 	input-hooker.cpp
-	EventLogger.h
-	InputEvent.h
-	InputEventTypes.h
+	input-event.cpp
+	input-event.h
+	input-event-types.h
+	event-logger.h
 	keycodes.h
 	keycodes-anonimized.h
 )

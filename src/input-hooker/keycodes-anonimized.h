@@ -5,7 +5,7 @@ const char* vKeyCodesAnonimized[] = {
     "Left mouse button",
     "Right mouse button",
     "Control - break processing",
-    "Middle mouse button(three - button mouse)",
+    "Middle mouse button",
     "X1 mouse button",
     "X2 mouse button",
     "Undefined", // 0x07
@@ -56,7 +56,7 @@ const char* vKeyCodesAnonimized[] = {
     "digit in center",     // 4
     "digit in center",     // 5
     "digit in center",     // 6
-    "digit in center",	   // 7
+    "digit in center",     // 7
     "digit in right side", // 8
     "digit in right side", // 9
     "Undefined", // 0x3a
@@ -92,9 +92,9 @@ const char* vKeyCodesAnonimized[] = {
     "letter in left - bottom",     // X
     "letter in center - top",     // Y
     "letter in left - bottom",     // Z
-    "Left Windows key(Natural keyboard)",
-    "Right Windows key(Natural keyboard)",
-    "Applications key(Natural keyboard)",
+    "Left Windows key",
+    "Right Windows key",
+    "Context Menu key",
     "Reserved",
     "Computer Sleep key",
     "Numeric keypad key", // 0
@@ -188,10 +188,10 @@ const char* vKeyCodesAnonimized[] = {
     "Reserved", // 0xB8
     "Reserved", // 0xB9
     "letter in right - middle", // ";:"
-    "For any country / region, the '+' key",
-    "For any country / region, the ',' key",
-    "For any country / region, the '-' key",
-    "For any country / region, the '.' key",
+    "+",
+    ",",
+    "-",
+    ".",
     "key in right - bottom", // /?
     "key in left - top", // `~
     "Reserved", // 0xC1
@@ -227,12 +227,12 @@ const char* vKeyCodesAnonimized[] = {
     "Used for miscellaneous characters; it can vary by keyboard.",
     "Reserved", // 0xE0
     "OEM specific", //0xE1
-    "Either the angle bracket key or the backslash key on the RT 102 - key keyboard",
+    "\\", //"Either the angle bracket key or the backslash key on the RT 102 - key keyboard"
     "OEM specific", // 0xE3
     "OEM specific", // 0xE4
     "IME PROCESS key",
     "OEM specific",
-    "Used to pass Unicode characters as if they were keystrokes.The VK_PACKET key is the low word of a 32 - bit Virtual Key value used for non - keyboard input methods. For more information, see Remark in KEYBDINPUT, SendInput, WM_KEYDOWN, and WM_KEYUP",
+    "Unicode carachter", // "Used to pass Unicode characters as if they were keystrokes.The VK_PACKET key is the low word of a 32 - bit Virtual Key value used for non - keyboard input methods. For more information, see Remark in KEYBDINPUT, SendInput, WM_KEYDOWN, and WM_KEYUP",
     "Unassigned",
     "OEM specific", //0xE9
     "OEM specific", //0xEa

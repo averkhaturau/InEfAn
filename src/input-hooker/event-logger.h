@@ -1,6 +1,6 @@
 #pragma once
 
-#include "InputEvent.h"
+#include "input-event.h"
 #include <fstream>
 
 class EventLogger
