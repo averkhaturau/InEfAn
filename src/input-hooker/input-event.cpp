@@ -26,24 +26,23 @@ DWORD MouseAnyEvent::time() const
 
 std::string MouseAnyEvent::description() const
 {
-    switch (wparam)
-    {
-    case WM_LBUTTONDOWN:   return "left down"; break;
-    case WM_LBUTTONUP:     return "left up"; break;
-    case WM_LBUTTONDBLCLK: return "left dblclick"; break;
-    case WM_MOUSEMOVE:     return "move"; break;
-    case WM_MOUSEWHEEL:    return "wheel"; break;
-    case WM_MOUSEHWHEEL:   return "h-wheel"; break;
-    case WM_RBUTTONDOWN:   return "right down"; break;
-    case WM_RBUTTONUP:     return "right up"; break;
-    case WM_RBUTTONDBLCLK: return "right dblclick"; break;
-    case WM_MBUTTONDOWN:   return "middle down"; break;
-    case WM_MBUTTONUP:     return "middle up"; break;
-    case WM_MBUTTONDBLCLK: return "middle dblclick"; break;
-    case WM_XBUTTONDOWN:   return "X down"; break;
-    case WM_XBUTTONUP:     return "X up"; break;
-    case WM_XBUTTONDBLCLK: return "X dblclick"; break;
-    default:               return "undefined action"; break;
+    switch (wparam) {
+        case WM_LBUTTONDOWN:   return "left down"; break;
+        case WM_LBUTTONUP:     return "left up"; break;
+        case WM_LBUTTONDBLCLK: return "left dblclick"; break;
+        case WM_MOUSEMOVE:     return "move"; break;
+        case WM_MOUSEWHEEL:    return "wheel"; break;
+        case WM_MOUSEHWHEEL:   return "h-wheel"; break;
+        case WM_RBUTTONDOWN:   return "right down"; break;
+        case WM_RBUTTONUP:     return "right up"; break;
+        case WM_RBUTTONDBLCLK: return "right dblclick"; break;
+        case WM_MBUTTONDOWN:   return "middle down"; break;
+        case WM_MBUTTONUP:     return "middle up"; break;
+        case WM_MBUTTONDBLCLK: return "middle dblclick"; break;
+        case WM_XBUTTONDOWN:   return "X down"; break;
+        case WM_XBUTTONUP:     return "X up"; break;
+        case WM_XBUTTONDBLCLK: return "X dblclick"; break;
+        default:               return "undefined action"; break;
     }
 }
 
@@ -70,8 +69,9 @@ DWORD KeyboardEvent::time() const
 
 std::string KeyboardEvent::description() const
 {
-    return std::string(wparam == WM_KEYDOWN || wparam == WM_SYSKEYDOWN ? "down " : "up ") +
-        vKeyCodesAnonimized[eventData.vkCode % sizeof(vKeyCodesAnonimized)];
+    return std::string() +
+           vKeyCodesAnonimized[eventData.vkCode % sizeof(vKeyCodesAnonimized)] + " " +
+           (wparam == WM_KEYDOWN || wparam == WM_SYSKEYDOWN ? "down " : "up ");
 }
 
 std::string KeyboardEvent::inputDevice() const

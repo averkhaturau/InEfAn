@@ -37,7 +37,7 @@ int APIENTRY _tWinMain(
     MSG msg = {};
     LimitSingleInstance siLock(L"Local\\" _T(VER_SZ_PRODUCTNAME));
 
-    try {   
+    try {
 
         if (siLock.IsAnotherInstanceRunning()) {
             return 1;

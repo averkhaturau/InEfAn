@@ -7,14 +7,11 @@
 
 Logger::LogRecord logEvent(InputDeviceEvent const& ie)
 {
-    try
-    {
+    try {
         return Logger::instance() << std::setw(9) << ie.inputDevice() << " " << ie.description();
-    } catch (std::exception& ee)
-    {
+    } catch (std::exception& ee) {
         return Logger::instance() << ee.what();
-    } catch (...)
-    {
+    } catch (...) {
         return Logger::instance() << "Unknown exception raised";
     }
 }
@@ -23,30 +20,26 @@ void initEventsListening()
 {
     // Start listen to input devices
     InputHooker::instance().setHooks(
-        [](WPARAM wparam, KBDLLHOOKSTRUCT kbsrtuct) {EventPreanalyser<KeyboardEvent>(KeyboardEvent(wparam, kbsrtuct))(); },
-        [](WPARAM wparam, MSLLHOOKSTRUCT mstruct) {EventPreanalyser<MouseAnyEvent>(MouseAnyEvent(wparam, mstruct))(); });
+    [](WPARAM wparam, KBDLLHOOKSTRUCT kbsrtuct) {EventPreanalyser<KeyboardEvent>(KeyboardEvent(wparam, kbsrtuct))(); },
+    [](WPARAM wparam, MSLLHOOKSTRUCT mstruct) {EventPreanalyser<MouseAnyEvent>(MouseAnyEvent(wparam, mstruct))(); });
     InputHooker::instance().startHook();
 
     // Start tracking foreground window
     static ActiveWindowTracker awt;
     awt.setCallback([](HWND hwnd) {
-        try
-        {
+        try {
             if (!hwnd)
                 Logger::instance() << L"No foreground window detected";
-            else
-            {
+            else {
                 WindowInfo wi(hwnd);
                 Logger::instance() << L"Foreground window title is \"" << wi.getTitle()
-                    << L"\" from process name \"" << wi.getProcessName()
-                    << L"\" running from file \"" << wi.getProcessFilename()
-                    << L"\"";
+                                   << L"\" from process name \"" << wi.getProcessName()
+                                   << L"\" running from file \"" << wi.getProcessFilename()
+                                   << L"\"";
             }
-        } catch (std::exception& ee)
-        {
+        } catch (std::exception& ee) {
             Logger::instance() << ee.what();
-        } catch (...)
-        {
+        } catch (...) {
             Logger::instance() << "Unknown exception raised";
         }
     });
@@ -54,12 +47,10 @@ void initEventsListening()
 
 void EventPreanalyser<MouseAnyEvent>::operator()()
 {
-    if (ie.isRepeatable())
-    {
+    if (ie.isRepeatable()) {
         const bool isTheSameEvent = ie.eventType() == lastEvent.eventType();
 
-        if (!isTheSameEvent)
-        {
+        if (!isTheSameEvent) {
             if (lastEvent.eventType() != 0)
                 logEvent(lastEvent) << " finished";
             logEvent(ie) << " started";
