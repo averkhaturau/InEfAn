@@ -125,7 +125,7 @@ def parse_log_line(line):
     else:
         # system event
         evt_text = " ".join(line_word[2:])
-        print((evt_text + " at " + unicode(event_time)).encode(sys.stdout.encoding, errors='replace'))
+        #print((evt_text + " at " + unicode(event_time)).encode(sys.stdout.encoding, errors='replace'))
 
         m = re.search('Foreground window title is "(.*)" from process name "(.*)" running from file "(.*)"', evt_text)
         if m:
@@ -161,7 +161,7 @@ def print_characteristics():
             continue
         typing_speed = num_keypresses*60 / (period_end - period_start).seconds
         mean_typing_speed += typing_speed * 2 / len(activity_periods)
-        print("Typing speed is {} at {}".format(typing_speed, period_end))
+        #print("Typing speed is {} at {}".format(typing_speed, period_end))
         # print(period_start, period_end, num_keypresses, typing_speed)
 
         # calcuate mouse-to-keyboard switch time
@@ -176,9 +176,9 @@ def print_characteristics():
     print("Mean Typing speed is {}".format(mean_typing_speed))
 
     mean_mouse_to_kb = reduce(lambda x,y: x+y, map(lambda (e1,e2): e2-e1, mouse_to_kb))/len(mouse_to_kb)
-    print("mean_mouse_to_kb={}".format(mean_mouse_to_kb))
+    print("Mean time to transit hand from mouse to keyboard = {}".format(mean_mouse_to_kb))
     mean_kb_to_mouse = reduce(lambda x,y: x+y, map(lambda (e1,e2): e2-e1, kb_to_mouse))/len(kb_to_mouse)
-    print("mean_kb_to_mouse={}".format(mean_kb_to_mouse))
+    print("Mean time to transit hand from keyboard to mouse = {}".format(mean_kb_to_mouse))
 
 
 
