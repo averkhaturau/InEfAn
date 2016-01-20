@@ -1,7 +1,17 @@
 import sys
 import datetime
 import re
+from itertools import *
 
+
+def pairwise(iterable):                    
+    "s -> (s0,s1), (s1,s2), (s2, s3), ..." 
+    a, b = tee(iterable)                   
+    try:                                   
+        next(b)                            
+    except StopIteration:                  
+        pass                               
+    return zip(a, b)                       
 
 def parse_log():
     reload(sys)  
@@ -31,6 +41,14 @@ activity_periods = []
 key_press_events = []
 
 inactivity_interval = datetime.timedelta(seconds=4) # if no events during this time span, consider user inactive
+
+mean_typing_speed = 0.0
+
+# filtered 
+unique_input_events = []
+
+mouse_to_kb = []
+kb_to_mouse = []
 
 ####################################################################
 
@@ -72,9 +90,15 @@ def parse_log_line(line):
 
     if line_word[2] == "mouse":
         if line_word[-1] == "up" or line_word[-1] == "finished":
-            print("Mouse using stopped at " + unicode(event_time))
+            #print("Mouse using stopped at " + unicode(event_time))
+            if (unique_input_events or unique_input_events[-1][0] != "mouse stopped"):
+                unique_input_events.append(("mouse stopped", event_time))
+            else:
+                unique_input_events[-1] = ("mouse stopped", event_time)
         elif line_word[-1] == "down" or line_word[-1] == "started":
-            print("Mouse using started at " + unicode(event_time))
+            #print("Mouse using started at " + unicode(event_time))
+            if (not unique_input_events or unique_input_events[-1][0] != "mouse started"):
+                unique_input_events.append(("mouse started", event_time))
         else:
             print("Mouse single event at " + unicode(event_time))
 
@@ -82,11 +106,17 @@ def parse_log_line(line):
 
     elif line_word[2] == "keyboard":
         if line_word[-1] == "up":
-            print("Keyboard using stopped at " + unicode(event_time))
+            #print("Keyboard using stopped at " + unicode(event_time))
+            if (not unique_input_events or unique_input_events[-1][0] != "keyboard stopped"):
+                unique_input_events.append(("keyboard stopped", event_time))
+            else:
+                unique_input_events[-1] = ("keyboard stopped", event_time)
             if line_word[3] in ("letter", "digit", "SPACEBAR", "-","+",",",".", "\\"):
                 key_press_events.append(event_time)
         elif line_word[-1] == "down":
-            print("Keyboard using started at " + unicode(event_time))
+            #print("Keyboard using started at " + unicode(event_time))
+            if (not unique_input_events or unique_input_events[-1][0] != "keyboard started"):
+                unique_input_events.append(("keyboard started", event_time))
         else:
             print("Keyboard single event at " + unicode(event_time))
 
@@ -94,7 +124,6 @@ def parse_log_line(line):
 
     else:
         # system event
-        print(line_word)
         evt_text = " ".join(line_word[2:])
         print((evt_text + " at " + unicode(event_time)).encode(sys.stdout.encoding, errors='replace'))
 
@@ -120,24 +149,39 @@ def user_is_active_at(t):
 
 
 def print_characteristics():
+    global mean_typing_speed, mouse_to_kb, kb_to_mouse
     it = iter(activity_periods)
     for period_start in it:
         period_end = next(it)
         if period_end - period_start < inactivity_interval:
             continue
-        num_keypresses = sum(1 for press_time in key_press_events if press_time >= period_start and period_start <= period_end)
+        # calculate typing speed
+        num_keypresses = sum(1 for press_time in key_press_events if period_start <= press_time <= period_end)
         if num_keypresses < 2:
             continue
         typing_speed = num_keypresses*60 / (period_end - period_start).seconds
-        print("Typing speed is {}".format(typing_speed))
-        print(period_start, period_end, num_keypresses, typing_speed)
+        mean_typing_speed += typing_speed * 2 / len(activity_periods)
+        print("Typing speed is {} at {}".format(typing_speed, period_end))
+        # print(period_start, period_end, num_keypresses, typing_speed)
 
+        # calcuate mouse-to-keyboard switch time
+        events_scope = filter(lambda (eType, eTime): period_start <= eTime <= period_end, unique_input_events)
+        for (e1,e2) in pairwise(events_scope):
+            if e1[0] == "mouse stopped" and e2[0] == "keyboard started":
+                mouse_to_kb.append((e1[1],e2[1]))
+            elif e1[0] == "keyboard stopped" and e2[0] == "mouse started":
+                kb_to_mouse.append((e1[1],e2[1]))
+        
 
+    print("Mean Typing speed is {}".format(mean_typing_speed))
 
+    mean_mouse_to_kb = reduce(lambda x,y: x+y, map(lambda (e1,e2): e2-e1, mouse_to_kb))/len(mouse_to_kb)
+    print("mean_mouse_to_kb={}".format(mean_mouse_to_kb))
+    mean_kb_to_mouse = reduce(lambda x,y: x+y, map(lambda (e1,e2): e2-e1, kb_to_mouse))/len(kb_to_mouse)
+    print("mean_kb_to_mouse={}".format(mean_kb_to_mouse))
 
 
 
 parse_log()
 
 print_characteristics()
-
