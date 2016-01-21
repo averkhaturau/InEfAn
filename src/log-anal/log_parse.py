@@ -45,7 +45,7 @@ def handle_log_line(line):
         if line.startswith("==="):
             parsing_header = False
         else:
-        	get_data_from_header(line)
+            get_data_from_header(line)
     else:
         if line.startswith("==="):
             parsing_header = True
@@ -57,7 +57,7 @@ def handle_log_line(line):
 def get_data_from_header(line):
     m = re.search("(?<=running on)[ \\t]+(.*)[ \\t]+powered by[ \\t]+(.*)", line)
     if m:
-    	global pc_type,os_version
+        global pc_type,os_version
         pc_type = m.group(1)
         os_version = m.group(2)
         print("Running on " + pc_type + " powered by " + os_version)
@@ -164,9 +164,9 @@ def print_characteristics():
         sum(map(lambda (s,i): i, typing_keypresses_intervals), datetime.timedelta()))
     print("Mean Typing speed is {}".format(mean_typing_speed))
 
-    mean_mouse_to_kb = reduce(lambda x,y: x+y, map(lambda (e1,e2): e2-e1, mouse_to_kb))/len(mouse_to_kb)
+    mean_mouse_to_kb = sum( map(lambda (e1,e2): e2-e1, mouse_to_kb))/len(mouse_to_kb)
     print("Mean time to transit hand from mouse to keyboard = {}".format(mean_mouse_to_kb))
-    mean_kb_to_mouse = reduce(lambda x,y: x+y, map(lambda (e1,e2): e2-e1, kb_to_mouse))/len(kb_to_mouse)
+    mean_kb_to_mouse = sum( map(lambda (e1,e2): e2-e1, kb_to_mouse))/len(kb_to_mouse)
     print("Mean time to transit hand from keyboard to mouse = {}".format(mean_kb_to_mouse))
 
 
