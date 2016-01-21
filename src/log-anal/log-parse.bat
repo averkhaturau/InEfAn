@@ -1,1 +1,0 @@
-call python log-parse.py %APPDATA%\..\Local\inefan\logfile.txt 
