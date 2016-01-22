@@ -154,11 +154,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         break;
                     case ID_TRAYMENU_PAUSE:
                         Logger::instance().enable(false);
-                        trayNotify(IDC_LOGGING_PAUSED);
+                        trayIconUpdate(IDI_MAINICONPAUSED, IDC_LOGGING_PAUSED);
                         break;
                     case ID_TRAYMENU_RESUME:
                         Logger::instance().enable(true);
-                        trayNotify(IDC_LOGGING_RESUMED);
+                        trayIconUpdate(IDI_MAINICON, IDC_LOGGING_RESUMED);
                         break;
                     case ID_TRAYMENU_SENDLOGFILES: {
                         //  bool result = postLogfiles();

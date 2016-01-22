@@ -14,6 +14,20 @@ def pairwise(iterable):
     return zip(a, b)                    
    
 
+def parse_log():
+    reload(sys)  
+    sys.setdefaultencoding('utf-8')
+ #   sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf8', buffering=1)
+
+    if len(sys.argv) < 2:
+        print("Usage:\n\t>" + sys.argv[0] + " inefan.log")
+        exit(-1)
+
+    with open(sys.argv[1]) as logfile:
+        for line in logfile:
+           handle_log_line(line[:-1])
+
+
 
 ####################################################################
 #  Global variables
@@ -29,7 +43,7 @@ key_press_events = []
 
 inactivity_interval = datetime.timedelta(seconds=4) # if no events during this time span, consider user inactive
 
-typing_keypresses_intervals = []
+mean_typing_speed = 0.0
 
 # filtered 
 unique_input_events = []
@@ -47,7 +61,7 @@ def handle_log_line(line):
         if line.startswith("==="):
             parsing_header = False
         else:
-            get_data_from_header(line)
+        	get_data_from_header(line)
     else:
         if line.startswith("==="):
             parsing_header = True
@@ -59,7 +73,7 @@ def handle_log_line(line):
 def get_data_from_header(line):
     m = re.search("(?<=running on)[ \\t]+(.*)[ \\t]+powered by[ \\t]+(.*)", line)
     if m:
-        global pc_type,os_version
+    	global pc_type,os_version
         pc_type = m.group(1)
         os_version = m.group(2)
         print("Running on " + pc_type + " powered by " + os_version)
@@ -144,13 +158,12 @@ def print_characteristics():
         if period_end - period_start < inactivity_interval:
             continue
         # calculate typing speed
-        key_presses_in_period = filter(lambda (press_time): period_start <= press_time <= period_end, key_press_events)
-        num_keypresses = len(key_presses_in_period)
-        if num_keypresses < 3:
+        num_keypresses = sum(1 for press_time in key_press_events if period_start <= press_time <= period_end)
+        if num_keypresses < 2:
             continue
-        typing_interval = key_presses_in_period[-1] - key_presses_in_period[0]
-        typing_keypresses_intervals.append((num_keypresses, typing_interval))
-        # print("Typing speed is {} at {}".format(calc_typing_speed(num_keypresses, typing_interval), period_end))
+        typing_speed = num_keypresses*60 / (period_end - period_start).seconds
+        mean_typing_speed += typing_speed * 2 / len(activity_periods)
+        #print("Typing speed is {} at {}".format(typing_speed, period_end))
         # print(period_start, period_end, num_keypresses, typing_speed)
 
         # calcuate mouse-to-keyboard switch time
@@ -161,15 +174,16 @@ def print_characteristics():
             elif e1[0] == "keyboard stopped" and e2[0] == "mouse started":
                 kb_to_mouse.append((e1[1],e2[1]))
         
-    mean_typing_speed = calc_typing_speed( \
-        sum(map(lambda (s,i): s, typing_keypresses_intervals)), \
-        sum(map(lambda (s,i): i, typing_keypresses_intervals), datetime.timedelta()))
+
     print("Mean Typing speed is {}".format(mean_typing_speed))
 
-    mean_mouse_to_kb = sum( map(lambda (e1,e2): e2-e1, mouse_to_kb), datetime.timedelta() )/len(mouse_to_kb)
+    mean_mouse_to_kb = reduce(lambda x,y: x+y, map(lambda (e1,e2): e2-e1, mouse_to_kb))/len(mouse_to_kb)
     print("Mean time to transit hand from mouse to keyboard = {}".format(mean_mouse_to_kb))
-    mean_kb_to_mouse = sum( map(lambda (e1,e2): e2-e1, kb_to_mouse), datetime.timedelta() )/len(kb_to_mouse)
+    mean_kb_to_mouse = reduce(lambda x,y: x+y, map(lambda (e1,e2): e2-e1, kb_to_mouse))/len(kb_to_mouse)
     print("Mean time to transit hand from keyboard to mouse = {}".format(mean_kb_to_mouse))
 
-def calc_typing_speed(num_keypresses, timespan):
-    return num_keypresses * 60 / timespan.seconds
+
+
+parse_log()
+
+print_characteristics()

@@ -1,6 +1,7 @@
 import sys
 
 from log_parse import *
+from log_plot  import *
 
 def parse_log():
     reload(sys)  
@@ -18,3 +19,4 @@ def parse_log():
 parse_log()
 
 print_characteristics()
+log_plot(key_press_events)

@@ -9,6 +9,7 @@
 #define IDR_MENU1                   129
 #define IDI_ICON1                   131
 #define IDI_MAINICON                131
+#define IDI_MAINICONPAUSED          132
 #define ID_TRAYMENU_EXIT            32771
 #define ID_TRAYMENU_ABOUT           32777
 #define ID_TRAYMENU_SENDLOGFILES    32778

@@ -12,5 +12,6 @@ extern NOTIFYICONDATAW traydata;
 extern UINT traydata_id;
 
 void trayNotify(UINT resStr);
+void trayIconUpdate(UINT resIco, UINT resStr);
 std::wstring loadStdWStringFromRC(int resId);
 

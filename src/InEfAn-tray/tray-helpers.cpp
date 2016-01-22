@@ -30,7 +30,7 @@ UINT traydata_id = 0;
 void trayNotify(UINT resStr)
 {
     traydata_id = resStr;
-    LoadStringW(GetModuleHandle(NULL), resStr, traydata.szInfo, _countof(traydata.szInfo));
+    LoadStringW(GetModuleHandleW(NULL), resStr, traydata.szInfo, _countof(traydata.szInfo));
     traydata.uFlags |= NIF_INFO;
     Shell_NotifyIconW(NIM_MODIFY, &traydata);
 }
@@ -38,14 +38,12 @@ void trayNotify(UINT resStr)
 
 void trayIconUpdate(UINT resIco, UINT resStr)
 {
-    HICON icon = LoadIconW(GetModuleHandle(NULL), MAKEINTRESOURCE(resIco));
+    HINSTANCE moduleH = GetModuleHandleW(NULL);
+    HICON icon = LoadIconW(moduleH, MAKEINTRESOURCE(resIco));
     traydata.hIcon = icon;
     const int displ = _countof(_T(VER_SZ_PRODUCTNAME));
-    if (LoadStringW(GetModuleHandleW(NULL), resStr, traydata.szTip + displ, _countof(traydata.szTip) - displ)) {
-        traydata.szTip[displ - 1] = L'\n';
-    }
-
-    traydata.uFlags = NIF_TIP | NIF_ICON;
+    LoadStringW(moduleH, resStr, traydata.szInfo, _countof(traydata.szInfo));
+    traydata.uFlags = NIF_TIP | NIF_ICON | NIF_INFO;
     Shell_NotifyIconW(NIM_MODIFY, &traydata);
 }
 
