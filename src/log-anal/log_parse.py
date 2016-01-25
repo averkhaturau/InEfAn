@@ -6,13 +6,13 @@ from itertools import *
 
 def pairwise(iterable):                    
     "s -> (s0,s1), (s1,s2), (s2, s3), ..." 
-    a, b = tee(iterable)                   
-    try:                                   
-        next(b)                            
-    except StopIteration:                  
-        pass                               
-    return zip(a, b)                    
-   
+    a, b = tee(iterable)
+    try:
+        next(b)
+    except StopIteration:
+        pass
+    return zip(a, b)
+
 
 
 ####################################################################
@@ -26,6 +26,8 @@ foreground_windows = {}
 
 activity_periods = []
 key_press_events = []
+mouse_click_events = []
+mouse_other_events = []
 
 inactivity_interval = datetime.timedelta(seconds=4) # if no events during this time span, consider user inactive
 
@@ -36,6 +38,8 @@ unique_input_events = []
 
 mouse_to_kb = []
 kb_to_mouse = []
+
+is_header_info_shown = False
 
 ####################################################################
 
@@ -57,18 +61,21 @@ def handle_log_line(line):
 
 # get system info from header line
 def get_data_from_header(line):
+    global is_header_info_shown
+    if is_header_info_shown: return
     m = re.search("(?<=running on)[ \\t]+(.*)[ \\t]+powered by[ \\t]+(.*)", line)
     if m:
         global pc_type,os_version
         pc_type = m.group(1)
         os_version = m.group(2)
         print("Running on " + pc_type + " powered by " + os_version)
+        is_header_info_shown = True
 
 
 # read simple event line
 def parse_log_line(line):
 
-    line_word = filter(None, re.split(" |\t|\n|\r", line))
+    line_word = [w for w in re.split(" |\t|\n|\r", line) if w]
     if len(line_word) < 3:
         return
     event_time = datetime.datetime.strptime( line_word[0] + " " + line_word[1], "%Y-%m-%d %H:%M:%S.%f" )
@@ -87,8 +94,13 @@ def parse_log_line(line):
             #print("Mouse using started at " + unicode(event_time))
             if (not unique_input_events or unique_input_events[-1][0] != "mouse started"):
                 unique_input_events.append(("mouse started", event_time))
+            if line_word[-1] == "down":
+                mouse_click_events.append(event_time)
+            else: 
+                mouse_other_events.append(event_time)
         else:
             print("Mouse single event at " + unicode(event_time))
+            mouse_other_events.append(event_time)
 
         user_is_active_at(event_time)
 
@@ -144,7 +156,7 @@ def print_characteristics():
         if period_end - period_start < inactivity_interval:
             continue
         # calculate typing speed
-        key_presses_in_period = filter(lambda (press_time): period_start <= press_time <= period_end, key_press_events)
+        key_presses_in_period = tuple(filter(lambda press_time: period_start <= press_time <= period_end, key_press_events))
         num_keypresses = len(key_presses_in_period)
         if num_keypresses < 3:
             continue
@@ -154,7 +166,7 @@ def print_characteristics():
         # print(period_start, period_end, num_keypresses, typing_speed)
 
         # calcuate mouse-to-keyboard switch time
-        events_scope = filter(lambda (eType, eTime): period_start <= eTime <= period_end, unique_input_events)
+        events_scope = list(filter(lambda eType_eTime: period_start <= eType_eTime[1] <= period_end, unique_input_events))
         for (e1,e2) in pairwise(events_scope):
             if e1[0] == "mouse stopped" and e2[0] == "keyboard started":
                 mouse_to_kb.append((e1[1],e2[1]))
@@ -162,14 +174,19 @@ def print_characteristics():
                 kb_to_mouse.append((e1[1],e2[1]))
         
     mean_typing_speed = calc_typing_speed( \
-        sum(map(lambda (s,i): s, typing_keypresses_intervals)), \
-        sum(map(lambda (s,i): i, typing_keypresses_intervals), datetime.timedelta()))
+        sum(map(lambda s_i: s_i[0], typing_keypresses_intervals)), \
+        sum(map(lambda s_i: s_i[1], typing_keypresses_intervals), datetime.timedelta()))
     print("Mean Typing speed is {}".format(mean_typing_speed))
 
-    mean_mouse_to_kb = sum( map(lambda (e1,e2): e2-e1, mouse_to_kb), datetime.timedelta() )/len(mouse_to_kb)
+    mean_mouse_to_kb = calc_trastition_time(mouse_to_kb)
     print("Mean time to transit hand from mouse to keyboard = {}".format(mean_mouse_to_kb))
-    mean_kb_to_mouse = sum( map(lambda (e1,e2): e2-e1, kb_to_mouse), datetime.timedelta() )/len(kb_to_mouse)
+    mean_kb_to_mouse = calc_trastition_time(kb_to_mouse)
     print("Mean time to transit hand from keyboard to mouse = {}".format(mean_kb_to_mouse))
+
+
+def calc_trastition_time(transition_events):
+    return sum( map(lambda e1_e2: e1_e2[1]-e1_e2[0], transition_events), datetime.timedelta() ) / len(transition_events)
+
 
 def calc_typing_speed(num_keypresses, timespan):
     return num_keypresses * 60 / timespan.seconds
