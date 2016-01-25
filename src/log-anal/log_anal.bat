@@ -1,1 +1,1 @@
-call python log_anal.py %APPDATA%\..\Local\inefan\logfile.txt 
+call python  log_anal.py %APPDATA%\..\Local\Plezir\InEfAn\logfile.txt

@@ -14,7 +14,7 @@ public:
         auto getLogfilename = []() {
             wchar_t logfileDir[MAX_PATH] = {};
             SHGetFolderPathW(0, CSIDL_LOCAL_APPDATA | CSIDL_FLAG_CREATE, NULL, SHGFP_TYPE_CURRENT, reinterpret_cast<LPWSTR>(logfileDir));
-            return std::tr2::sys::path(toUtf8(logfileDir)) / std::tr2::sys::path("inefan/logfile.txt");
+            return std::tr2::sys::path(toUtf8(logfileDir)) / std::tr2::sys::path(BRAND_COMPANYNAME "/" BRAND_NAME "/logfile.txt");
         };
         static Logger l2f(getLogfilename());
         return l2f;

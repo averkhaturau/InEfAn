@@ -25,7 +25,10 @@ is_using_keyboard = False
 foreground_windows = {}
 
 activity_periods = []
+                                            
+# to estimate typing speed
 key_press_events = []
+# to counterpose mouse events to key presses
 mouse_click_events = []
 mouse_other_events = []
 
@@ -99,7 +102,7 @@ def parse_log_line(line):
             else: 
                 mouse_other_events.append(event_time)
         else:
-            print("Mouse single event at " + unicode(event_time))
+            print("Mouse single event at " + str(event_time))
             mouse_other_events.append(event_time)
 
         user_is_active_at(event_time)
@@ -118,7 +121,7 @@ def parse_log_line(line):
             if (not unique_input_events or unique_input_events[-1][0] != "keyboard started"):
                 unique_input_events.append(("keyboard started", event_time))
         else:
-            print("Keyboard single event at " + unicode(event_time))
+            print("Keyboard single event at " + str(event_time))
 
         user_is_active_at(event_time)
 
