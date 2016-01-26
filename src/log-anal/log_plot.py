@@ -3,30 +3,7 @@ import matplotlib.dates as mdates
 import numpy as np
 import datetime
 import log_parse
-
-def make_histogram(events, start, interval):
-    period_start = start
-    period_end = period_start + interval
-    hist = [[]] # array of arrays
-    for evt in events:
-        if evt < period_end:
-            hist[-1].append(evt)
-        else:
-            hist.append([evt])
-            period_start = period_end
-            period_end = period_start + interval
-
-    return hist
-
-
-def perdelta(start, end, delta):
-    curr = start
-    while curr < end:
-        yield curr
-        curr += delta
-
-def norm_events_stat_to_hist(events, start, interval):
-    return list(map(lambda a: len(a), make_histogram(events, start, interval)))
+from log_utils import *
     
 
 def log_plot(key_press_events, mouse_click_events, mouse_other_events):
@@ -47,12 +24,14 @@ def log_plot(key_press_events, mouse_click_events, mouse_other_events):
     #print (x_axis)
 
     ind = range(len(x_axis))
-    width = .4
+    width = .25
 
     plt.title("Average Input Events per hour")
     keypress_bar = plt.bar(ind, keypress_hist, width, color='r')
-    clicks_bar = plt.bar(ind, m_click_hist, width, color='m', bottom=keypress_hist)
-    moves_bar = plt.bar(ind, m_other_hist, width, color='y', bottom=m_click_hist)
+    clicks_bar = plt.bar([x+width for x in ind], m_click_hist, width, color='m'#, bottom=keypress_hist
+        )
+    moves_bar = plt.bar([x+2.*width for x in ind], m_other_hist, width, color='y', bottom=m_click_hist
+        )
 
     plt.ylabel("Events per minute")
     plt.xticks(ind, x_axis)

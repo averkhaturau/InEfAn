@@ -1,19 +1,7 @@
 import sys
 import datetime
 import re
-from itertools import *
-
-
-def pairwise(iterable):                    
-    "s -> (s0,s1), (s1,s2), (s2, s3), ..." 
-    a, b = tee(iterable)
-    try:
-        next(b)
-    except StopIteration:
-        pass
-    return zip(a, b)
-
-
+from log_utils import *
 
 ####################################################################
 #  Global variables
@@ -185,11 +173,3 @@ def print_characteristics():
     print("Mean time to transit hand from mouse to keyboard = {}".format(mean_mouse_to_kb))
     mean_kb_to_mouse = calc_trastition_time(kb_to_mouse)
     print("Mean time to transit hand from keyboard to mouse = {}".format(mean_kb_to_mouse))
-
-
-def calc_trastition_time(transition_events):
-    return sum( map(lambda e1_e2: e1_e2[1]-e1_e2[0], transition_events), datetime.timedelta() ) / len(transition_events)
-
-
-def calc_typing_speed(num_keypresses, timespan):
-    return num_keypresses * 60 / timespan.seconds
