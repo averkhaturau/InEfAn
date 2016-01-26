@@ -30,7 +30,7 @@ std::string timestamp(system_clock::time_point const& time)
 #pragma warning(push)
 #pragma warning(disable:4996)
     strftime(buff, sizeof(buff) - 4, "%Y-%m-%d %H:%M:%S.", localtime(&localunixtime));
-    sprintf_s(&buff[20], 5, "%03u ", static_cast<unsigned int>(time.time_since_epoch().count() % 1000));
+    sprintf_s(&buff[20], 5, "%03u ", static_cast<unsigned int>(std::chrono::duration_cast<std::chrono::milliseconds>(time.time_since_epoch()).count() % 1000));
 #pragma warning(pop)
     return buff;
 }
