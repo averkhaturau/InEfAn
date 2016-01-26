@@ -18,7 +18,14 @@ def parse_log():
 
     with fopen_func(sys.argv[1]) as logfile:
         for line in logfile:
-           handle_log_line(line[:-1])
+            try:
+                handle_log_line(line[:-1])
+            except IOError as ee:
+                print("I/O error({0}): {1}".format(ee.errno, ee.strerror))
+            except ValueError as ee:
+                print("ValueError: {}\non parsing '{}'".format(str(ee), line))
+            except:
+                print("Unexpected error {} on parsing line '{}'".format(sys.exc_info()[0], line))
 
 parse_log()
 

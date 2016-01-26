@@ -30,3 +30,4 @@
 
 #shadow build directory
 .build*
+*.orig

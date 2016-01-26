@@ -43,6 +43,7 @@ def handle_log_line(line):
             parsing_header = False
         else:
             get_data_from_header(line)
+
     else:
         if line.startswith("==="):
             parsing_header = True
@@ -141,11 +142,15 @@ def user_is_active_at(t):
 
 def print_characteristics():
     global mean_typing_speed, mouse_to_kb, kb_to_mouse
+    activity_time = datetime.timedelta()
     it = iter(activity_periods)
     for period_start in it:
         period_end = next(it)
         if period_end - period_start < inactivity_interval:
             continue
+
+        activity_time += period_end - period_start
+
         # calculate typing speed
         key_presses_in_period = tuple(filter(lambda press_time: period_start <= press_time <= period_end, key_press_events))
         num_keypresses = len(key_presses_in_period)
@@ -169,7 +174,19 @@ def print_characteristics():
         sum(map(lambda s_i: s_i[1], typing_keypresses_intervals), datetime.timedelta()))
     print("Mean Typing speed is {}".format(mean_typing_speed))
 
-    mean_mouse_to_kb = calc_trastition_time(mouse_to_kb)
+    mean_mouse_to_kb = calc_mean_trastition_time(mouse_to_kb)
     print("Mean time to transit hand from mouse to keyboard = {}".format(mean_mouse_to_kb))
-    mean_kb_to_mouse = calc_trastition_time(kb_to_mouse)
+    mean_kb_to_mouse = calc_mean_trastition_time(kb_to_mouse)
     print("Mean time to transit hand from keyboard to mouse = {}".format(mean_kb_to_mouse))
+
+    observation_period = unique_input_events[-1][1] - unique_input_events[0][1] 
+    print("You were active {:1.1f} minutes during {:1.1f} observed, whisch is {:1.1f}%".format( \
+        timdelta2Minutes(activity_time), timdelta2Minutes(observation_period), 100*timdelta2Minutes(activity_time) / timdelta2Minutes(observation_period)))
+
+    hand_moves_per_hour = (len(mouse_to_kb) + len(kb_to_mouse))*60. / timdelta2Minutes(activity_time)
+    hand_moving_time = calc_total_trastition_time(mouse_to_kb + kb_to_mouse)
+    hand_moving_percents = timdelta2Minutes(hand_moving_time)*100/timdelta2Minutes(activity_time)
+    print("You have moved your hand from mouse to keyboard {} times and {} times back, you do it average {:1.1f} times per hour and this tooks you {:3.1f}% of your active time".format( \
+        len(mouse_to_kb), len(kb_to_mouse), (len(mouse_to_kb) + len(kb_to_mouse))*60/timdelta2Minutes(activity_time), hand_moving_percents))
+
+
