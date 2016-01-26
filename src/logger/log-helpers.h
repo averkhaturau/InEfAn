@@ -40,3 +40,5 @@ template<> inline std::string toUtf8(float arg) { return std::to_string(arg); }
 template<> inline std::string toUtf8(bool arg) { return arg ? "true" : "false"; }
 
 std::string timestamp(std::chrono::system_clock::time_point const&);
+std::string timestamp_filename(std::chrono::system_clock::time_point const& time = std::chrono::system_clock::now());
+

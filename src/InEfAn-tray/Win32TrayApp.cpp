@@ -166,6 +166,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         trayNotify(IDC_LOGFILES_NOTSENT);
                     }
                     break;
+                    case ID_TRAYMENU_NEW_LOG: {
+                        Logger::instance() << "Starting new logfile";
+                        Logger::instance().enable(false);
+                        const auto archFilename = Logger::instance().logFilename().replace_extension(timestamp_filename() + ".txt");
+                        std::tr2::sys::rename(Logger::instance().logFilename(), archFilename);
+                        Logger::instance().enable(true);
+                        Logger::instance() << "Continuing the logfile " << archFilename.string();
+                        trayNotify(IDC_LOGFILES_NOTSENT);
+                    }
+                    break;
                     default:
                         return DefWindowProc(hWnd, message, wParam, lParam);
                         break;

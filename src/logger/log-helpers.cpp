@@ -34,3 +34,10 @@ std::string timestamp(system_clock::time_point const& time)
 #pragma warning(pop)
     return buff;
 }
+
+std::string timestamp_filename(system_clock::time_point const& time)
+{
+    std::string timeStr = timestamp(time);
+    timeStr[10] = timeStr[13] = timeStr[16] = '-';
+    return timeStr.substr(0, 19);
+}

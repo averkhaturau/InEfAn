@@ -31,6 +31,7 @@ BEGIN
 		MENUITEM "Приостановить логгирование", ID_TRAYMENU_PAUSE
 		MENUITEM "Продолжить логгирование", ID_TRAYMENU_RESUME
 		MENUITEM "Отправить отчёт разработчикам", ID_TRAYMENU_SENDLOGFILES
+		MENUITEM "Начать лог заново", ID_TRAYMENU_NEW_LOG
 		MENUITEM SEPARATOR
 
 		MENUITEM "Выйти",                        ID_TRAYMENU_EXIT
@@ -65,7 +66,8 @@ BEGIN
 		MENUITEM SEPARATOR
 		MENUITEM "Pause logging", ID_TRAYMENU_PAUSE
 		MENUITEM "Resume logging", ID_TRAYMENU_RESUME
-		MENUITEM "Send report to developers",    ID_TRAYMENU_SENDLOGFILES
+		MENUITEM "Send report to developers", ID_TRAYMENU_SENDLOGFILES
+		MENUITEM "Start new log", ID_TRAYMENU_NEW_LOG
 		MENUITEM SEPARATOR
 
 		MENUITEM "Exit",                         ID_TRAYMENU_EXIT
@@ -93,12 +95,13 @@ IDR_MENU1 MENU
 BEGIN
     POPUP "Tray Menu"
     BEGIN
-		MENUITEM "Аб Iнафане...",    ID_TRAYMENU_ABOUT
+		MENUITEM "Аб Iнэфане...",    ID_TRAYMENU_ABOUT
 
 		MENUITEM SEPARATOR
 		MENUITEM "Прыпынiць лагiраванне", ID_TRAYMENU_PAUSE
 		MENUITEM "Працягнуць лагiраванне", ID_TRAYMENU_RESUME
-		MENUITEM "Адправiць справасдачу распрацоўнiкам",    ID_TRAYMENU_SENDLOGFILES
+		MENUITEM "Адправiць справасдачу распрацоўнiкам", ID_TRAYMENU_SENDLOGFILES
+		MENUITEM "Пачаць усё спачатку", ID_TRAYMENU_NEW_LOG
 		MENUITEM SEPARATOR
 
 		MENUITEM "Выйсцi",                         ID_TRAYMENU_EXIT
