@@ -9,7 +9,6 @@ def parse_log():
     if sys.version_info < (3, 0):
         reload(sys)  
         sys.setdefaultencoding('utf8')
-#        sys.stdout = open(sys.stdout.fileno(), mode='w', encoding='utf8', buffering=1)
         fopen_func = lambda filename: open(filename)
     else:
         fopen_func = lambda filename: open(filename, encoding='utf8')

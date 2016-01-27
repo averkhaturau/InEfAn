@@ -10,7 +10,7 @@ parsing_header = False
 is_using_mouse = False
 is_using_keyboard = False
 
-foreground_windows = {}
+foreground_windows = []
 
 activity_periods = []
                                             
@@ -21,10 +21,9 @@ mouse_click_events = []
 mouse_other_events = []
 
 inactivity_interval = datetime.timedelta(seconds=4) # if no events during this time span, consider user inactive
-
 typing_keypresses_intervals = []
 
-# filtered 
+# filtered
 unique_input_events = []
 
 mouse_to_kb = []
@@ -33,7 +32,7 @@ kb_to_mouse = []
 is_header_info_shown = False
 
 analysis_begin = datetime.datetime(1917,11,7)
-analysis_end   = datetime.datetime.now()
+analysis_end = datetime.datetime.now()
 
 ####################################################################
 
@@ -73,7 +72,7 @@ def parse_log_line(line):
     line_word = [w for w in re.split(" |\t|\n|\r", line) if w]
     if len(line_word) < 3:
         return
-    event_time = datetime.datetime.strptime( line_word[0] + " " + line_word[1], "%Y-%m-%d %H:%M:%S.%f" )
+    event_time = datetime.datetime.strptime(line_word[0] + " " + line_word[1], "%Y-%m-%d %H:%M:%S.%f")
     # print(event_time, line_word[2:])
 
     global current_window, analysis_begin, analysis_end
@@ -123,7 +122,8 @@ def parse_log_line(line):
     else:
         # system event
         evt_text = " ".join(line_word[2:])
-        #print((evt_text + " at " + unicode(event_time)).encode(sys.stdout.encoding, errors='replace'))
+        #print((evt_text + " at " +
+        #unicode(event_time)).encode(sys.stdout.encoding, errors='replace'))
 
         m = re.search('Foreground window title is "(.*)" from process name "(.*)" running from file "(.*)"', evt_text)
         if m:
@@ -134,7 +134,7 @@ def parse_log_line(line):
             }
         else:
             current_window = None # FIXME
-        foreground_windows.update({event_time: current_window})
+        foreground_windows.append((event_time, current_window))
 
 
 # determine user activity periods
@@ -149,6 +149,7 @@ def user_is_active_at(t):
 def print_characteristics():
     global mean_typing_speed, mouse_to_kb, kb_to_mouse
     activity_time = datetime.timedelta()
+    active_apps = {}
     it = iter(activity_periods)
     for period_start in it:
         period_end = next(it)
@@ -156,6 +157,16 @@ def print_characteristics():
             continue
 
         activity_time += period_end - period_start
+
+        foreground_apps = []
+        for foreground_app in foreground_windows:
+            if foreground_app[0] < period_start:
+                foreground_apps = [foreground_app]
+            elif foreground_app[0] < period_end:
+                foreground_apps.append(foreground_app)
+        #print("Apps used from {} to {} are: {}".format(period_start,
+        #period_end, foreground_apps))
+        active_apps.update({(period_start, period_end): foreground_apps})
 
         # calculate typing speed
         key_presses_in_period = tuple(filter(lambda press_time: period_start <= press_time <= period_end, key_press_events))
@@ -180,7 +191,7 @@ def print_characteristics():
         print("Not enough observation, please gather more statistics")
         return
 
-    mean_typing_speed = calc_typing_speed( \
+    mean_typing_speed = calc_typing_speed(\
         sum(map(lambda s_i: s_i[0], typing_keypresses_intervals)), \
         sum(map(lambda s_i: s_i[1], typing_keypresses_intervals), datetime.timedelta()))
     print("Mean Typing speed is {}".format(mean_typing_speed))
@@ -194,15 +205,15 @@ def print_characteristics():
     if timdelta2Minutes(observation_period) < 1:
         print("Observation time is not enough for statistics...")
 
-    print("You were active {:1.1f} minutes during {:1.1f} observed, which is {:1.1f}%".format( \
-        timdelta2Minutes(activity_time), timdelta2Minutes(observation_period), 100*timdelta2Minutes(activity_time) / timdelta2Minutes(observation_period)))
+    print("You were active {:1.1f} minutes during {:1.1f} observed, which is {:1.1f}%".format(\
+        timdelta2Minutes(activity_time), timdelta2Minutes(observation_period), 100 * timdelta2Minutes(activity_time) / timdelta2Minutes(observation_period)))
 
     if timdelta2Minutes(activity_time) < 1:
         print("Active interval was less then a minute, which is not enough for statistics")
-    hand_moves_per_hour = (len(mouse_to_kb) + len(kb_to_mouse))*60. / timdelta2Minutes(activity_time)
+    hand_moves_per_hour = (len(mouse_to_kb) + len(kb_to_mouse)) * 60. / timdelta2Minutes(activity_time)
     hand_moving_time = calc_total_trastition_time(mouse_to_kb + kb_to_mouse)
-    hand_moving_percents = timdelta2Minutes(hand_moving_time)*100/timdelta2Minutes(activity_time)
-    print("You have moved your hand from mouse to keyboard {} times and {} times back, you do it average {:1.1f} times per hour and this tooks you {:3.1f}% of your active time".format( \
-        len(mouse_to_kb), len(kb_to_mouse), (len(mouse_to_kb) + len(kb_to_mouse))*60/timdelta2Minutes(activity_time), hand_moving_percents))
+    hand_moving_percents = timdelta2Minutes(hand_moving_time) * 100 / timdelta2Minutes(activity_time)
+    print("You have moved your hand from mouse to keyboard {} times and {} times back, you do it average {:1.1f} times per hour and this tooks you {:3.1f}% of your active time".format(\
+        len(mouse_to_kb), len(kb_to_mouse), (len(mouse_to_kb) + len(kb_to_mouse)) * 60 / timdelta2Minutes(activity_time), hand_moving_percents))
 
 

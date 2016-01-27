@@ -14,11 +14,11 @@ def pairwise(iterable):
 
 
 def timdelta2Minutes(td):
-    return td.days*24.*60 + td.seconds/60.
+    return td.days * 24. * 60 + td.seconds / 60.
 
 
 def calc_total_trastition_time(transition_events):
-    return sum( map(lambda e1_e2: e1_e2[1]-e1_e2[0], transition_events), datetime.timedelta() )
+    return sum(map(lambda e1_e2: e1_e2[1] - e1_e2[0], transition_events), datetime.timedelta())
 
 def calc_mean_trastition_time(transition_events):
     if len(transition_events) > 0:

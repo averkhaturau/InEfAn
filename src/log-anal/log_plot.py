@@ -25,7 +25,7 @@ def log_plot(key_press_events, mouse_click_events, mouse_other_events):
 
     width = .25
     ind = range(len(x_axis))
-    ind_m = [x+width for x in ind]
+    ind_m = [x + width for x in ind]
 
     plt.title("Average Input Events per hour")
     keypress_bar = plt.bar(ind, keypress_hist, width, color='r')
