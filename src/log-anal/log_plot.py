@@ -8,8 +8,8 @@ from log_utils import *
 
 def log_plot(key_press_events, mouse_click_events, mouse_other_events):
 
-    hist_delta = datetime.timedelta(hours=1)
-    start = min(key_press_events[0], mouse_click_events[0], mouse_other_events[0]).replace(minute=0,second=0,microsecond=0)
+    hist_delta = datetime.timedelta(minutes=1)
+    start = min(key_press_events[0], mouse_click_events[0], mouse_other_events[0]).replace(second=0,microsecond=0)
 
     keypress_hist = norm_events_stat_to_hist(key_press_events, start, hist_delta)
     m_click_hist = norm_events_stat_to_hist(mouse_click_events, start, hist_delta)

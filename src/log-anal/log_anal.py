@@ -18,13 +18,17 @@ def parse_log():
         print("Usage:\n\t>" + sys.argv[0] + " inefan.log [-begin <analysis start time> -end <analysis end time>]")
         exit(-1)
 
-#    global analysis_begin, analysis_end  
-    if len(sys.argv) > 3 and sys.argv[2] == "-begin":
-        log_parse.analysis_begin = datetime.datetime.strptime(sys.argv[3], "%Y-%m-%d %H:%M:%S")
-        if len(sys.argv) > 5 and sys.argv[4] == "-end":
-            log_parse.analysis_end = datetime.datetime.strptime(sys.argv[5], "%Y-%m-%d %H:%M:%S")
-        print("Analysing logs from {} to {}".format(str(log_parse.analysis_begin), str(log_parse.analysis_end)))
-                
+    if len(sys.argv) > 3:
+        if sys.argv[2] == "-begin":
+            log_parse.analysis_begin = datetime.datetime.strptime(sys.argv[3], "%Y-%m-%d %H:%M:%S")
+            if len(sys.argv) > 5 and sys.argv[4] == "-end":
+                log_parse.analysis_end = datetime.datetime.strptime(sys.argv[5], "%Y-%m-%d %H:%M:%S")
+        elif sys.argv[2] == "-last":
+            passed_time_interval = datetime.datetime.strptime(sys.argv[3], "%H:%M")
+            log_parse.analysis_begin = datetime.datetime.now() - datetime.timedelta(hours=passed_time_interval.hour, minutes=passed_time_interval.minute)
+
+        print("Analysing logs from {} to {}".format(str(log_parse.analysis_begin), str(log_parse.analysis_end)))                
+
 
     with fopen_func(sys.argv[1]) as logfile:
         for line in logfile:

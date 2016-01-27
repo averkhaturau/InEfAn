@@ -175,6 +175,11 @@ def print_characteristics():
             elif e1[0] == "keyboard stopped" and e2[0] == "mouse started":
                 kb_to_mouse.append((e1[1],e2[1]))
         
+
+    if len(unique_input_events) < 5 or len(activity_periods) < 1:
+        print("Not enough observation, please gather more statistics")
+        return
+
     mean_typing_speed = calc_typing_speed( \
         sum(map(lambda s_i: s_i[0], typing_keypresses_intervals)), \
         sum(map(lambda s_i: s_i[1], typing_keypresses_intervals), datetime.timedelta()))
