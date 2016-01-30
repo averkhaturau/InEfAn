@@ -6,35 +6,59 @@ import log_parse
 from log_utils import *
     
 
-def log_plot(key_press_events, mouse_click_events, mouse_other_events):
+def log_plot(key_press_events, mouse_click_events, mouse_other_events, foreground_windows):
+    with plt.xkcd():
+        try:
+            hist_delta = datetime.timedelta(minutes=1)
+            start = min(key_press_events[0], mouse_click_events[0], mouse_other_events[0]).replace(#minute=0,
+                second=0,microsecond=0)
+            finish = max(key_press_events[-1], mouse_click_events[-1], mouse_other_events[-1]).replace(#minute=0,
+                second=0,microsecond=0)
+            finish.replace(minute=finish.minute + 1) # add also last incomplete period
 
-    hist_delta = datetime.timedelta(minutes=1)
-    start = min(key_press_events[0], mouse_click_events[0], mouse_other_events[0]).replace(second=0,microsecond=0)
+            keypress_hist = norm_events_stat_to_hist(key_press_events, start, finish, hist_delta)
+            m_click_hist = norm_events_stat_to_hist(mouse_click_events, start, finish, hist_delta)
+            m_other_hist = norm_events_stat_to_hist(mouse_other_events, start, finish, hist_delta)
 
-    keypress_hist = norm_events_stat_to_hist(key_press_events, start, hist_delta)
-    m_click_hist = norm_events_stat_to_hist(mouse_click_events, start, hist_delta)
-    m_other_hist = norm_events_stat_to_hist(mouse_other_events, start, hist_delta)
+            #print(keypress_hist)
+            #print(m_click_hist)
+            #print(m_other_hist)
 
-    #print(keypress_hist)
-    #print(m_click_hist)
-    #print(m_other_hist)
+            #l = plt.plot(keypress_hist, 'r', linewidth=2)
+            x_axis = list(map(lambda dt: dt.strftime("%d/%m %H:%M"), (perdelta(start, finish, hist_delta))))
+            #print (x_axis)
 
-    #l = plt.plot(keypress_hist, 'r', linewidth=2)
-    x_axis = list(map(lambda dt: dt.strftime("%d/%m %H:%M"), (perdelta(start, key_press_events[-1], hist_delta))))
-    #print (x_axis)
+            width = .25
+            ind = range(len(x_axis))
+            ind_m = [x + width for x in ind]
+            max_height = max(keypress_hist + m_other_hist) - 1
 
-    width = .25
-    ind = range(len(x_axis))
-    ind_m = [x + width for x in ind]
+            plt.title("Average Input Events per hour")
+            keypress_bar = plt.bar(ind, keypress_hist, width, color='r')
+            clicks_bar = plt.bar(ind_m, m_click_hist, width, color='g')
+            moves_bar = plt.bar(ind_m, m_other_hist, width, color='y', bottom=m_click_hist)
 
-    plt.title("Average Input Events per hour")
-    keypress_bar = plt.bar(ind, keypress_hist, width, color='r')
-    clicks_bar = plt.bar(ind_m, m_click_hist, width, color='g')
-    moves_bar = plt.bar(ind_m, m_other_hist, width, color='y', bottom=m_click_hist)
+            annotations = apps_usage_stat(foreground_windows, start, hist_delta)
+            print(annotations)
+            ann_index = 0
+            for ann in annotations:
+                ann_text = ""
+                for app_usage in ann:
+                    ann_text += "{} - {}%\n".format(app_usage[0], app_usage[1])
+                plt.annotate("{} - {}%".format(app_usage[0], app_usage[1]),
+                    xy=(ann_index + width, max(keypress_hist[ann_index],m_click_hist[ann_index] + m_other_hist[ann_index])),
+                    arrowprops=dict(arrowstyle='->'), xytext=(ann_index, max_height))
+                ann_index += 1
+            # TODO: find where 3 or more hours of silence
+            #plt.annotate("HERE I FELT TIRED\nAND WENT TO BED",
+            #    xy=(13, 100), arrowprops=dict(arrowstyle='->'), xytext=(15, 1000))
 
-    plt.ylabel("Events per minute")
-    plt.xticks(ind, x_axis)
-    plt.xticks(rotation='vertical')
-    plt.legend((keypress_bar[0], clicks_bar[0], moves_bar[0]), ("Key Press events", "Mouse Click events", "Mouse Moves and Scrolls"))
+            plt.ylabel("Events per minute")
+            plt.xticks(ind, x_axis)
+            plt.xticks(rotation='vertical')
+            plt.legend((keypress_bar[0], clicks_bar[0], moves_bar[0]), ("Key Press events", "Mouse Click events", "Mouse Moves and Scrolls"))
 
-    plt.show()
+            plt.show()
+        except:
+            print("Unexpected error {} on parsing line '{}'".format(sys.exc_info()[0], line))
+

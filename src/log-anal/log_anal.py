@@ -43,4 +43,4 @@ def parse_log():
 parse_log()
 
 log_parse.print_characteristics()
-log_plot.log_plot(log_parse.key_press_events, log_parse.mouse_click_events, log_parse.mouse_other_events)
+log_plot.log_plot(log_parse.key_press_events, log_parse.mouse_click_events, log_parse.mouse_other_events, log_parse.foreground_windows)

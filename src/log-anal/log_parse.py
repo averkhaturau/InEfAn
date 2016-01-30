@@ -129,7 +129,7 @@ def parse_log_line(line):
         if m:
             current_window = {\
                 "title": m.group(1),\
-                "procName":m.group(2),\
+                "procname":m.group(2),\
                 "filename":m.group(3)\
             }
         else:
@@ -149,7 +149,6 @@ def user_is_active_at(t):
 def print_characteristics():
     global mean_typing_speed, mouse_to_kb, kb_to_mouse
     activity_time = datetime.timedelta()
-    active_apps = {}
     it = iter(activity_periods)
     for period_start in it:
         period_end = next(it)
@@ -157,16 +156,6 @@ def print_characteristics():
             continue
 
         activity_time += period_end - period_start
-
-        foreground_apps = []
-        for foreground_app in foreground_windows:
-            if foreground_app[0] < period_start:
-                foreground_apps = [foreground_app]
-            elif foreground_app[0] < period_end:
-                foreground_apps.append(foreground_app)
-        #print("Apps used from {} to {} are: {}".format(period_start,
-        #period_end, foreground_apps))
-        active_apps.update({(period_start, period_end): foreground_apps})
 
         # calculate typing speed
         key_presses_in_period = tuple(filter(lambda press_time: period_start <= press_time <= period_end, key_press_events))
