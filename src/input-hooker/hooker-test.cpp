@@ -12,10 +12,14 @@ int main()
 
         InputHooker::instance().setHooks(
         [&el](WPARAM wparam, KBDLLHOOKSTRUCT kbsrtuct) {
-            el.log(KeyboardEvent(wparam, kbsrtuct));
+            try {
+                el.log(KeyboardEvent(wparam, kbsrtuct));
+            } catch(std::exception const& ee) {std::cout << ee.what();}
         },
         [&el](WPARAM wparam, MSLLHOOKSTRUCT mstruct) {
-            el.log(MouseAnyEvent(wparam, mstruct));
+            try {
+                el.log(MouseAnyEvent(wparam, mstruct));
+            } catch (std::exception const& ee) { std::cout << ee.what();}
         }
         );
         InputHooker::instance().startHook();
@@ -27,7 +31,7 @@ int main()
     } catch (std::exception& ee) {
         std::cerr << "Exception thrown: " << ee.what();
     } catch (...) {
-        std::cerr << "Exited due to unknown echeption";
+        std::cerr << "Exited due to unknown exception";
     }
     return 0;
 }

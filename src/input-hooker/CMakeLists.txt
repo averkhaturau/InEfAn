@@ -15,7 +15,7 @@ set(SRC
 
 add_definitions(-DDLL_NAME=${DLL_NAME})
 
-add_library(${DLL_NAME} SHARED input-hooker-dll.cpp)
+add_library(${DLL_NAME} SHARED input-hooker-dll.cpp input-hooker-dll.h)
 
 add_library(${DLL_NAME}_ STATIC ${SRC})
 

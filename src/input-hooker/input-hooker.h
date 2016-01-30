@@ -4,6 +4,7 @@
 #include <functional>
 #include <stdexcept>
 #include <string>
+#include <iostream>
 #include "input-hooker-dll.h"
 
 
@@ -17,18 +18,31 @@ public:
     {
         stopHook();
 
+        std::cout << "starting hook" << std::endl;
+
         hookDll = LoadLibraryA(dllName);
-        keyboardCallback = (HOOKPROC)GetProcAddress(hookDll, "keyboardCallback");
-        mouseCallback = (HOOKPROC)GetProcAddress(hookDll, "mouseCallback");
+
+        std::cout << "DLL loaded: " << hookDll << std::endl;
+
+        keyboardCallback = GetProcAddress<HOOKPROC>(hookDll, "keyboardCallback");
+        mouseCallback = GetProcAddress<HOOKPROC>(hookDll, "mouseCallback");
         setCallbacks_t* setCallbacks = (setCallbacks_t*)GetProcAddress(hookDll, "setCallbacks");
+
+        std::cout << "ProcAddr acquired: " << keyboardCallback << ", " << mouseCallback << ", " << setCallbacks << std::endl;
+
 
         if (!keyboardCallback || !mouseCallback || !setCallbacks)
             throw std::runtime_error(std::string("Unable to find DLL methods in ") + dllName + " error: " + std::to_string(GetLastError()));
 
-        keyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, keyboardCallback, NULL, 0);
-        mouseHook    = SetWindowsHookEx(WH_MOUSE_LL,    mouseCallback, NULL, 0);
+        keyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, keyboardCallback, hookDll, 0);
+        mouseHook    = SetWindowsHookEx(WH_MOUSE_LL,    mouseCallback, hookDll, 0);
+
+        if (!(keyboardHook && mouseHook))
+            throw std::runtime_error(std::string("SetWindowsHookEx filed w/e: ") + std::to_string(GetLastError()));
 
         (*setCallbacks)(onKeypressed, onMouse, keyboardHook, mouseHook);
+
+        std::cout << "Hooks set: " << keyboardHook << ", " << mouseHook  << std::endl;
     }
     void stopHook()
     {
@@ -44,7 +58,6 @@ public:
             FreeLibrary(hookDll);
             hookDll = NULL;
         }
-
     }
 
     ~InputHooker() {stopHook();}

@@ -1,5 +1,5 @@
 #include "input-hooker-dll.h"
-
+#include <iostream>
 
 Keypressed_t onKeyPressed;
 Mouse_t onMouse;
@@ -16,8 +16,8 @@ void __cdecl setCallbacks(Keypressed_t& k, Mouse_t& m, HHOOK kh, HHOOK mh)
     mouseHook = mh;
 }
 
-extern "C" __declspec(dllexport)
-LRESULT __cdecl keyboardCallback(
+__declspec(dllexport)
+LRESULT __stdcall keyboardCallback(
     _In_ int    nCode,
     _In_ WPARAM wParam,
     _In_ LPARAM lParam
@@ -29,8 +29,8 @@ LRESULT __cdecl keyboardCallback(
     return CallNextHookEx(keyboardHook, nCode, wParam, lParam);
 }
 
-extern "C" __declspec(dllexport)
-LRESULT __cdecl mouseCallback(
+__declspec(dllexport)
+LRESULT __stdcall mouseCallback(
     _In_ int    nCode,
     _In_ WPARAM wParam,
     _In_ LPARAM lParam
