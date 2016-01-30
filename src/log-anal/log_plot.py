@@ -29,7 +29,7 @@ def log_plot(key_press_events, mouse_click_events, mouse_other_events, foregroun
             x_axis = list(map(lambda dt: dt.strftime("%d/%m %H:%M"), (perdelta(start, finish, hist_delta))))
             #print (x_axis)
 
-            width = .25
+            width = .35
             ind = range(len(x_axis))
             ind_m = [x + width for x in ind]
             max_height = max(keypress_hist + m_other_hist)
@@ -46,12 +46,14 @@ def log_plot(key_press_events, mouse_click_events, mouse_other_events, foregroun
                 if ann:
                     ann_text = "{} - {}%".format(ann[0][0], ann[0][1])
                     for app_usage in ann[1:]:
-                        ann_text += "\n{} - {}%".format(app_usage[0], app_usage[1])
+                        if app_usage[1]:
+                            ann_text += "\n{} - {}%".format(app_usage[0], app_usage[1])
                     this_height = max(keypress_hist[ann_index],m_click_hist[ann_index] + m_other_hist[ann_index])
-                    plt.annotate(ann_text,
-                        xy=(ann_index + width, this_height),
-                        arrowprops=dict(arrowstyle='->'),
-                        xytext=(ann_index, this_height + random.random()*( max_height-this_height)))
+                    if this_height:
+                        plt.annotate(ann_text,
+                            xy=(ann_index + width, this_height),
+                            arrowprops=dict(arrowstyle='->'),
+                            xytext=(ann_index, this_height + random.random()*( max_height-this_height)))
                 ann_index += 1
             # TODO: find where 3 or more hours of silence
             #plt.annotate("HERE I FELT TIRED\nAND WENT TO BED",

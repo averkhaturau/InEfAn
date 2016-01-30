@@ -89,6 +89,6 @@ def apps_usage_stat(foreground_windows, start, hist_delta):
     result = []
     for period in period_stats:
         result.append(list(map(lambda app_time: (app_time[0],int(timdelta2Minutes(app_time[1]) * 100 / timdelta2Minutes(hist_delta))),
-            sorted(filter(lambda item: item[0], period.items()), key=lambda x: -x[1]))))
+            sorted(filter(lambda item: item[0], period.items()), key=lambda x: -x[1])[:3])))
 
     return result
