@@ -3,12 +3,13 @@ import matplotlib.dates as mdates
 import numpy as np
 import datetime
 import log_parse
+import random
 from log_utils import *
     
 
 def log_plot(key_press_events, mouse_click_events, mouse_other_events, foreground_windows):
     with plt.xkcd():
-        try:
+        #try:
             hist_delta = datetime.timedelta(minutes=1)
             start = min(key_press_events[0], mouse_click_events[0], mouse_other_events[0]).replace(#minute=0,
                 second=0,microsecond=0)
@@ -31,7 +32,7 @@ def log_plot(key_press_events, mouse_click_events, mouse_other_events, foregroun
             width = .25
             ind = range(len(x_axis))
             ind_m = [x + width for x in ind]
-            max_height = max(keypress_hist + m_other_hist) - 1
+            max_height = max(keypress_hist + m_other_hist)
 
             plt.title("Average Input Events per hour")
             keypress_bar = plt.bar(ind, keypress_hist, width, color='r')
@@ -39,19 +40,23 @@ def log_plot(key_press_events, mouse_click_events, mouse_other_events, foregroun
             moves_bar = plt.bar(ind_m, m_other_hist, width, color='y', bottom=m_click_hist)
 
             annotations = apps_usage_stat(foreground_windows, start, hist_delta)
-            print(annotations)
+            #print(annotations)
             ann_index = 0
             for ann in annotations:
-                ann_text = ""
-                for app_usage in ann:
-                    ann_text += "{} - {}%\n".format(app_usage[0], app_usage[1])
-                plt.annotate("{} - {}%".format(app_usage[0], app_usage[1]),
-                    xy=(ann_index + width, max(keypress_hist[ann_index],m_click_hist[ann_index] + m_other_hist[ann_index])),
-                    arrowprops=dict(arrowstyle='->'), xytext=(ann_index, max_height))
+                if ann:
+                    ann_text = "{} - {}%".format(ann[0][0], ann[0][1])
+                    for app_usage in ann[1:]:
+                        ann_text += "\n{} - {}%".format(app_usage[0], app_usage[1])
+                    this_height = max(keypress_hist[ann_index],m_click_hist[ann_index] + m_other_hist[ann_index])
+                    plt.annotate(ann_text,
+                        xy=(ann_index + width, this_height),
+                        arrowprops=dict(arrowstyle='->'),
+                        xytext=(ann_index, this_height + random.random()*( max_height-this_height)))
                 ann_index += 1
             # TODO: find where 3 or more hours of silence
             #plt.annotate("HERE I FELT TIRED\nAND WENT TO BED",
-            #    xy=(13, 100), arrowprops=dict(arrowstyle='->'), xytext=(15, 1000))
+            #    xy=(13, 100), arrowprops=dict(arrowstyle='->'), xytext=(15,
+            #    1000))
 
             plt.ylabel("Events per minute")
             plt.xticks(ind, x_axis)
@@ -59,6 +64,6 @@ def log_plot(key_press_events, mouse_click_events, mouse_other_events, foregroun
             plt.legend((keypress_bar[0], clicks_bar[0], moves_bar[0]), ("Key Press events", "Mouse Click events", "Mouse Moves and Scrolls"))
 
             plt.show()
-        except:
-            print("Unexpected error {} on parsing line '{}'".format(sys.exc_info()[0], line))
+        #except:
+        #    print("Unexpected error {}".format(sys.exc_info()[0]))
 

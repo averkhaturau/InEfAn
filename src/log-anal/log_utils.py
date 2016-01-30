@@ -51,8 +51,7 @@ def group_by_intervals(events, start, finish, interval):
                 hist.append([])
             hist[-1].append(evt)
 
-    desired_out_length = timdelta2Minutes(finish-start+interval)/timdelta2Minutes(interval)
-    print("desired_out_length={}".format(desired_out_length))
+    desired_out_length = timdelta2Minutes(finish - start + interval) / timdelta2Minutes(interval)
     while len(hist) < desired_out_length:
         hist.append([])
 
@@ -68,30 +67,28 @@ def apps_usage_stat(foreground_windows, start, hist_delta):
     end = start + hist_delta
     prev_proc = None
     for time_app in foreground_windows:
-        print (time_app)
         if not time_app[1]:
             time_app = (time_app[0], {"procname":""})
         if start <= time_app[0] < end:
             if prev_proc:
-                new_usage_time = (time_app[0]-prev_proc[0])
+                new_usage_time = (time_app[0] - prev_proc[0])
                 if period_stats[-1] and prev_proc[1]["procname"] in period_stats[-1]:
                     new_usage_time += period_stats[-1][prev_proc[1]["procname"]]
                 period_stats[-1].update({prev_proc[1]["procname"]: new_usage_time})
         else:
-            if time_app[0] < end:
+            while time_app[0] >= end:
                 start,end = end, end + hist_delta
                 if prev_proc:
                     if period_stats[-1] and prev_proc[1]["procname"] in period_stats[-1]:
-                        new_usage_time = period_stats[-1][prev_proc[1]["procname"]] + (start - prev_proc[0])
+                        new_usage_time = min(period_stats[-1][prev_proc[1]["procname"]] + (start - prev_proc[0]), hist_delta)
                         period_stats[-1].update({prev_proc[1]["procname"]: new_usage_time})
-                    period_stats.append({prev_proc[1]["procname"]: time_app[0] - start})
- 
+                    period_stats.append({prev_proc[1]["procname"]: min(time_app[0],end) - start})
+
         prev_proc = time_app
 
     result = []
     for period in period_stats:
-        result.append(list(map(
-            lambda app_time: (app_time[0],int(timdelta2Minutes(app_time[1])*100/timdelta2Minutes(hist_delta))),
-            sorted(filter(lambda item: item[0], period.items()), key=lambda x: -x[1])[:3])))
+        result.append(list(map(lambda app_time: (app_time[0],int(timdelta2Minutes(app_time[1]) * 100 / timdelta2Minutes(hist_delta))),
+            sorted(filter(lambda item: item[0], period.items()), key=lambda x: -x[1]))))
 
     return result
