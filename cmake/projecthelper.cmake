@@ -69,7 +69,7 @@ macro(SETUP_COMPILER_SETTINGS IS_DYNAMIC)
 	set(IS_DYNAMIC ${IS_DYNAMIC})
 
 	string(REPLACE ";" " " cmake_cl_release_init_str "${ADDITIONAL_CL_OPTIMIZATION_OPTIONS} /D NDEBUG /EHsc")
-	string(REPLACE ";" " " cmake_linker_release_init_str "${ADDITIONAL_LINKER_OPTIMIZATION_OPTIONS} /opt:ref /opt:icf")
+	string(REPLACE ";" " " cmake_linker_release_init_str "${ADDITIONAL_LINKER_OPTIMIZATION_OPTIONS}") # /opt:ref /OPT:ICF
 		
 	if(IS_DYNAMIC)
 

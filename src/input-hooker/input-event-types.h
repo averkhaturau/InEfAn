@@ -2,6 +2,8 @@
 
 #include <Windows.h>
 
+/// This class structure is not currently used. It's just an idea for events presentation in future
+
 class InputEvent
 {
     /*std::chrono::system_clock::time_point*/ DWORD time_;

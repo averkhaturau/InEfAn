@@ -4,11 +4,23 @@
 #include "active-app-tracker/ActiveWindowTracker.h"
 #include "active-app-tracker/WindowInfo.h"
 
+// helper function to print mouse position from the input event
+inline std::string mousePosToString(InputDeviceEvent const& ie)
+{
+    std::string mousePosStr;
+    try {
+        if (ie.eventType() == WM_MOUSEMOVE) {
+            const POINT& mousePos = dynamic_cast<MouseAnyEvent const&>(ie).mousePos();
+            mousePosStr = std::string("(") + std::to_string(mousePos.x) + ", " + std::to_string(mousePos.y) + ")";
+        }
+    } catch(std::bad_cast const&) {/*skip*/}
+    return mousePosStr;
+}
 
 Logger::LogRecord logEvent(InputDeviceEvent const& ie)
 {
     try {
-        return Logger::instance() << std::setw(9) << ie.inputDevice() << " " << ie.description();
+        return Logger::instance() << std::setw(9) << ie.inputDevice() << " " << ie.description() << mousePosToString(ie);
     } catch (std::exception& ee) {
         return Logger::instance() << ee.what();
     } catch (...) {
