@@ -1,11 +1,20 @@
 import sys
 import datetime
+
+# local
 import log_parse
-import log_plot
+import chart
 
 # for pyinstaller
-import Tkinter
-import FileDialog 
+try:
+    # for Python2
+    import Tkinter
+    import FileDialog
+except ImportError:
+    # for Python3
+    import tkinter
+    import tkinter.filedialog 
+
 
 def parse_log():
 
@@ -46,4 +55,4 @@ def parse_log():
 parse_log()
 
 log_parse.print_characteristics()
-log_plot.log_plot(log_parse.key_press_events, log_parse.mouse_click_events, log_parse.mouse_other_events, log_parse.foreground_windows)
+chart.log_plot(log_parse.key_press_events, log_parse.mouse_click_events, log_parse.mouse_other_events, log_parse.foreground_windows)

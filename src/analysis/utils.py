@@ -13,7 +13,7 @@ def pairwise(iterable):
     return zip(a, b)
 
 
-def timdelta2Minutes(td):
+def timedelta2Minutes(td):
     return td.days * 24. * 60 + td.seconds / 60.
 
 
@@ -27,9 +27,9 @@ def calc_mean_trastition_time(transition_events):
 
 
 def calc_typing_speed(num_keypresses, timespan):
-    minutes = timdelta2Minutes(timespan)
+    minutes = timedelta2Minutes(timespan)
     if minutes > 0:
-        return num_keypresses / timdelta2Minutes(timespan)
+        return num_keypresses / timedelta2Minutes(timespan)
 
 
 def perdelta(start, end, delta):
@@ -51,7 +51,7 @@ def group_by_intervals(events, start, finish, interval):
                 hist.append([])
             hist[-1].append(evt)
 
-    desired_out_length = timdelta2Minutes(finish - start + interval) / timdelta2Minutes(interval)
+    desired_out_length = timedelta2Minutes(finish - start + interval) / timedelta2Minutes(interval)
     while len(hist) < desired_out_length:
         hist.append([])
 
@@ -88,7 +88,7 @@ def apps_usage_stat(foreground_windows, start, hist_delta):
 
     result = []
     for period in period_stats:
-        result.append(list(map(lambda app_time: (app_time[0],int(timdelta2Minutes(app_time[1]) * 100 / timdelta2Minutes(hist_delta))),
+        result.append(list(map(lambda app_time: (app_time[0],int(timedelta2Minutes(app_time[1]) * 100 / timedelta2Minutes(hist_delta))),
             sorted(filter(lambda item: item[0], period.items()), key=lambda x: -x[1])[:3])))
 
     return result

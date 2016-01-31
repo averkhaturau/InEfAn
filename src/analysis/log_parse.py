@@ -1,7 +1,8 @@
 import sys
 import datetime
 import re
-from log_utils import *
+
+from utils import *
 
 ####################################################################
 #  Global variables
@@ -34,6 +35,9 @@ is_header_info_shown = False
 analysis_begin = datetime.datetime(1917,11,7)
 analysis_end = datetime.datetime.now()
 
+inefan_exit_events = []
+last_parsed_time = None
+
 ####################################################################
 
 
@@ -49,6 +53,10 @@ def handle_log_line(line):
     else:
         if line.startswith("==="):
             parsing_header = True
+            global last_parsed_time
+            if last_parsed_time:
+                inefan_exit_events.append(last_parsed_time)
+                last_parsed_time = None
         else:
             parse_log_line(line)
 
@@ -71,8 +79,13 @@ def parse_log_line(line):
 
     line_word = [w for w in re.split(" |\t|\n|\r", line) if w]
     if len(line_word) < 3:
+        global last_parsed_time
+        if last_parsed_time and line == "Disabling logging...":
+            inefan_exit_events.append(last_parsed_time)
+            last_parsed_time = None
         return
     event_time = datetime.datetime.strptime(line_word[0] + " " + line_word[1], "%Y-%m-%d %H:%M:%S.%f")
+    last_parsed_time = event_time
     # print(event_time, line_word[2:])
 
     global current_window, analysis_begin, analysis_end
@@ -191,18 +204,18 @@ def print_characteristics():
     print("Mean time to transit hand from keyboard to mouse = {}".format(mean_kb_to_mouse))
 
     observation_period = unique_input_events[-1][1] - unique_input_events[0][1]
-    if timdelta2Minutes(observation_period) < 1:
+    if timedelta2Minutes(observation_period) < 1:
         print("Observation time is not enough for statistics...")
 
     print("You were active {:1.1f} minutes during {:1.1f} observed, which is {:1.1f}%".format(\
-        timdelta2Minutes(activity_time), timdelta2Minutes(observation_period), 100 * timdelta2Minutes(activity_time) / timdelta2Minutes(observation_period)))
+        timedelta2Minutes(activity_time), timedelta2Minutes(observation_period), 100 * timedelta2Minutes(activity_time) / timedelta2Minutes(observation_period)))
 
-    if timdelta2Minutes(activity_time) < 1:
+    if timedelta2Minutes(activity_time) < 1:
         print("Active interval was less then a minute, which is not enough for statistics")
-    hand_moves_per_hour = (len(mouse_to_kb) + len(kb_to_mouse)) * 60. / timdelta2Minutes(activity_time)
+    hand_moves_per_hour = (len(mouse_to_kb) + len(kb_to_mouse)) * 60. / timedelta2Minutes(activity_time)
     hand_moving_time = calc_total_trastition_time(mouse_to_kb + kb_to_mouse)
-    hand_moving_percents = timdelta2Minutes(hand_moving_time) * 100 / timdelta2Minutes(activity_time)
+    hand_moving_percents = timedelta2Minutes(hand_moving_time) * 100 / timedelta2Minutes(activity_time)
     print("You have moved your hand from mouse to keyboard {} times and {} times back, you do it average {:1.1f} times per hour and this tooks you {:3.1f}% of your active time".format(\
-        len(mouse_to_kb), len(kb_to_mouse), (len(mouse_to_kb) + len(kb_to_mouse)) * 60 / timdelta2Minutes(activity_time), hand_moving_percents))
+        len(mouse_to_kb), len(kb_to_mouse), (len(mouse_to_kb) + len(kb_to_mouse)) * 60 / timedelta2Minutes(activity_time), hand_moving_percents))
 
 

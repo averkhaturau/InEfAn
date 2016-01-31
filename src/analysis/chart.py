@@ -2,9 +2,11 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
 import datetime
-import log_parse
 import random
-from log_utils import *
+
+#local
+import log_parse
+from utils import *
     
 
 def log_plot(key_press_events, mouse_click_events, mouse_other_events, foreground_windows):
@@ -59,6 +61,13 @@ def log_plot(key_press_events, mouse_click_events, mouse_other_events, foregroun
                             arrowprops=dict(arrowstyle='->'),
                             xytext=(ann_index, this_height + random.random()*( max_height-this_height)))
                 ann_index += 1
+
+            for inefan_exits in log_parse.inefan_exit_events:
+                exit_ind = timedelta2Minutes(inefan_exits - start) / timedelta2Minutes(hist_delta)
+                height = random.random() * 0.3 * max_height
+                plt.annotate("Here InEfAn log interrupts...", xy=(exit_ind, 1),
+                    arrowprops=dict(arrowstyle='->'), xytext=(exit_ind+1, height))
+
             # TODO: find where 3 or more hours of silence
             #plt.annotate("HERE I FELT TIRED\nAND WENT TO BED",
             #    xy=(13, 100), arrowprops=dict(arrowstyle='->'), xytext=(15,
