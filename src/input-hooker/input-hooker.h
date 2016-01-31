@@ -21,6 +21,8 @@ public:
         std::cout << "starting hook" << std::endl;
 
         hookDll = LoadLibraryA(dllName);
+        if (!hookDll)
+            throw std::runtime_error(std::string("Error loading ") + dllName + "; error " + std::to_string(GetLastError()));
 
         std::cout << "DLL loaded: " << hookDll << std::endl;
 

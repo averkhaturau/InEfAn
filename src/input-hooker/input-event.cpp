@@ -70,7 +70,7 @@ DWORD KeyboardEvent::time() const
 std::string KeyboardEvent::description() const
 {
     return std::string() +
-           vKeyCodesAnonimized[eventData.vkCode % sizeof(vKeyCodesAnonimized)] + " " +
+           vKeyCodesAnonimized[eventData.vkCode % _countof(vKeyCodesAnonimized)] + " " +
            (wparam == WM_KEYDOWN || wparam == WM_SYSKEYDOWN ? "down " : "up ");
 }
 

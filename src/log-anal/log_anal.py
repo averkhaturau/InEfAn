@@ -3,6 +3,9 @@ import datetime
 import log_parse
 import log_plot
 
+# for pyinstaller
+import Tkinter
+import FileDialog 
 
 def parse_log():
 

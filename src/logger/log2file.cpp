@@ -30,9 +30,12 @@ namespace
 
     std::string osVer()
     {
+#pragma warning(push)
+#pragma warning(disable:4996)
         OSVERSIONINFO osvi = { sizeof(OSVERSIONINFO) };
         GetVersionEx(&osvi);
         return std::to_string(osvi.dwMajorVersion) + "." + std::to_string(osvi.dwMinorVersion);
+#pragma warning(pop)
     }
 }
 

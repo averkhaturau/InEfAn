@@ -8,6 +8,10 @@ from log_utils import *
     
 
 def log_plot(key_press_events, mouse_click_events, mouse_other_events, foreground_windows):
+    if not (key_press_events and mouse_click_events and mouse_other_events):
+        print("Not enough statistics for the chart :(")
+        return
+
     with plt.xkcd():
         #try:
             hist_delta = datetime.timedelta(minutes=1)
