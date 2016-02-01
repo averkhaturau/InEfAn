@@ -202,8 +202,17 @@ def print_characteristics():
     print("Mean time to transit hand from mouse to keyboard = {}".format(mean_mouse_to_kb))
     mean_kb_to_mouse = calc_mean_trastition_time(kb_to_mouse)
     print("Mean time to transit hand from keyboard to mouse = {}".format(mean_kb_to_mouse))
+    hand_moving_time = calc_total_trastition_time(mouse_to_kb + kb_to_mouse)
+    print("During the observation you moved your hand total {}".format(hand_moving_time))
 
     observation_period = unique_input_events[-1][1] - unique_input_events[0][1]
+    # extrapolate statistics to 1 year
+    one_year_rate = 365.25*24*60 / timedelta2Minutes(observation_period)
+    print(("For 1 year you would spend {:1.0f} hours of you life to move you hand to mouse and back," +
+        " if you use you PC like you do during the observed time")
+        .format(timedelta2Minutes(hand_moving_time) * one_year_rate / 60))
+
+
     if timedelta2Minutes(observation_period) < 1:
         print("Observation time is not enough for statistics...")
 
@@ -213,9 +222,8 @@ def print_characteristics():
     if timedelta2Minutes(activity_time) < 1:
         print("Active interval was less then a minute, which is not enough for statistics")
     hand_moves_per_hour = (len(mouse_to_kb) + len(kb_to_mouse)) * 60. / timedelta2Minutes(activity_time)
-    hand_moving_time = calc_total_trastition_time(mouse_to_kb + kb_to_mouse)
     hand_moving_percents = timedelta2Minutes(hand_moving_time) * 100 / timedelta2Minutes(activity_time)
-    print("You have moved your hand from mouse to keyboard {} times and {} times back, you do it average {:1.1f} times per hour and this tooks you {:3.1f}% of your active time".format(\
+    print("You have moved your hand from mouse to keyboard {} times and {} times back, you do it average {:1.1f} times per hour and this tooks you {:3.1f}% of your active time".format(
         len(mouse_to_kb), len(kb_to_mouse), (len(mouse_to_kb) + len(kb_to_mouse)) * 60 / timedelta2Minutes(activity_time), hand_moving_percents))
 
 
