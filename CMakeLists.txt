@@ -19,6 +19,12 @@ SET_DESKTOP_TARGET()
 DEFINE_DEFAULT_DEFINITIONS()
 SETUP_COMPILER_SETTINGS(OFF)
 
+set(CMAKE_MODULE_PATH 
+	${CMAKE_MODULE_PATH} 
+	${CMAKE_SOURCE_DIR}/cmake
+)
+
+
 include_directories(src)
 
 add_subdirectory(src/input-hooker)
