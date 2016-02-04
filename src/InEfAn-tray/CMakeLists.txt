@@ -45,10 +45,10 @@ set(INSTALLER_COMPONENTS ${INSTALLER_COMPONENTS} PARENT_SCOPE)
 set(INSTALLER_${INSTALLER_COMPONENT}_EXTRA_INSTALL_COMMANDS "
 ;\\\${If} \\\${RunningX64}
 	SetRegView 64
-	WriteRegStr HKLM \\\"SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\" \\\"${BRAND_NAME}\\\" \\\"\\\$INSTDIR\\\\${INSTALLER_COMPONENT}.exe\\\"
+	WriteRegStr HKCU \\\"SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\" \\\"${BRAND_NAME}\\\" \\\"\\\$INSTDIR\\\\${INSTALLER_COMPONENT}.exe\\\"
 ;\\\${Else}
 ;	SetRegView 32
-;	WriteRegStr HKLM \\\"SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\" \\\"${BRAND_NAME}\\\" \\\"\\\$INSTDIR\\\\${INSTALLER_COMPONENT}.exe\\\"
+;	WriteRegStr HKCU \\\"SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\" \\\"${BRAND_NAME}\\\" \\\"\\\$INSTDIR\\\\${INSTALLER_COMPONENT}.exe\\\"
 ;\\\${EndIf}
 Exec \\\"\\\$INSTDIR\\\\${INSTALLER_COMPONENT}.exe\\\"
 " PARENT_SCOPE)
@@ -56,10 +56,10 @@ Exec \\\"\\\$INSTDIR\\\\${INSTALLER_COMPONENT}.exe\\\"
 set(INSTALLER_${INSTALLER_COMPONENT}_EXTRA_UNINSTALL_COMMANDS "
 ;\\\${If} \\\${RunningX64}
 	SetRegView 64
-	DeleteRegValue  HKLM \\\"SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\" \\\"${BRAND_NAME}\\\"
+	DeleteRegValue  HKCU \\\"SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\" \\\"${BRAND_NAME}\\\"
 ;\\\${Else}
 ;	SetRegView 32
-;	DeleteRegValue  HKLM \\\"SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\" \\\"${BRAND_NAME}\\\"
+;	DeleteRegValue  HKCU \\\"SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\" \\\"${BRAND_NAME}\\\"
 ;\\\${EndIf}
 ;Push \\\"${BRAND_NAME}TRAYAGENT\\\"
 ;Call un.CloseProgramGracefully
