@@ -8,21 +8,12 @@ fileheader = '''<html>
 
     <link rel="stylesheet" type="text/css" href="stat-slides.css">
 
-<script type="text/javascript">
-    $(document).ready(function(){
-        for(i=1;i<=@numberofmessages@+1;++i)
-            $("#element-" + i).css("display", "none");
-        (function myLoop (i) {
-                $("#element-" + i).fadeOut("1000");
-                ++i;
-                $("#element-" + i).delay("500").fadeIn("1000");
-                if (i<=@numberofmessages@)
-                   setTimeout(function () {myLoop(i);}, 4000)
-                else
-                   $(".background-image").css("display", "inline")
-        })(0);
-    });
-</script>
+    <script type="text/javascript">
+        var numberofmessages = @numberofmessages@;
+    </script>
+
+    <script src="present-slides.js"></script>
+
 
 </head>
 <body>
