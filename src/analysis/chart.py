@@ -39,7 +39,7 @@ def log_plot(key_press_events, mouse_click_events, mouse_other_events, foregroun
             ind_m = [x + width for x in ind]
             max_height = max(keypress_hist + m_other_hist)
 
-            plt.title("Average Input Events per hour")
+            plt.title("Average Input Events per minute")
             keypress_bar = plt.bar(ind, keypress_hist, width, color='r', edgecolor='b')
             clicks_bar = plt.bar(ind_m, m_click_hist, width, color='g', edgecolor='b')
             moves_bar = plt.bar(ind_m, m_other_hist, width, color='y', edgecolor='b', bottom=m_click_hist)

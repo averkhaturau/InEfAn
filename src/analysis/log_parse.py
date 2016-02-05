@@ -207,7 +207,11 @@ def print_characteristics():
         sum(map(lambda s_i: s_i[0], typing_keypresses_intervals)), \
         sum(map(lambda s_i: s_i[1], typing_keypresses_intervals), datetime.timedelta()))
 
-    result_messages.append("Ваша средняя скорость набора во время теста {} букв в минуту.".format(mean_typing_speed))
+    if not mean_typing_speed:
+        print("Not enough observation, please gather more statistics")
+        return
+
+    result_messages.append("Ваша средняя скорость набора во время теста {:1.0f} букв в минуту.".format(mean_typing_speed))
   
     print(result_messages[-1].encode(sys.stdout.encoding))
 
@@ -218,7 +222,7 @@ def print_characteristics():
     result_messages.append("Среднее время переноса руки с клавиатуры на мышь {}.".format(mean_kb_to_mouse))
     print(result_messages[-1].encode(sys.stdout.encoding))
     hand_moving_time = calc_total_trastition_time(mouse_to_kb + kb_to_mouse)
-    result_messages.append("Во время эксперимента мы перемещали руку {} раз.".format(hand_moving_time))
+    result_messages.append("Во время эксперимента Ваша рука была между мышью и клавиатурой {:2.0f} секунд".format(timedelta2Minutes(hand_moving_time)*60))
     print(result_messages[-1].encode(sys.stdout.encoding))
 
     observation_period = unique_input_events[-1][1] - unique_input_events[0][1]

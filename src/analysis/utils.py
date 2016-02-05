@@ -14,7 +14,7 @@ def pairwise(iterable):
 
 
 def timedelta2Minutes(td):
-    return td.days * 24. * 60 + td.seconds / 60.
+    return td.days * 24. * 60 + td.seconds / 60. + td.microseconds / 60000000
 
 
 def calc_total_trastition_time(transition_events):
