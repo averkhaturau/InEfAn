@@ -41,9 +41,9 @@ def log_plot(key_press_events, mouse_click_events, mouse_other_events, foregroun
             max_height = max(keypress_hist + m_other_hist)
 
             plt.title("Average Input Events per hour")
-            keypress_bar = plt.bar(ind, keypress_hist, width, color='r')
-            clicks_bar = plt.bar(ind_m, m_click_hist, width, color='g')
-            moves_bar = plt.bar(ind_m, m_other_hist, width, color='y', bottom=m_click_hist)
+            keypress_bar = plt.bar(ind, keypress_hist, width, color='r', edgecolor='b')
+            clicks_bar = plt.bar(ind_m, m_click_hist, width, color='g', edgecolor='b')
+            moves_bar = plt.bar(ind_m, m_other_hist, width, color='y', edgecolor='b', bottom=m_click_hist)
 
             annotations = apps_usage_stat(foreground_windows, start, hist_delta)
             #print(annotations)
@@ -58,7 +58,7 @@ def log_plot(key_press_events, mouse_click_events, mouse_other_events, foregroun
                     if this_height:
                         plt.annotate(ann_text,
                             xy=(ann_index + width, this_height),
-                            arrowprops=dict(arrowstyle='->'),
+                            arrowprops=dict(facecolor='grey',arrowstyle='->'),
                             xytext=(ann_index, this_height + random.random()*( max_height-this_height)))
                 ann_index += 1
 
@@ -80,9 +80,12 @@ def log_plot(key_press_events, mouse_click_events, mouse_other_events, foregroun
 
 
             fig = plt.gcf()
+            fig.patch.set_facecolor('black')
+            axes = plt.gca()
+            axes.patch.set_facecolor('black')
             fig.set_size_inches(19.2,10.8, forward=True)
-            fig.savefig("res/chart.png", dpi=100)
-            plt.show()
+            fig.savefig("res/chart.png", dpi=100, transparent=True)
+#            plt.show()
 
         #except:
         #    print("Unexpected error {}".format(sys.exc_info()[0]))

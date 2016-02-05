@@ -1,0 +1,56 @@
+div {
+    color: white;
+    font-size: 36px;
+    text-align: center;
+    font-family: PT Sans, sans-serif;
+    font-weight: 400;
+}
+ul{
+    font-size: 26px;
+}
+.container{
+    position: relative;
+    background-color: black;
+    width: 100%;
+    height: 100%;
+}
+.middle{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    height: 40%;
+    width: 50%;
+    margin: -5% 0 0 -25%;
+}
+.background-image{
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: url("chart.png");
+    opacity:0.3;
+    background-color: black;
+    left: 0; top: 0;
+}
+strong{
+    font-weight: bold;
+}
+.logo img{
+    width: 150px;
+}
+body {
+    margin: 0;
+    background-color: black;
+}
+.logo{
+    bottom: 0;
+    position: absolute;
+    right: 0;
+}
+
+@font-face {
+  font-family: 'PT Sans';
+  font-style: normal;
+  font-weight: 700;
+  src: local('PT Sans Bold'), local('PTSans-Bold'), url(kTYfCWJhlldPf5LnG4ZnHPk_vArhqVIZ0nv9q090hN8.woff2) format('woff2');
+  color: white;
+}

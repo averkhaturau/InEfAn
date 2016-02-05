@@ -4,6 +4,7 @@ import datetime
 # local
 import log_parse
 import chart
+import exhibit
 
 # for pyinstaller
 try:
@@ -54,5 +55,7 @@ def parse_log():
 
 parse_log()
 
-log_parse.print_characteristics()
+result_messages = log_parse.print_characteristics()
 chart.log_plot(log_parse.key_press_events, log_parse.mouse_click_events, log_parse.mouse_other_events, log_parse.foreground_windows)
+
+exhibit.present_as_html(result_messages, "res/stat-slides.html")
