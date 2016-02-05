@@ -207,7 +207,9 @@ def print_characteristics():
 
     observation_period = unique_input_events[-1][1] - unique_input_events[0][1]
     # extrapolate statistics to 1 year
-    one_year_rate = 365.25*24*60 / timedelta2Minutes(observation_period)
+#    one_year_rate = 365.25*24*60 / timedelta2Minutes(observation_period)
+    # for exhibition, use other formula
+    one_year_rate = 365.25*4*60 / timedelta2Minutes(activity_time)
     print(("For 1 year you would spend {:1.0f} hours of you life to move you hand to mouse and back," +
         " if you use you PC like you do during the observed time")
         .format(timedelta2Minutes(hand_moving_time) * one_year_rate / 60))

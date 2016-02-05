@@ -78,7 +78,12 @@ def log_plot(key_press_events, mouse_click_events, mouse_other_events, foregroun
             plt.xticks(rotation='vertical')
             plt.legend((keypress_bar[0], clicks_bar[0], moves_bar[0]), ("Key Press events", "Mouse Click events", "Mouse Moves and Scrolls"))
 
+
+            fig = plt.gcf()
+            fig.set_size_inches(19.2,10.8, forward=True)
+            fig.savefig("res/chart.png", dpi=100)
             plt.show()
+
         #except:
         #    print("Unexpected error {}".format(sys.exc_info()[0]))
 
