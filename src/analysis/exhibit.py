@@ -43,6 +43,8 @@ filefooter = '''
 
 def present_as_html(msgs,filename):
     if sys.version_info < (3, 0):
+        reload(sys)  
+        sys.setdefaultencoding('utf8')
         fopen_func = lambda filename: open(filename, "w")
     else:
         fopen_func = lambda filename: open(filename, "w", encoding='utf8')

@@ -20,8 +20,7 @@ def log_plot(key_press_events, mouse_click_events, mouse_other_events, foregroun
             start = min(key_press_events[0], mouse_click_events[0], mouse_other_events[0]).replace(#minute=0,
                 second=0,microsecond=0)
             finish = max(key_press_events[-1], mouse_click_events[-1], mouse_other_events[-1]).replace(#minute=0,
-                second=0,microsecond=0)
-            finish.replace(minute=finish.minute + 1) # add also last incomplete period
+                second=0,microsecond=0) + hist_delta
 
             keypress_hist = norm_events_stat_to_hist(key_press_events, start, finish, hist_delta)
             m_click_hist = norm_events_stat_to_hist(mouse_click_events, start, finish, hist_delta)

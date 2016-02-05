@@ -1,3 +1,6 @@
+#!python
+# coding=utf-8
+
 import sys
 import datetime
 import re
@@ -39,6 +42,11 @@ inefan_exit_events = []
 last_parsed_time = None
 
 ####################################################################
+
+if sys.version_info < (3, 0):
+    reload(sys)  
+    sys.setdefaultencoding('utf8')
+
 
 
 # treats header and event line different
@@ -199,44 +207,42 @@ def print_characteristics():
         sum(map(lambda s_i: s_i[0], typing_keypresses_intervals)), \
         sum(map(lambda s_i: s_i[1], typing_keypresses_intervals), datetime.timedelta()))
 
-    result_messages.append("Mean Typing speed is {}".format(mean_typing_speed))
+    result_messages.append("Ваша средняя скорость набора во время теста {} букв в минуту.".format(mean_typing_speed))
   
-    print(result_messages[-1])
+    print(result_messages[-1].encode(sys.stdout.encoding))
 
     mean_mouse_to_kb = calc_mean_trastition_time(mouse_to_kb)
-    result_messages.append("Mean time to transit hand from mouse to keyboard = {}".format(mean_mouse_to_kb))
-    print(result_messages[-1])
+    result_messages.append("Среднее время переноса руки с мыши на клавиатуру {}.".format(mean_mouse_to_kb))
+    print(result_messages[-1].encode(sys.stdout.encoding))
     mean_kb_to_mouse = calc_mean_trastition_time(kb_to_mouse)
-    result_messages.append("Mean time to transit hand from keyboard to mouse = {}".format(mean_kb_to_mouse))
-    print(result_messages[-1])
+    result_messages.append("Среднее время переноса руки с клавиатуры на мышь {}.".format(mean_kb_to_mouse))
+    print(result_messages[-1].encode(sys.stdout.encoding))
     hand_moving_time = calc_total_trastition_time(mouse_to_kb + kb_to_mouse)
-    result_messages.append("During the observation you moved your hand total {}".format(hand_moving_time))
-    print(result_messages[-1])
+    result_messages.append("Во время эксперимента мы перемещали руку {} раз.".format(hand_moving_time))
+    print(result_messages[-1].encode(sys.stdout.encoding))
 
     observation_period = unique_input_events[-1][1] - unique_input_events[0][1]
     # extrapolate statistics to 1 year
 #    one_year_rate = 365.25*24*60 / timedelta2Minutes(observation_period)
     # for exhibition, use other formula
     one_year_rate = 365.25*4*60 / timedelta2Minutes(activity_time)
-    result_messages.append(("For 1 year you would spend {:1.0f} hours of you life to move you hand to mouse and back," +
-        " if you use you PC like you do during the observed time")
+    result_messages.append(("За год работы вы тратите {:1.0f} часов своей жизни на перенос руки между клавиатурой и мышью.")
         .format(timedelta2Minutes(hand_moving_time) * one_year_rate / 60))
-    print(result_messages[-1])
+    print(result_messages[-1].encode(sys.stdout.encoding))
 
     if timedelta2Minutes(observation_period) < 1:
-        print("Observation time is not enough for statistics...")
+        print("Недостаточное время наблюдения для получения статистики, пожалуйста, продолжайте.")
 
-    result_messages.append("You were active {:1.1f} minutes during {:1.1f} observed, which is {:1.1f}%".format(\
+    result_messages.append("Вы пользовались устройствами ввода {:1.1f} минут в течение {:1.1f} минут, т.е. {:1.1f}%".format(\
         timedelta2Minutes(activity_time), timedelta2Minutes(observation_period), 100 * timedelta2Minutes(activity_time) / timedelta2Minutes(observation_period)))
-    print(result_messages[-1])
+    print(result_messages[-1].encode(sys.stdout.encoding))
 
     if timedelta2Minutes(activity_time) < 1:
         print("Active interval was less then a minute, which is not enough for statistics")
     hand_moves_per_hour = (len(mouse_to_kb) + len(kb_to_mouse)) * 60. / timedelta2Minutes(activity_time)
     hand_moving_percents = timedelta2Minutes(hand_moving_time) * 100 / timedelta2Minutes(activity_time)
-    result_messages.append("You have moved your hand from mouse to keyboard {} times and {} times back, you do it average {:1.1f} times per hour and this tooks you {:3.1f}% of your active time".format(
-        len(mouse_to_kb), len(kb_to_mouse), (len(mouse_to_kb) + len(kb_to_mouse)) * 60 / timedelta2Minutes(activity_time), hand_moving_percents))
-    print(result_messages[-1])
+    result_messages.append("За это время вы перенесли руку с клавиатуры на мышь {} раз и {} раз обратно, в среднем это {:1.1f} раз в час, т.е. {:3.1f}% вашего активного времени.".format(
+        len(kb_to_mouse), len(mouse_to_kb), (len(mouse_to_kb) + len(kb_to_mouse)) * 60 / timedelta2Minutes(activity_time), hand_moving_percents))
+    print(result_messages[-1].encode(sys.stdout.encoding))
 
     return result_messages
-    
