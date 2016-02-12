@@ -211,6 +211,11 @@ def print_characteristics():
     mean_typing_speed = calc_typing_speed(\
         sum(map(lambda s_i: s_i[0], typing_keypresses_intervals)), \
         sum(map(lambda s_i: s_i[1], typing_keypresses_intervals), datetime.timedelta()))
+
+    if not mean_typing_speed:
+        print("Not enough observation, please gather more statistics")
+        return
+
     print("Mean Typing speed is {}".format(mean_typing_speed))
 
     mean_mouse_to_kb = calc_mean_trastition_time(mouse_to_kb)
