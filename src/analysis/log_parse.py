@@ -38,6 +38,10 @@ analysis_end = datetime.datetime.now()
 inefan_exit_events = []
 last_parsed_time = None
 
+keys_and_scrolls = []
+
+transition_to_scrolling = []
+
 ####################################################################
 
 
@@ -94,6 +98,9 @@ def parse_log_line(line):
         return
 
     if line_word[2] == "mouse":
+        if line_word[3] in ("wheel","h-wheel"):
+            keys_and_scrolls.append(("scroll "+line_word[-1], event_time))
+
         if line_word[-1] == "up" or line_word[-1] == "finished":
             #print("Mouse using stopped at " + str(event_time))
             if (not unique_input_events or unique_input_events[-1][0] != "mouse stopped"):
@@ -115,6 +122,7 @@ def parse_log_line(line):
         user_is_active_at(event_time)
 
     elif line_word[2] == "keyboard":
+        keys_and_scrolls.append(("key "+line_word[-1], event_time))
         if line_word[-1] == "up":
             #print("Keyboard using stopped at " + unicode(event_time))
             if (not unique_input_events or unique_input_events[-1][0] != "keyboard stopped"):
@@ -160,7 +168,7 @@ def user_is_active_at(t):
 
 
 def print_characteristics():
-    global mean_typing_speed, mouse_to_kb, kb_to_mouse
+    global mean_typing_speed, mouse_to_kb, kb_to_mouse, transition_to_scrolling
     activity_time = datetime.timedelta()
     it = iter(activity_periods)
     for period_start in it:
@@ -187,7 +195,14 @@ def print_characteristics():
                 mouse_to_kb.append((e1[1],e2[1]))
             elif e1[0] == "keyboard stopped" and e2[0] == "mouse started":
                 kb_to_mouse.append((e1[1],e2[1]))
-        
+
+        # calc hand-transition time for scrolling only
+        transition_to_scrolling_in_period = list(filter(
+            lambda e1_e2: e1_e2[0][0] == "key up" and e1_e2[1][0] == "scroll started",
+            pairwise(list(filter(lambda evt: period_start <= evt[1] <= period_end, keys_and_scrolls)))))
+        transition_to_scrolling += map(lambda evts: (evts[0][1], evts[1][1]), transition_to_scrolling_in_period)
+
+    #print("transition_to_scrolling = {}".format(transition_to_scrolling))
 
     if len(unique_input_events) < 5 or len(activity_periods) < 1:
         print("Not enough observation, please gather more statistics")
@@ -226,4 +241,7 @@ def print_characteristics():
     print("You have moved your hand from mouse to keyboard {} times and {} times back, you do it average {:1.1f} times per hour and this tooks you {:3.1f}% of your active time".format(
         len(mouse_to_kb), len(kb_to_mouse), (len(mouse_to_kb) + len(kb_to_mouse)) * 60 / timedelta2Minutes(activity_time), hand_moving_percents))
 
-
+    kb_to_scrolling_time = calc_total_trastition_time(transition_to_scrolling)
+    mean_kb_to_scrolling = calc_mean_trastition_time(transition_to_scrolling)
+    print("Your mean delay to start scrolling is {}, that is total {} diring the observation"
+    	.format(mean_kb_to_scrolling, kb_to_scrolling_time))
