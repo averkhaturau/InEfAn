@@ -16,7 +16,9 @@ foreground_windows = []
 activity_periods = []
                                             
 # to estimate typing speed
-key_press_events = []
+key_press_event_groups = [[]]
+key_press_events = [] # output to graph
+
 # to counterpose mouse events to key presses
 mouse_click_events = []
 mouse_other_events = []
@@ -41,6 +43,9 @@ last_parsed_time = None
 keys_and_scrolls = []
 
 transition_to_scrolling = []
+
+is_ctrl_key_down = False
+is_alt_key_down = False
 
 ####################################################################
 
@@ -92,7 +97,7 @@ def parse_log_line(line):
     last_parsed_time = event_time
     # print(event_time, line_word[2:])
 
-    global current_window, analysis_begin, analysis_end
+    global current_window, analysis_begin, analysis_end, is_ctrl_key_down, is_alt_key_down, key_press_event_groups
 
     if not (analysis_begin < event_time < analysis_end):
         return
@@ -108,6 +113,8 @@ def parse_log_line(line):
             else:
                 unique_input_events[-1] = ("mouse stopped", event_time)
         elif line_word[-1] == "down" or line_word[-1] == "started":
+            if key_press_event_groups[-1]:
+                key_press_event_groups.append([])
             #print("Mouse using started at " + unicode(event_time))
             if (not unique_input_events or unique_input_events[-1][0] != "mouse started"):
                 unique_input_events.append(("mouse started", event_time))
@@ -124,14 +131,26 @@ def parse_log_line(line):
     elif line_word[2] == "keyboard":
         keys_and_scrolls.append(("key "+line_word[-1], event_time))
         if line_word[-1] == "up":
+            if len(line_word)>4:
+                if line_word[4] == "CONTROL":
+                    is_ctrl_key_down = False
+                elif line_word[4] == "MENU":
+                    is_alt_key_down = False
+
             #print("Keyboard using stopped at " + unicode(event_time))
             if (not unique_input_events or unique_input_events[-1][0] != "keyboard stopped"):
                 unique_input_events.append(("keyboard stopped", event_time))
             else:
                 unique_input_events[-1] = ("keyboard stopped", event_time)
-            if line_word[3] in ("letter", "digit", "SPACEBAR", "-","+",",",".", "\\"):
-                key_press_events.append(event_time)
+            if line_word[3] in ("letter", "digit", "SPACEBAR", "-","+",",",".", "\\") and not (is_ctrl_key_down or is_alt_key_down):
+                key_press_event_groups[-1].append(event_time)
         elif line_word[-1] == "down":
+            if len(line_word)>4:
+                if line_word[4] == "CONTROL":
+                    is_ctrl_key_down = True
+                elif line_word[4] == "MENU":
+                    is_alt_key_down = True
+
             #print("Keyboard using started at " + unicode(event_time))
             if (not unique_input_events or unique_input_events[-1][0] != "keyboard started"):
                 unique_input_events.append(("keyboard started", event_time))
@@ -157,7 +176,6 @@ def parse_log_line(line):
             current_window = None # FIXME
         foreground_windows.append((event_time, current_window))
 
-
 # determine user activity periods
 def user_is_active_at(t):
     if len(activity_periods) == 0 or (t - activity_periods[-1]) > inactivity_interval:
@@ -168,7 +186,7 @@ def user_is_active_at(t):
 
 
 def print_characteristics():
-    global mean_typing_speed, mouse_to_kb, kb_to_mouse, transition_to_scrolling
+    global mean_typing_speed, mouse_to_kb, kb_to_mouse, transition_to_scrolling, typing_keypresses_intervals, key_press_events
     activity_time = datetime.timedelta()
     it = iter(activity_periods)
     for period_start in it:
@@ -179,22 +197,30 @@ def print_characteristics():
         activity_time += period_end - period_start
 
         # calculate typing speed
-        key_presses_in_period = tuple(filter(lambda press_time: period_start <= press_time <= period_end, key_press_events))
-        num_keypresses = len(key_presses_in_period)
-        if num_keypresses < 3:
-            continue
-        typing_interval = key_presses_in_period[-1] - key_presses_in_period[0]
-        typing_keypresses_intervals.append((num_keypresses, typing_interval))
+        key_presses_in_period = []
+        for group in key_press_event_groups:
+            filtered_group = list(filter(lambda press_time: period_start <= press_time <= period_end, group))
+            if len(filtered_group) > 3:
+                key_presses_in_period.append(filtered_group)
+	
+        if key_presses_in_period:
+            key_press_events += flattern(key_presses_in_period)
+
+        typing_keypresses_intervals += list(map(lambda g: (len(g), g[-1]-g[0]), key_presses_in_period))
+
         # print("Typing speed is {} at {}".format(calc_typing_speed(num_keypresses, typing_interval), period_end))
         # print(period_start, period_end, num_keypresses, typing_speed)
 
-        # calcuate mouse-to-keyboard switch time
         events_scope = list(filter(lambda eType_eTime: period_start <= eType_eTime[1] <= period_end, unique_input_events))
+
+        # calcuate mouse-to-keyboard switch time
         for (e1,e2) in pairwise(events_scope):
             if e1[0] == "mouse stopped" and e2[0] == "keyboard started":
                 mouse_to_kb.append((e1[1],e2[1]))
             elif e1[0] == "keyboard stopped" and e2[0] == "mouse started":
                 kb_to_mouse.append((e1[1],e2[1]))
+
+        # calc isolated mouse usages, e.g. time on mouse in activity periods, between key presses
 
         # calc hand-transition time for scrolling only
         transition_to_scrolling_in_period = list(filter(
@@ -205,7 +231,7 @@ def print_characteristics():
     #print("transition_to_scrolling = {}".format(transition_to_scrolling))
 
     if len(unique_input_events) < 5 or len(activity_periods) < 1:
-        print("Not enough observation, please gather more statistics")
+        print("Not enough observation, please gather more statistics.")
         return
 
     mean_typing_speed = calc_typing_speed(\
@@ -213,34 +239,34 @@ def print_characteristics():
         sum(map(lambda s_i: s_i[1], typing_keypresses_intervals), datetime.timedelta()))
 
     if not mean_typing_speed:
-        print("Not enough observation, please gather more statistics")
+        print("Not enough observation, please gather more statistics.")
         return
 
     print("Mean Typing speed is {}".format(mean_typing_speed))
 
     mean_mouse_to_kb = calc_mean_trastition_time(mouse_to_kb)
-    print("Mean time to transit hand from mouse to keyboard = {}".format(mean_mouse_to_kb))
+    print("Mean time to transit hand from mouse to keyboard = {}.".format(mean_mouse_to_kb))
     mean_kb_to_mouse = calc_mean_trastition_time(kb_to_mouse)
-    print("Mean time to transit hand from keyboard to mouse = {}".format(mean_kb_to_mouse))
+    print("Mean time to transit hand from keyboard to mouse = {}.".format(mean_kb_to_mouse))
     hand_moving_time = calc_total_trastition_time(mouse_to_kb + kb_to_mouse)
-    print("During the observation you moved your hand total {}".format(hand_moving_time))
+    print("During the observation you moved your hand total {}.".format(hand_moving_time))
 
     observation_period = unique_input_events[-1][1] - unique_input_events[0][1]
     # extrapolate statistics to 1 year
     one_year_rate = 365.25*24*60 / timedelta2Minutes(observation_period)
     print(("For 1 year you would spend {:1.0f} hours of you life to move you hand to mouse and back," +
-        " if you use you PC like you do during the observed time")
+        " if you use you PC like you do during the observed time.")
         .format(timedelta2Minutes(hand_moving_time) * one_year_rate / 60))
 
 
     if timedelta2Minutes(observation_period) < 1:
         print("Observation time is not enough for statistics...")
 
-    print("You were active {:1.1f} minutes during {:1.1f} observed, which is {:1.1f}%".format(\
+    print("You were active {:1.1f} minutes during {:1.1f} observed, which is {:1.1f}%.".format(\
         timedelta2Minutes(activity_time), timedelta2Minutes(observation_period), 100 * timedelta2Minutes(activity_time) / timedelta2Minutes(observation_period)))
 
     if timedelta2Minutes(activity_time) < 1:
-        print("Active interval was less then a minute, which is not enough for statistics")
+        print("Active interval was less then a minute, which is not enough for statistics.")
     hand_moves_per_hour = (len(mouse_to_kb) + len(kb_to_mouse)) * 60. / timedelta2Minutes(activity_time)
     hand_moving_percents = timedelta2Minutes(hand_moving_time) * 100 / timedelta2Minutes(activity_time)
     print("You have moved your hand from mouse to keyboard {} times and {} times back, you do it average {:1.1f} times per hour and this tooks you {:3.1f}% of your active time".format(
@@ -248,5 +274,5 @@ def print_characteristics():
 
     kb_to_scrolling_time = calc_total_trastition_time(transition_to_scrolling)
     mean_kb_to_scrolling = calc_mean_trastition_time(transition_to_scrolling)
-    print("Your mean delay to start scrolling is {}, that is total {} diring the observation"
+    print("Your mean delay to start scrolling is {}, that is total {} diring the observation."
     	.format(mean_kb_to_scrolling, kb_to_scrolling_time))

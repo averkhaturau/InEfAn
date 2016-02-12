@@ -92,3 +92,7 @@ def apps_usage_stat(foreground_windows, start, hist_delta):
             sorted(filter(lambda item: item[0], period.items()), key=lambda x: -x[1])[:3])))
 
     return result
+
+
+def flattern(list_of_lists):
+    return list(chain.from_iterable(list_of_lists))
