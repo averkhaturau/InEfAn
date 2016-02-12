@@ -47,6 +47,7 @@ transition_to_scrolling = []
 is_ctrl_key_down = False
 is_alt_key_down = False
 
+isolated_mouse_events = [[]]
 ####################################################################
 
 
@@ -186,7 +187,7 @@ def user_is_active_at(t):
 
 
 def print_characteristics():
-    global mean_typing_speed, mouse_to_kb, kb_to_mouse, transition_to_scrolling, typing_keypresses_intervals, key_press_events
+    global mean_typing_speed, mouse_to_kb, kb_to_mouse, transition_to_scrolling, typing_keypresses_intervals, key_press_events, isolated_mouse_events
     activity_time = datetime.timedelta()
     it = iter(activity_periods)
     for period_start in it:
@@ -221,6 +222,19 @@ def print_characteristics():
                 kb_to_mouse.append((e1[1],e2[1]))
 
         # calc isolated mouse usages, e.g. time on mouse in activity periods, between key presses
+        gathering = False
+        for evt in events_scope:
+            if evt[0] == "keyboard stopped" and not gathering:
+                gathering = True
+                if isolated_mouse_events[-1]:
+                    isolated_mouse_events.append([])
+            elif evt[0] == "keyboard started":
+                gathering = False
+            else:
+                if gathering:
+                     isolated_mouse_events[-1].append(evt[1])
+        if gathering and isolated_mouse_events[-1]:
+            isolated_mouse_events.pop()
 
         # calc hand-transition time for scrolling only
         transition_to_scrolling_in_period = list(filter(
@@ -276,3 +290,8 @@ def print_characteristics():
     mean_kb_to_scrolling = calc_mean_trastition_time(transition_to_scrolling)
     print("Your mean delay to start scrolling is {}, that is total {} diring the observation."
     	.format(mean_kb_to_scrolling, kb_to_scrolling_time))
+
+    isolated_mouse_times = [g[-1]-g[0] for g in isolated_mouse_events if g and g[-1]-g[0] < datetime.timedelta(seconds=30)]
+    isolated_mouse_sum = sum(isolated_mouse_times, datetime.timedelta())
+    print("You used mouse less then then 30 seconds between typing {} times during {}, mean isolated mouse usage time is {:2.1f} seconds"
+        .format(len(isolated_mouse_times), isolated_mouse_sum, timedelta2Minutes(isolated_mouse_sum)*60/len(isolated_mouse_times)))
