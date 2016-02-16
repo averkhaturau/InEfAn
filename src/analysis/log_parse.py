@@ -187,7 +187,8 @@ def user_is_active_at(t):
 
 
 def print_characteristics():
-    global mean_typing_speed, mouse_to_kb, kb_to_mouse, transition_to_scrolling, typing_keypresses_intervals, key_press_events, isolated_mouse_events
+    global mean_typing_speed, mouse_to_kb, kb_to_mouse,\
+        transition_to_scrolling, typing_keypresses_intervals, key_press_events, isolated_mouse_events
     activity_time = datetime.timedelta()
     it = iter(activity_periods)
     for period_start in it:
@@ -203,7 +204,7 @@ def print_characteristics():
             filtered_group = list(filter(lambda press_time: period_start <= press_time <= period_end, group))
             if len(filtered_group) > 3:
                 key_presses_in_period.append(filtered_group)
-	
+
         if key_presses_in_period:
             key_press_events += flattern(key_presses_in_period)
 
@@ -226,7 +227,7 @@ def print_characteristics():
         for evt in events_scope:
             if evt[0] == "keyboard stopped" and not gathering:
                 gathering = True
-                if isolated_mouse_events[-1]:
+                if not isolated_mouse_events or isolated_mouse_events[-1]:
                     isolated_mouse_events.append([])
             elif evt[0] == "keyboard started":
                 gathering = False
