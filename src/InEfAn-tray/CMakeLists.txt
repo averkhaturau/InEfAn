@@ -11,14 +11,20 @@ set(VERS_FILE ${CMAKE_CURRENT_BINARY_DIR}/Version.inl)
 
 
 set(SRCS
+	app-id.h
 	events-logging.h
 	events-logging.cpp
+	guid.h
 	resource-App.h
 	single-instance.h
 	tray-helpers.cpp
 	tray-helpers.h
+	win-firewall.cpp
+	win-firewall.h
 	Win32TrayApp.cpp
 	Win32TrayApp.rc
+	win-reg.cpp
+	win-reg.h
 
 	${VERS_CONF}
 	${VERS_FILE}
@@ -26,7 +32,7 @@ set(SRCS
 
 add_executable(${PROJECT_NAME} WIN32 ${SRCS})
 
-target_link_libraries(${PROJECT_NAME} ${ADDITIONAL_LIBS} logger ActiveAppTracker InputHooker_)
+target_link_libraries(${PROJECT_NAME} ${ADDITIONAL_LIBS} logger ActiveAppTracker InputHooker_ Rpcrt4.lib)
 
 VersionConf(${PROJECT_NAME} ${VERS_CONF} ${VERS_FILE})
 

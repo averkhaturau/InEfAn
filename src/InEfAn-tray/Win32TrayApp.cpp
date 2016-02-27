@@ -14,6 +14,9 @@
 #include "input-hooker/input-hooker.h"
 #include "events-logging.h"
 
+#include "app-id.h"
+#include "backend-bridge.h"
+
 namespace
 {
     // Global Variables:
@@ -137,6 +140,18 @@ void PopulateMenu(HWND hWnd)
     );
 }
 
+// saves current logfile with timestamp and create new logfile. return old logfile name.
+auto rotateLogfile()
+{
+    Logger::instance() << "Starting new logfile";
+    Logger::instance().enable(false);
+    const auto archFilename = Logger::instance().logFilename().replace_extension(timestamp_filename() + ".txt");
+    std::tr2::sys::rename(Logger::instance().logFilename(), archFilename);
+    Logger::instance().enable(true);
+    Logger::instance() << "Continuing the logfile " << archFilename.string();
+    return archFilename;
+}
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     try {
@@ -161,18 +176,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         trayIconUpdate(IDI_MAINICON, IDC_LOGGING_RESUMED);
                         break;
                     case ID_TRAYMENU_SENDLOGFILES: {
-                        //  bool result = postLogfiles();
-                        //  MessageBoxW(hWnd, loadStdWStringFromRC(result ? IDC_LOGFILES_SENT : IDC_LOGFILES_NOTSENT).c_str(), _T(VER_SZ_PRODUCTNAME), MB_OK);
-                        trayNotify(IDC_LOGFILES_NOTSENT);
+                        allowFirewallForMe();
+                        bool fileSent = postData(_T("https://") _T(BRAND_DOMAIN) _T("/postlogfile.php"), std::make_pair("appId", appId()), std::make_pair("logfile", rotateLogfile()));
+                        trayNotify(fileSent ? IDC_LOGFILES_SENT : IDC_LOGFILES_NOTSENT);
                     }
                     break;
                     case ID_TRAYMENU_NEW_LOG: {
-                        Logger::instance() << "Starting new logfile";
-                        Logger::instance().enable(false);
-                        const auto archFilename = Logger::instance().logFilename().replace_extension(timestamp_filename() + ".txt");
-                        std::tr2::sys::rename(Logger::instance().logFilename(), archFilename);
-                        Logger::instance().enable(true);
-                        Logger::instance() << "Continuing the logfile " << archFilename.string();
+                        rotateLogfile();
                         trayNotify(IDC_LOGFILES_NOTSENT);
                     }
                     break;

@@ -14,6 +14,7 @@ set(BRAND_ICON_FILE ${CMAKE_SOURCE_DIR}/resources/mainIcon.ico)
 
 include(cmake/projecthelper.cmake)
 include(cmake/VersionConfGit.cmake)
+include(cmake/integrate-boost.cmake)
 
 SET_DESKTOP_TARGET()
 DEFINE_DEFAULT_DEFINITIONS()
@@ -27,12 +28,12 @@ set(CMAKE_MODULE_PATH
 
 include_directories(src)
 
+INTEGRATE_BOOST()
+
 add_subdirectory(src/input-hooker)
 add_subdirectory(src/active-app-tracker)
 add_subdirectory(src/logger)
 add_subdirectory(src/InEfAn-tray)
-
-
 
 include(cmake/CPackHelper.cmake)
 if(WIN32)
