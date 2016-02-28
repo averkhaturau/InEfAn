@@ -186,6 +186,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         trayNotify(IDC_LOGFILES_NOTSENT);
                     }
                     break;
+                    case ID_TRAYMENU_EDIT_LOGFILE: {
+                        auto oldLogfile = rotateLogfile();
+                        const std::wstring oldLogfileName = oldLogfile.wstring();
+                        const std::wstring logfilesDir = oldLogfile.parent_path().wstring();
+                        ShellExecuteW(hWnd, _T("open"), oldLogfileName.c_str(), NULL, logfilesDir.c_str(), SW_RESTORE);
+                    }
+                    break;
+                    case ID_TRAYMENU_OPEN_LOGFILES_DIR: {
+                        const std::wstring logfilesDir = Logger::instance().logFilename().parent_path().wstring();
+                        ShellExecuteW(hWnd, _T("open"), logfilesDir.c_str(), NULL, NULL, SW_RESTORE);
+                    }
+                    break;
                     default:
                         return DefWindowProc(hWnd, message, wParam, lParam);
                         break;
