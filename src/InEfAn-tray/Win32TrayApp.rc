@@ -26,15 +26,15 @@ BEGIN
     POPUP "Tray Menu"
     BEGIN
 		MENUITEM "О InEfAn...",        ID_TRAYMENU_ABOUT
-
+		MENUITEM "Личный кабинет", ID_TRAYMENU_MYPROFILE
 		MENUITEM SEPARATOR
 		MENUITEM "Приостановить логгирование", ID_TRAYMENU_PAUSE
 		MENUITEM "Продолжить логгирование", ID_TRAYMENU_RESUME
 		MENUITEM "Начать лог заново", ID_TRAYMENU_NEW_LOG
 		MENUITEM SEPARATOR
-		MENUITEM "Просмотреть логфайл", ID_TRAYMENU_EDIT_LOGFILE
-		MENUITEM "Открыть папку с логфайлами", ID_TRAYMENU_OPEN_LOGFILES_DIR
-		MENUITEM "Отправить отчёт разработчикам", ID_TRAYMENU_SENDLOGFILES
+		MENUITEM "Просмотреть лог", ID_TRAYMENU_EDIT_LOGFILE
+		MENUITEM "Открыть папку с логами", ID_TRAYMENU_OPEN_LOGFILES_DIR
+		MENUITEM "Отправить лог разработчикам", ID_TRAYMENU_SENDLOGFILES
 		MENUITEM SEPARATOR
 		MENUITEM "Выйти",                        ID_TRAYMENU_EXIT
     END
@@ -64,7 +64,7 @@ BEGIN
     POPUP "Tray Menu"
     BEGIN
 		MENUITEM "About InEfAn...",    ID_TRAYMENU_ABOUT
-
+		MENUITEM "My Profile", ID_TRAYMENU_MYPROFILE
 		MENUITEM SEPARATOR
 		MENUITEM "Pause logging", ID_TRAYMENU_PAUSE
 		MENUITEM "Resume logging", ID_TRAYMENU_RESUME
@@ -100,7 +100,7 @@ BEGIN
     POPUP "Tray Menu"
     BEGIN
 		MENUITEM "Аб Iнэфане...",    ID_TRAYMENU_ABOUT
-
+		MENUITEM "Мой Профiль", ID_TRAYMENU_MYPROFILE
 		MENUITEM SEPARATOR
 		MENUITEM "Прыпынiць лагiраванне", ID_TRAYMENU_PAUSE
 		MENUITEM "Працягнуць лагiраванне", ID_TRAYMENU_RESUME

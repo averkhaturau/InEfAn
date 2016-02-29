@@ -190,12 +190,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         auto oldLogfile = rotateLogfile();
                         const std::wstring oldLogfileName = oldLogfile.wstring();
                         const std::wstring logfilesDir = oldLogfile.parent_path().wstring();
-                        ShellExecuteW(hWnd, _T("open"), oldLogfileName.c_str(), NULL, logfilesDir.c_str(), SW_RESTORE);
+                        ShellExecuteW(hWnd, L"open", oldLogfileName.c_str(), NULL, logfilesDir.c_str(), SW_RESTORE);
                     }
                     break;
                     case ID_TRAYMENU_OPEN_LOGFILES_DIR: {
                         const std::wstring logfilesDir = Logger::instance().logFilename().parent_path().wstring();
-                        ShellExecuteW(hWnd, _T("open"), logfilesDir.c_str(), NULL, NULL, SW_RESTORE);
+                        ShellExecuteW(hWnd, L"open", logfilesDir.c_str(), NULL, NULL, SW_RESTORE);
+                    }
+                    break;
+                    case ID_TRAYMENU_MYPROFILE: {
+                        const std::wstring myProfileUrl = std::wstring(_T("https://") _T(BRAND_DOMAIN) _T("/myprofile.php?appId=")) + appId();
+                        ShellExecuteW(hWnd, L"open", myProfileUrl.c_str(), NULL, NULL, SW_RESTORE);
                     }
                     break;
                     default:
