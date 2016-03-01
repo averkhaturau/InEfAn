@@ -58,19 +58,14 @@ def log_plot(key_press_events, mouse_click_events, mouse_other_events, foregroun
                         plt.annotate(ann_text,
                             xy=(ann_index + width, this_height),
                             arrowprops=dict(arrowstyle='->'),
-                            xytext=(ann_index, this_height + random.random()*( max_height-this_height)))
+                            xytext=(ann_index, this_height + random.random() * (max_height - this_height)))
                 ann_index += 1
 
             for inefan_exits in log_parse.inefan_exit_events:
                 exit_ind = timedelta2Minutes(inefan_exits - start) / timedelta2Minutes(hist_delta)
                 height = random.random() * 0.3 * max_height
                 plt.annotate("Here InEfAn log interrupts...", xy=(exit_ind, 1),
-                    arrowprops=dict(arrowstyle='->'), xytext=(exit_ind+1, height))
-
-            # TODO: find where 3 or more hours of silence
-            #plt.annotate("HERE I FELT TIRED\nAND WENT TO BED",
-            #    xy=(13, 100), arrowprops=dict(arrowstyle='->'), xytext=(15,
-            #    1000))
+                    arrowprops=dict(arrowstyle='->'), xytext=(exit_ind + 1, height))
 
             plt.ylabel("Events per minute")
             plt.xticks(ind, x_axis)

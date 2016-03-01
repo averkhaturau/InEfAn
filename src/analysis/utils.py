@@ -29,7 +29,7 @@ def calc_mean_trastition_time(transition_events):
 def calc_typing_speed(num_keypresses, timespan):
     minutes = timedelta2Minutes(timespan)
     if minutes > 0:
-        return num_keypresses / timedelta2Minutes(timespan)
+        return num_keypresses / minutes
 
 
 def perdelta(start, end, delta):

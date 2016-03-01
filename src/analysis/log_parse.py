@@ -1,8 +1,10 @@
 import sys
 import datetime
 import re
+import math
 
 from utils import *
+
 
 ####################################################################
 #  Global variables
@@ -105,7 +107,7 @@ def parse_log_line(line):
 
     if line_word[2] == "mouse":
         if line_word[3] in ("wheel","h-wheel"):
-            keys_and_scrolls.append(("scroll "+line_word[-1], event_time))
+            keys_and_scrolls.append(("scroll " + line_word[-1], event_time))
 
         if line_word[-1] == "up" or line_word[-1] == "finished":
             #print("Mouse using stopped at " + str(event_time))
@@ -130,9 +132,9 @@ def parse_log_line(line):
         user_is_active_at(event_time)
 
     elif line_word[2] == "keyboard":
-        keys_and_scrolls.append(("key "+line_word[-1], event_time))
+        keys_and_scrolls.append(("key " + line_word[-1], event_time))
         if line_word[-1] == "up":
-            if len(line_word)>4:
+            if len(line_word) > 4:
                 if line_word[4] == "CONTROL":
                     is_ctrl_key_down = False
                 elif line_word[4] == "MENU":
@@ -146,7 +148,7 @@ def parse_log_line(line):
             if line_word[3] in ("letter", "digit", "SPACEBAR", "-","+",",",".", "\\") and not (is_ctrl_key_down or is_alt_key_down):
                 key_press_event_groups[-1].append(event_time)
         elif line_word[-1] == "down":
-            if len(line_word)>4:
+            if len(line_word) > 4:
                 if line_word[4] == "CONTROL":
                     is_ctrl_key_down = True
                 elif line_word[4] == "MENU":
@@ -208,9 +210,11 @@ def print_characteristics():
         if key_presses_in_period:
             key_press_events += flattern(key_presses_in_period)
 
-        typing_keypresses_intervals += list(map(lambda g: (len(g), g[-1]-g[0]), key_presses_in_period))
+        typing_keypresses_intervals += list(map(lambda g: (len(g), g[-1] - g[0]), key_presses_in_period))
 
-        # print("Typing speed is {} at {}".format(calc_typing_speed(num_keypresses, typing_interval), period_end))
+        # print("Typing speed is {} at
+        # {}".format(calc_typing_speed(num_keypresses, typing_interval),
+        # period_end))
         # print(period_start, period_end, num_keypresses, typing_speed)
 
         events_scope = list(filter(lambda eType_eTime: period_start <= eType_eTime[1] <= period_end, unique_input_events))
@@ -222,7 +226,8 @@ def print_characteristics():
             elif e1[0] == "keyboard stopped" and e2[0] == "mouse started":
                 kb_to_mouse.append((e1[1],e2[1]))
 
-        # calc isolated mouse usages, e.g. time on mouse in activity periods, between key presses
+        # calc isolated mouse usages, e.g.  time on mouse in activity periods,
+        # between key presses
         gathering = False
         for evt in events_scope:
             if evt[0] == "keyboard stopped" and not gathering:
@@ -238,8 +243,7 @@ def print_characteristics():
             isolated_mouse_events.pop()
 
         # calc hand-transition time for scrolling only
-        transition_to_scrolling_in_period = list(filter(
-            lambda e1_e2: e1_e2[0][0] == "key up" and e1_e2[1][0] == "scroll started",
+        transition_to_scrolling_in_period = list(filter(lambda e1_e2: e1_e2[0][0] == "key up" and e1_e2[1][0] == "scroll started",
             pairwise(list(filter(lambda evt: period_start <= evt[1] <= period_end, keys_and_scrolls)))))
         transition_to_scrolling += map(lambda evts: (evts[0][1], evts[1][1]), transition_to_scrolling_in_period)
 
@@ -257,20 +261,23 @@ def print_characteristics():
         print("Not enough observation, please gather more statistics.")
         return
 
-    print("Mean Typing speed is {}".format(mean_typing_speed))
+    typing_speed_variance = math.sqrt(sum(map(lambda s_i: (calc_typing_speed(s_i[0], s_i[1]) - mean_typing_speed) ** 2, typing_keypresses_intervals)) / len(typing_keypresses_intervals))
+
+    print("Mean Typing speed is {:1.1f}, variance is {}".format(mean_typing_speed, typing_speed_variance))
 
     mean_mouse_to_kb = calc_mean_trastition_time(mouse_to_kb)
-    print("Mean time to transit hand from mouse to keyboard = {}.".format(mean_mouse_to_kb))
+    mouse_to_kb_variance = math.sqrt(sum(map(lambda s_f: (timedelta2Minutes(s_f[1] - s_f[0] - mean_mouse_to_kb) * 60) ** 2, mouse_to_kb)) / len(mouse_to_kb))
+    print("Mean time to transit hand from mouse to keyboard = {}, variance = {} seconds.".format(mean_mouse_to_kb, mouse_to_kb_variance))
     mean_kb_to_mouse = calc_mean_trastition_time(kb_to_mouse)
-    print("Mean time to transit hand from keyboard to mouse = {}.".format(mean_kb_to_mouse))
+    kb_to_mouse_variance = math.sqrt(sum(map(lambda s_f: (timedelta2Minutes(s_f[1] - s_f[0] - mean_kb_to_mouse) * 60) ** 2, kb_to_mouse)) / len(kb_to_mouse))
+    print("Mean time to transit hand from keyboard to mouse = {}, variance = {} seconds.".format(mean_kb_to_mouse, kb_to_mouse_variance))
     hand_moving_time = calc_total_trastition_time(mouse_to_kb + kb_to_mouse)
     print("During the observation you moved your hand total {}.".format(hand_moving_time))
 
     observation_period = unique_input_events[-1][1] - unique_input_events[0][1]
     # extrapolate statistics to 1 year
-    one_year_rate = 365.25*24*60 / timedelta2Minutes(observation_period)
-    print(("For 1 year you would spend {:1.0f} hours of you life to move you hand to mouse and back," +
-        " if you use you PC like you do during the observed time.")
+    one_year_rate = 365.25 * 24 * 60 / timedelta2Minutes(observation_period)
+    print(("For 1 year you would spend {:1.0f} hours of you life to move you hand to mouse and back," + " if you use you PC like you do during the observed time.")
         .format(timedelta2Minutes(hand_moving_time) * one_year_rate / 60))
 
 
@@ -284,15 +291,14 @@ def print_characteristics():
         print("Active interval was less then a minute, which is not enough for statistics.")
     hand_moves_per_hour = (len(mouse_to_kb) + len(kb_to_mouse)) * 60. / timedelta2Minutes(activity_time)
     hand_moving_percents = timedelta2Minutes(hand_moving_time) * 100 / timedelta2Minutes(activity_time)
-    print("You have moved your hand from mouse to keyboard {} times and {} times back, you do it average {:1.1f} times per hour and this tooks you {:3.1f}% of your active time".format(
-        len(mouse_to_kb), len(kb_to_mouse), (len(mouse_to_kb) + len(kb_to_mouse)) * 60 / timedelta2Minutes(activity_time), hand_moving_percents))
+    print("You have moved your hand from mouse to keyboard {} times and {} times back, you do it average {:1.1f} times per hour and this tooks you {:3.1f}% of your active time".format(len(mouse_to_kb), len(kb_to_mouse), (len(mouse_to_kb) + len(kb_to_mouse)) * 60 / timedelta2Minutes(activity_time), hand_moving_percents))
 
     kb_to_scrolling_time = calc_total_trastition_time(transition_to_scrolling)
     mean_kb_to_scrolling = calc_mean_trastition_time(transition_to_scrolling)
     print("Your mean delay to start scrolling is {}, that is total {} diring the observation."
     	.format(mean_kb_to_scrolling, kb_to_scrolling_time))
 
-    isolated_mouse_times = [g[-1]-g[0] for g in isolated_mouse_events if g and g[-1]-g[0] < datetime.timedelta(seconds=30)]
+    isolated_mouse_times = [g[-1] - g[0] for g in isolated_mouse_events if g and g[-1] - g[0] < datetime.timedelta(seconds=30)]
     isolated_mouse_sum = sum(isolated_mouse_times, datetime.timedelta())
     print("You used mouse less then then 30 seconds between typing {} times during {}, mean isolated mouse usage time is {:2.1f} seconds"
-        .format(len(isolated_mouse_times), isolated_mouse_sum, timedelta2Minutes(isolated_mouse_sum)*60/len(isolated_mouse_times)))
+        .format(len(isolated_mouse_times), isolated_mouse_sum, timedelta2Minutes(isolated_mouse_sum) * 60 / len(isolated_mouse_times)))
