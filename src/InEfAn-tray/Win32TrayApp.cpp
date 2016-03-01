@@ -10,6 +10,7 @@
 #include <filesystem>
 #include "logger/logger.h"
 #include <tchar.h>
+#include <time.h>
 
 #include "input-hooker/input-hooker.h"
 #include "events-logging.h"
@@ -177,8 +178,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         break;
                     case ID_TRAYMENU_SENDLOGFILES: {
                         allowFirewallForMe();
-                        bool fileSent = postData(_T("https://") _T(BRAND_DOMAIN) _T("/postlogfile.php"), std::make_pair("appId", appId()), std::make_pair("logfile", rotateLogfile()));
+                        bool fileSent = postData(_T("https://") _T(BRAND_DOMAIN) _T("/inefan/"), std::make_pair("appId", appId()), std::make_pair("logfile", rotateLogfile()));
                         trayNotify(fileSent ? IDC_LOGFILES_SENT : IDC_LOGFILES_NOTSENT);
+                        if (fileSent)
+                            RegistryHelper(HKEY_CURRENT_USER, _T("Software\\") _T(BRAND_COMPANYNAME) _T("\\") _T(BRAND_NAME))
+                            .writeValue(_T("logsPostTime"), std::to_wstring(time(0)));
                     }
                     break;
                     case ID_TRAYMENU_NEW_LOG: {
@@ -199,7 +203,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     }
                     break;
                     case ID_TRAYMENU_MYPROFILE: {
-                        const std::wstring myProfileUrl = std::wstring(_T("https://") _T(BRAND_DOMAIN) _T("/myprofile.php?appId=")) + appId();
+                        const std::wstring myProfileUrl = std::wstring(_T("https://") _T(BRAND_DOMAIN) _T("/inefan/?appId=")) + appId();
                         ShellExecuteW(hWnd, L"open", myProfileUrl.c_str(), NULL, NULL, SW_RESTORE);
                     }
                     break;
