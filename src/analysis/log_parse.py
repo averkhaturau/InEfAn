@@ -261,6 +261,12 @@ def print_characteristics():
         print("Not enough observation, please gather more statistics.")
         return
 
+    # save all hand transitions to a file
+    with open('all-transitions.txt', 'w') as transitionsFile:
+        transitionsFile.write('kb_to_mouse='+str(kb_to_mouse)+'\n')
+        transitionsFile.write('mouse_to_kb='+str(mouse_to_kb)+'\n\n')
+
+
     typing_speed_variance = math.sqrt(sum(map(lambda s_i: (calc_typing_speed(s_i[0], s_i[1]) - mean_typing_speed) ** 2, typing_keypresses_intervals)) / len(typing_keypresses_intervals))
 
     print("Mean Typing speed is {:1.1f}, variance is {}".format(mean_typing_speed, typing_speed_variance))

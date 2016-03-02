@@ -76,3 +76,39 @@ def log_plot(key_press_events, mouse_click_events, mouse_other_events, foregroun
         #except:
         #    print("Unexpected error {}".format(sys.exc_info()[0]))
 
+
+
+def plot_transitions(k2m,m2k):
+
+
+    k2m_starts=[]
+    k2m_stops=[]
+    for intrvl in k2m:
+        k2m_starts.append(intrvl[0])
+        k2m_stops.append(intrvl[1])
+    plt.hlines(np.repeat(1,len(k2m)),#range(1,len(k2m)+1),
+        k2m_starts, k2m_stops, 'y', lw=10)
+
+    m2k_starts=[]
+    m2k_stops=[]
+    for intrvl in m2k:
+        m2k_starts.append(intrvl[0])
+        m2k_stops.append(intrvl[1])
+    plt.hlines(np.repeat(1,len(m2k)),# range(2,len(m2k)+2),
+        m2k_starts, m2k_stops, 'b', lw=10)
+
+    #Setup the plot
+    ax = plt.gca()
+    ax.xaxis_date()
+    myFmt = mdates.DateFormatter('%H:%M')
+    ax.xaxis.set_major_formatter(myFmt)
+    ax.xaxis.set_major_locator(mdates.SecondLocator(interval=60))
+
+    #To adjust the xlimits a timedelta is needed.
+    #delta = (stop.max() - start.min())/10
+
+    #plt.yticks(y[unique_idx], captions)
+    plt.ylim(0,2)#max(len(m2k),len(k2m)+2))
+    plt.xlim(min(k2m_starts[0], m2k_starts[0]), max(m2k_stops[-1], k2m_stops[-1]))
+    plt.xlabel('Time')
+    plt.show()
