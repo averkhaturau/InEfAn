@@ -72,7 +72,17 @@ def log_plot(key_press_events, mouse_click_events, mouse_other_events, foregroun
             plt.xticks(rotation='vertical')
             plt.legend((keypress_bar[0], clicks_bar[0], moves_bar[0]), ("Key Press events", "Mouse Click events", "Mouse Moves and Scrolls"))
 
+
+            fig = plt.gcf()
+            fig.patch.set_facecolor('black')
+            axes = plt.gca()
+            axes.patch.set_facecolor('black')
+            fig.set_size_inches(19.2,10.8, forward=True)
+            fig.savefig("res/chart.png", dpi=100, transparent=True)
+
             plt.show()
+
+            fig.clear()
         #except:
         #    print("Unexpected error {}".format(sys.exc_info()[0]))
 
@@ -80,35 +90,47 @@ def log_plot(key_press_events, mouse_click_events, mouse_other_events, foregroun
 
 def plot_transitions(k2m,m2k):
 
+        if not k2m or not m2k:
+            return
 
-    k2m_starts=[]
-    k2m_stops=[]
-    for intrvl in k2m:
-        k2m_starts.append(intrvl[0])
-        k2m_stops.append(intrvl[1])
-    plt.hlines(np.repeat(1,len(k2m)),#range(1,len(k2m)+1),
-        k2m_starts, k2m_stops, 'y', lw=10)
+#    with plt.xkcd():
 
-    m2k_starts=[]
-    m2k_stops=[]
-    for intrvl in m2k:
-        m2k_starts.append(intrvl[0])
-        m2k_stops.append(intrvl[1])
-    plt.hlines(np.repeat(1,len(m2k)),# range(2,len(m2k)+2),
-        m2k_starts, m2k_stops, 'b', lw=10)
+        k2m_starts=[]
+        k2m_stops=[]
+        for intrvl in k2m:
+            k2m_starts.append(intrvl[0])
+            k2m_stops.append(intrvl[1])
+        plt.hlines(np.repeat(1,len(k2m)),#range(1,len(k2m)+1),
+            k2m_starts, k2m_stops, 'y', lw=100)
 
-    #Setup the plot
-    ax = plt.gca()
-    ax.xaxis_date()
-    myFmt = mdates.DateFormatter('%H:%M')
-    ax.xaxis.set_major_formatter(myFmt)
-    ax.xaxis.set_major_locator(mdates.SecondLocator(interval=60))
+        m2k_starts=[]
+        m2k_stops=[]
+        for intrvl in m2k:
+            m2k_starts.append(intrvl[0])
+            m2k_stops.append(intrvl[1])
+        plt.hlines(np.repeat(1,len(m2k)),# range(2,len(m2k)+2),
+            m2k_starts, m2k_stops, 'b', lw=100)
 
-    #To adjust the xlimits a timedelta is needed.
-    #delta = (stop.max() - start.min())/10
+        #Setup the plot
+        ax = plt.gca()
+        ax.xaxis_date()
+        myFmt = mdates.DateFormatter('%M:%S')
+        ax.xaxis.set_major_formatter(myFmt)
+        ax.xaxis.set_major_locator(mdates.SecondLocator(interval=1))
+        ax.yaxis.set_visible(False)
 
-    #plt.yticks(y[unique_idx], captions)
-    plt.ylim(0,2)#max(len(m2k),len(k2m)+2))
-    plt.xlim(min(k2m_starts[0], m2k_starts[0]), max(m2k_stops[-1], k2m_stops[-1]))
-    plt.xlabel('Time')
-    plt.show()
+        #plt.yticks(y[unique_idx], captions)
+        plt.ylim(0,2)#max(len(m2k),len(k2m)+2))
+        time_diapazon = min(k2m_starts[0], m2k_starts[0]), max(m2k_stops[-1], k2m_stops[-1])
+        plt.xlim(time_diapazon[0], time_diapazon[1])
+        plt.xlabel('Time')
+        plt.ylabel('Hand transitions')
+
+        fig = plt.gcf()
+        fig.set_size_inches(timedelta2Minutes(time_diapazon[1] - time_diapazon[0])*60, 2, forward=True)
+        fig.savefig("trantition-graph.png", dpi=100, transparent=True)
+
+        plt.show()
+
+        fig.clear()
+    

@@ -104,10 +104,25 @@ std::wstring paramsToString(std::pair<const char*, std::tr2::sys::path>&& a)
     return std::wstring(a.first, a.first + strlen(a.first)) + _T("=") + encodeToBase64<std::wstring>(readFileToString<std::string>(a.second));
 }
 
+inline void debugTrace(std::wstring const& logMsg)
+{
+#ifdef _DEBUG
+    const auto timestampStr = timestamp(std::chrono::system_clock::now());
+    const std::wstring wtimestamp(timestampStr.begin(), timestampStr.end());
+    std::wofstream(Logger::instance().logFilename().parent_path() / L"inefan-debug.txt", std::ios::app) << wtimestamp << logMsg << L"\n";
+#endif
+}
+
 template<class ... T>
 bool postData(std::wstring const& url, std::pair<const char*, T>&& ... key_values)
 {
     try {
+#ifdef _DEBUG
+        InputHooker::instance().stopHook();
+        auto enableLogger = [](void*) {InputHooker::instance().startHook(); };
+        std::unique_ptr<void, decltype(enableLogger)> onRet((void*)1/*must be not nullptr*/, enableLogger);
+#endif
+
         CComPtr<IWinHttpRequest> request = CreateHTTPRequest();
         if (FAILED(request->Open(_bstr_t(L"POST").GetBSTR(), _bstr_t(url.c_str()).GetBSTR(), _variant_t(false))))
             throw std::runtime_error("Cannot create open request");
@@ -115,19 +130,20 @@ bool postData(std::wstring const& url, std::pair<const char*, T>&& ... key_value
             throw std::runtime_error("Cannot set request header");
 
         // ignore ssl errors
-        VARIANT opt;
-        V_VT(&opt) = VT_INT;
-        V_INT(&opt) = 0x3300;
-        request->put_Option(WinHttpRequestOption_SslErrorIgnoreFlags, opt);
+        request->put_Option(WinHttpRequestOption_SslErrorIgnoreFlags, _variant_t(SslErrorFlag_Ignore_All));
 
-        if (FAILED(request->Send(_variant_t(paramsToString(std::move(key_values)...).c_str()))))
+        const auto postData = paramsToString(std::move(key_values)...);
+        debugTrace(std::wstring(L"posted\n") + postData);
+
+        if (FAILED(request->Send(_variant_t(postData.c_str()))))
             throw std::runtime_error("Cannot send data");
 
         _bstr_t content;
         request->get_ResponseText(content.GetAddress());
 
+        const std::wstring decodedReply = content.GetBSTR();
+        debugTrace(std::wstring(L"recieved\n") + decodedReply);
         // TODO: process request
-        // std::wstring decodedReply = content.GetBSTR()
 
         return content.length() != 0;
     } catch(std::exception const& ee) {

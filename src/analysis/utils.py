@@ -30,6 +30,7 @@ def calc_typing_speed(num_keypresses, timespan):
     minutes = timedelta2Minutes(timespan)
     if minutes > 0:
         return num_keypresses / minutes
+    return 0
 
 
 def perdelta(start, end, delta):

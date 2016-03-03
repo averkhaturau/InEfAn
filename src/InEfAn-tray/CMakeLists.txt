@@ -14,6 +14,7 @@ set(SRCS
 	app-id.h
 	events-logging.h
 	events-logging.cpp
+	backend-bridge.h
 	guid.h
 	resource-App.h
 	single-instance.h

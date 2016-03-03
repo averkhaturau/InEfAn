@@ -11,9 +11,7 @@
 // Please create this class in dll only
 class InputHooker
 {
-
 public:
-
     void startHook()
     {
         stopHook();

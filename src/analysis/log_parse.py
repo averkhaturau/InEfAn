@@ -302,7 +302,7 @@ def print_characteristics():
     kb_to_scrolling_time = calc_total_trastition_time(transition_to_scrolling)
     mean_kb_to_scrolling = calc_mean_trastition_time(transition_to_scrolling)
     print("Your mean delay to start scrolling is {}, that is total {} diring the observation."
-    	.format(mean_kb_to_scrolling, kb_to_scrolling_time))
+        .format(mean_kb_to_scrolling, kb_to_scrolling_time))
 
     isolated_mouse_times = [g[-1] - g[0] for g in isolated_mouse_events if g and g[-1] - g[0] < datetime.timedelta(seconds=30)]
     isolated_mouse_sum = sum(isolated_mouse_times, datetime.timedelta())

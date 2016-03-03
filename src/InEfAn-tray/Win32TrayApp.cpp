@@ -166,7 +166,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         PostQuitMessage(0);
                         break;
                     case ID_TRAYMENU_ABOUT:
-                        ShellExecuteW(NULL, L"open", L"http://" _T(VER_SZ_DOMAIN) L"/", NULL, NULL, SW_SHOWNORMAL);
+                        ShellExecuteW(NULL, L"open", L"http://" _T(BRAND_DOMAIN) L"/", NULL, NULL, SW_SHOWNORMAL);
                         break;
                     case ID_TRAYMENU_PAUSE:
                         Logger::instance().enable(false);
