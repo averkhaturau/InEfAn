@@ -262,9 +262,9 @@ def print_characteristics():
         return
 
     # save all hand transitions to a file
-    with open('all-transitions.txt', 'w') as transitionsFile:
-        transitionsFile.write('kb_to_mouse='+str(kb_to_mouse)+'\n')
-        transitionsFile.write('mouse_to_kb='+str(mouse_to_kb)+'\n\n')
+    #with open('res/all-transitions.txt', 'w') as transitionsFile:
+    #    transitionsFile.write('kb_to_mouse='+str(kb_to_mouse)+'\n')
+    #    transitionsFile.write('mouse_to_kb='+str(mouse_to_kb)+'\n\n')
 
 
     typing_speed_variance = math.sqrt(sum(map(lambda s_i: (calc_typing_speed(s_i[0], s_i[1]) - mean_typing_speed) ** 2, typing_keypresses_intervals)) / len(typing_keypresses_intervals))
@@ -306,5 +306,6 @@ def print_characteristics():
 
     isolated_mouse_times = [g[-1] - g[0] for g in isolated_mouse_events if g and g[-1] - g[0] < datetime.timedelta(seconds=30)]
     isolated_mouse_sum = sum(isolated_mouse_times, datetime.timedelta())
-    print("You used mouse less then then 30 seconds between typing {} times during {}, mean isolated mouse usage time is {:2.1f} seconds"
-        .format(len(isolated_mouse_times), isolated_mouse_sum, timedelta2Minutes(isolated_mouse_sum) * 60 / len(isolated_mouse_times)))
+    if isolated_mouse_times:
+        print("You used mouse less then then 30 seconds between typing {} times during {}, mean isolated mouse usage time is {:2.1f} seconds"
+            .format(len(isolated_mouse_times), isolated_mouse_sum, timedelta2Minutes(isolated_mouse_sum) * 60 / len(isolated_mouse_times)))

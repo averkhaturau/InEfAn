@@ -55,6 +55,7 @@ def parse_log():
 parse_log()
 
 log_parse.print_characteristics()
-chart.log_plot(log_parse.key_press_events, log_parse.mouse_click_events, log_parse.mouse_other_events, log_parse.foreground_windows)
 
-chart.plot_transitions(log_parse.kb_to_mouse, log_parse.mouse_to_kb)
+chart.plot_transitions(log_parse.kb_to_mouse, log_parse.mouse_to_kb, log_parse.foreground_windows)
+
+chart.log_plot(log_parse.key_press_events, log_parse.mouse_click_events, log_parse.mouse_other_events, log_parse.foreground_windows)
