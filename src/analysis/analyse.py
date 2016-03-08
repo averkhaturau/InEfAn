@@ -4,6 +4,8 @@ import datetime
 # local
 import log_parse
 import chart
+import characteristics
+import utils
 
 # for pyinstaller
 try:
@@ -43,19 +45,44 @@ def parse_log():
 
     with fopen_func(sys.argv[1]) as logfile:
         for line in logfile:
-            try:
+#            try:
                 log_parse.handle_log_line(line)
-            except IOError as ee:
-                print("I/O error({0}): {1}".format(ee.errno, ee.strerror))
-            except ValueError as ee:
-                print("ValueError: {}\non parsing '{}'".format(str(ee), line))
-            except:
-                print("Unexpected error {} on parsing line '{}'".format(sys.exc_info()[0], line))
+#            except IOError as ee:
+#                print("I/O error({0}): {1}".format(ee.errno, ee.strerror))
+#            except ValueError as ee:
+#                print("ValueError: {}\non parsing '{}'".format(str(ee), line))
+#            except:
+#                print("Unexpected error {} on parsing line '{}'".format(sys.exc_info()[0], line.encode(sys.stdout.encoding, errors='replace')))
 
 parse_log()
 
-log_parse.print_characteristics()
 
-chart.plot_transitions(log_parse.kb_to_mouse, log_parse.mouse_to_kb, log_parse.foreground_windows)
 
-chart.log_plot(log_parse.key_press_events, log_parse.mouse_click_events, log_parse.mouse_other_events, log_parse.foreground_windows)
+app_intrvls = utils.app_intervals(log_parse.foreground_windows)
+for procname in app_intrvls:
+    if not procname:
+        continue
+    print("For the '{}' we gathed the following statistics:\n".format(procname))
+    app_activity_periods = utils.cross_intervals(app_intrvls[procname], log_parse.activity_periods, lambda element: element, lambda orig,intrvl: intrvl)
+    app_input_events     = utils.cross_intervals(app_intrvls[procname], log_parse.unique_input_events, lambda element: [element[1],element[1]], lambda orig,intrvl: (orig[0],intrvl[1]))
+    app_keys_and_scrolls = utils.cross_intervals(app_intrvls[procname], log_parse.keys_and_scrolls, lambda element: [element[1],element[1]], lambda orig,intrvl: (orig[0],intrvl[1]))
+    app_key_press_event_groups = []
+    for key_evt_group in log_parse.key_press_event_groups:
+        app_event_group = utils.cross_intervals(app_intrvls[procname], key_evt_group, lambda element: [element,element], lambda orig,intrvl: intrvl[1])
+        if app_event_group:
+            app_key_press_event_groups.append(app_event_group)
+    app_stat = characteristics.print_characteristics(app_activity_periods, log_parse.inactivity_interval, app_key_press_event_groups, app_input_events, app_keys_and_scrolls)
+    #print("{} statistics is {}".format(procname, app_stat))
+
+
+
+main_stat = characteristics.print_characteristics(log_parse.activity_periods, log_parse.inactivity_interval, log_parse.key_press_event_groups, log_parse.unique_input_events, log_parse.keys_and_scrolls)
+
+key_press_events = main_stat["key_press_events"]
+mouse_to_kb      = main_stat["mouse_to_kb"]
+kb_to_mouse      = main_stat["kb_to_mouse"]
+
+
+chart.plot_transitions(kb_to_mouse, mouse_to_kb, log_parse.foreground_windows)
+
+chart.log_plot(key_press_events, log_parse.mouse_click_events, log_parse.mouse_other_events, log_parse.foreground_windows, log_parse.inefan_exit_events)

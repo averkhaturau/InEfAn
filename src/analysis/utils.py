@@ -97,3 +97,59 @@ def apps_usage_stat(foreground_windows, start, hist_delta):
 
 def flattern(list_of_lists):
     return list(chain.from_iterable(list_of_lists))
+
+
+def app_intervals(fw):
+    intervals_with_app = []
+    for app in fw:
+        if intervals_with_app and intervals_with_app[-1][0] != app[1]["procname"]:
+            intervals_with_app[-1][1].append(app[0])
+            intervals_with_app.append([app[1]["procname"], [app[0]]])
+        elif not intervals_with_app:
+            intervals_with_app.append([app[1]["procname"], [app[0]]])
+    by_app = {}
+    for a in intervals_with_app:
+        if not a[0] in by_app:
+            by_app.update({a[0]:[]})
+        by_app[a[0]].append(a[1])
+    return by_app
+
+
+
+def cross_interval(i1, i2):
+    if i1[0] <= i2[1] and i1[1] >= i2[0]:
+        return [max(i1[0], i2[0]), min(i1[1], i2[1])]
+
+
+def cross_intervals(i1_list, i2_list, get_comparable_fn, to_orig_fn):
+    iter1 = iter(i1_list)
+    iter2 = iter(i2_list)
+
+    result = []
+
+    try:
+        val1 = next(iter1)
+        val_orig = next(iter2)
+        val2 = get_comparable_fn(val_orig)
+
+        while val1[1] < val2[0]:
+            val1 = next(iter1)
+        while val2[1] < val1[0]:
+            val_orig = next(iter2)
+            val2 = get_comparable_fn(val_orig)
+
+        while iter1 and iter2:
+            x_intrvl = cross_interval(val1, val2)
+            if x_intrvl:
+                result.append(to_orig_fn(val_orig, x_intrvl))
+            if val1[1] < val2[1]:
+                val1 = next(iter1)
+            else:
+                val_orig = next(iter2)
+                val2 = get_comparable_fn(val_orig)
+    except StopIteration:
+        pass
+    except IndexError:
+        pass
+    return result
+

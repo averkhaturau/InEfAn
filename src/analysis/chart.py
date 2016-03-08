@@ -5,11 +5,10 @@ import datetime
 import random
 
 #local
-import log_parse
 from utils import *
     
 
-def log_plot(key_press_events, mouse_click_events, mouse_other_events, foreground_windows):
+def log_plot(key_press_events, mouse_click_events, mouse_other_events, foreground_windows, inefan_exit_events):
     if not (key_press_events and mouse_click_events and mouse_other_events):
         print("Not enough statistics for the chart :(")
         return
@@ -61,7 +60,7 @@ def log_plot(key_press_events, mouse_click_events, mouse_other_events, foregroun
                             xytext=(ann_index, this_height + random.random() * (max_height - this_height)))
                 ann_index += 1
 
-            for inefan_exits in log_parse.inefan_exit_events:
+            for inefan_exits in inefan_exit_events:
                 exit_ind = timedelta2Minutes(inefan_exits - start) / timedelta2Minutes(hist_delta)
                 height = random.random() * 0.3 * max_height
                 plt.annotate("Here InEfAn log interrupts...", xy=(exit_ind, 1),
@@ -100,13 +99,13 @@ def plot_transitions(k2m,m2k,foreground_windows):
         #plt.hlines(np.repeat(2,2*len(foreground_windows)-1),
         #    fw_starts[:-1], fw_starts[2:], color='g', lw=3)
         fw_counter = 0
+        last_procname = ""
         for app in foreground_windows:
             #print(app)
-            if app[1] and app[1]['procname']:
+            if app[1] and app[1]['procname'] and app[1]['procname'] != last_procname:
                 plt.annotate(app[1]['procname'], xy=(app[0], 2), xytext=(app[0], 2.2+(fw_counter%7)/4))
                 fw_counter += 1
-        
-
+                last_procname = app[1]['procname']
 
         k2m_starts=[]
         k2m_stops=[]
