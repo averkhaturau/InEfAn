@@ -8,7 +8,7 @@ import random
 from utils import *
     
 
-def log_plot(key_press_events, mouse_click_events, mouse_other_events, foreground_windows, inefan_exit_events):
+def log_plot(key_press_events, mouse_click_events, mouse_other_events, foreground_windows, inefan_exit_events, outfilename="res/chart.png"):
     if not (key_press_events and mouse_click_events and mouse_other_events):
         print("Not enough statistics for the chart :(")
         return
@@ -77,7 +77,7 @@ def log_plot(key_press_events, mouse_click_events, mouse_other_events, foregroun
 #            axes = plt.gca()
 #            axes.patch.set_facecolor('black')
             fig.set_size_inches(19.2,10.8, forward=True)
-            fig.savefig("res/chart.png", dpi=100, transparent=False)
+            fig.savefig(outfilename, dpi=100, transparent=False)
 
             # plt.show()
 
@@ -87,7 +87,7 @@ def log_plot(key_press_events, mouse_click_events, mouse_other_events, foregroun
 
 
 
-def plot_transitions(k2m,m2k,foreground_windows):
+def plot_transitions(k2m,m2k,foreground_windows,outfilename="res/trantition-graph.png"):
 
         if not k2m or not m2k:
             return
@@ -142,7 +142,7 @@ def plot_transitions(k2m,m2k,foreground_windows):
 
         fig = plt.gcf()
         fig.set_size_inches(timedelta2Minutes(time_diapazon[1] - time_diapazon[0])*60*pixels_per_second*1.29/dpi, 3, forward=False)
-        fig.savefig("res/trantition-graph.png", dpi=dpi, transparent=False)
+        fig.savefig(outfilename, dpi=dpi, transparent=False)
 
         # plt.show()
 

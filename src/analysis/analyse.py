@@ -57,15 +57,16 @@ def parse_log():
 parse_log()
 
 
-
+'''
 app_intrvls = utils.app_intervals(log_parse.foreground_windows)
 for procname in app_intrvls:
     if not procname:
         continue
     print("For the '{}' we gathed the following statistics:\n".format(procname))
-    app_activity_periods = utils.cross_intervals(app_intrvls[procname], log_parse.activity_periods, lambda element: element, lambda orig,intrvl: intrvl)
-    app_input_events     = utils.cross_intervals(app_intrvls[procname], log_parse.unique_input_events, lambda element: [element[1],element[1]], lambda orig,intrvl: (orig[0],intrvl[1]))
-    app_keys_and_scrolls = utils.cross_intervals(app_intrvls[procname], log_parse.keys_and_scrolls, lambda element: [element[1],element[1]], lambda orig,intrvl: (orig[0],intrvl[1]))
+    app_activity_periods   = utils.cross_intervals(app_intrvls[procname], log_parse.activity_periods, lambda element: element, lambda orig,intrvl: intrvl)
+    app_input_events       = utils.cross_intervals(app_intrvls[procname], log_parse.unique_input_events, lambda element: [element[1],element[1]], lambda orig,intrvl: (orig[0],intrvl[1]))
+    app_keys_and_scrolls   = utils.cross_intervals(app_intrvls[procname], log_parse.keys_and_scrolls, lambda element: [element[1],element[1]], lambda orig,intrvl: (orig[0],intrvl[1]))
+    app_mouse_click_events = utils.cross_intervals(app_intrvls[procname], log_parse.mouse_click_events, lambda element: [element,element], lambda orig,intrvl: intrvl[1])
     app_key_press_event_groups = []
     for key_evt_group in log_parse.key_press_event_groups:
         app_event_group = utils.cross_intervals(app_intrvls[procname], key_evt_group, lambda element: [element,element], lambda orig,intrvl: intrvl[1])
@@ -73,8 +74,12 @@ for procname in app_intrvls:
             app_key_press_event_groups.append(app_event_group)
     app_stat = characteristics.print_characteristics(app_activity_periods, log_parse.inactivity_interval, app_key_press_event_groups, app_input_events, app_keys_and_scrolls)
     #print("{} statistics is {}".format(procname, app_stat))
-    chart.plot_transitions(kb_to_mouse, mouse_to_kb, log_parse.foreground_windows)
-
+    if not app_stat:
+        continue
+    local_foreground = [app_stat["mouse_to_kb"][0][0], {"title": procname, "procname": procname, "filename": ""}]
+    chart.plot_transitions(app_stat["kb_to_mouse"], app_stat["mouse_to_kb"], local_foreground, "res/" + procname + "-plot.png")
+    chart.log_plot(app_stat["key_press_events"], app_mouse_click_events, [], local_foreground, log_parse.inefan_exit_events, "res/" + procname + "-graph.png")
+'''
 
 main_stat = characteristics.print_characteristics(log_parse.activity_periods, log_parse.inactivity_interval, log_parse.key_press_event_groups, log_parse.unique_input_events, log_parse.keys_and_scrolls)
 
