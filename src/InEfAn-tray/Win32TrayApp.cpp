@@ -18,6 +18,7 @@
 #include "app-id.h"
 #include "backend-bridge.h"
 #include <thread>
+#include "win-reg.h"
 
 namespace
 {
@@ -30,6 +31,7 @@ namespace
 ATOM                MyRegisterClass(HINSTANCE hInstance);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 
+void periodicallySendFiles();
 
 int APIENTRY _tWinMain(
     _In_ HINSTANCE hInstance,
@@ -67,6 +69,9 @@ int APIENTRY _tWinMain(
         traydata.hIcon = LoadIconW(hInstance, MAKEINTRESOURCE(IDI_MAINICON));
 
         BOOL bSuccess = Shell_NotifyIconW(NIM_ADD, &traydata);
+
+
+        periodicallySendFiles();
 
         while (GetMessage(&msg, NULL, 0, 0)) {
             TranslateMessage(&msg);
@@ -156,12 +161,25 @@ auto rotateLogfile()
 
 void periodicallySendFiles()
 {
-    SetTimer(NULL, 0, 24 * 60 * 60 * 1000, static_cast<TIMERPROC>([](HWND, UINT, UINT_PTR, DWORD) {
-        std::thread([]() {
-            rotateLogfile();
-            postAllNewLogfiles();
-        }).detach();
+    static auto postFilesFn = []() {
+        rotateLogfile();
+        postAllNewLogfiles();
+    };
+    const time_t nextPostTime =
+        std::stoll(RegistryHelper(HKEY_CURRENT_USER, _T("Software\\") _T(BRAND_COMPANYNAME) _T("\\") _T(BRAND_NAME)).readValue(_T("logsPostTime"))) +
+        24 * 60 * 60;
+    const UINT timerInterval = static_cast<UINT>(std::max(nextPostTime - time(0), time_t(10)) * 1000);
+    static UINT_PTR timer = SetTimer(NULL, 0, timerInterval, static_cast<TIMERPROC>([](HWND, UINT, UINT_PTR, DWORD) {
+        KillTimer(NULL, timer);
+        allowFirewallForMe();
+        std::thread(postFilesFn).detach();
+        timer = SetTimer(NULL, 0, 24 * 60 * 60 * 1000, static_cast<TIMERPROC>([](HWND, UINT, UINT_PTR, DWORD) {
+            std::thread(postFilesFn).detach();
+        }));
+
     }));
+
+
 }
 
 

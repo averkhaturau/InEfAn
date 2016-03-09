@@ -67,6 +67,7 @@ for procname in app_intrvls:
     app_input_events       = utils.cross_intervals(app_intrvls[procname], log_parse.unique_input_events, lambda element: [element[1],element[1]], lambda orig,intrvl: (orig[0],intrvl[1]))
     app_keys_and_scrolls   = utils.cross_intervals(app_intrvls[procname], log_parse.keys_and_scrolls, lambda element: [element[1],element[1]], lambda orig,intrvl: (orig[0],intrvl[1]))
     app_mouse_click_events = utils.cross_intervals(app_intrvls[procname], log_parse.mouse_click_events, lambda element: [element,element], lambda orig,intrvl: intrvl[1])
+    app_mouse_other_events = utils.cross_intervals(app_intrvls[procname], log_parse.mouse_other_events, lambda element: [element,element], lambda orig,intrvl: intrvl[1])
     app_key_press_event_groups = []
     for key_evt_group in log_parse.key_press_event_groups:
         app_event_group = utils.cross_intervals(app_intrvls[procname], key_evt_group, lambda element: [element,element], lambda orig,intrvl: intrvl[1])
@@ -78,7 +79,7 @@ for procname in app_intrvls:
         continue
     local_foreground = [(app_stat["mouse_to_kb"][0][0], {"title": procname, "procname": procname, "filename": ""})]
     chart.plot_transitions(app_stat["kb_to_mouse"], app_stat["mouse_to_kb"], local_foreground, "res/" + procname + "-plot.png")
-    chart.log_plot(app_stat["key_press_events"], app_mouse_click_events, [], local_foreground, log_parse.inefan_exit_events, "res/" + procname + "-graph.png")
+    chart.log_plot(app_stat["key_press_events"], app_mouse_click_events, app_mouse_other_events, local_foreground, log_parse.inefan_exit_events, "res/" + procname + "-graph.png")
 
 
 print("\n\nGeneral statistics:")
@@ -89,6 +90,6 @@ mouse_to_kb      = main_stat["mouse_to_kb"]
 kb_to_mouse      = main_stat["kb_to_mouse"]
 
 
-chart.plot_transitions(kb_to_mouse, mouse_to_kb, log_parse.foreground_windows)
+chart.plot_transitions(kb_to_mouse, mouse_to_kb, log_parse.foreground_windows, "res/all-plot.png")
 
-chart.log_plot(key_press_events, log_parse.mouse_click_events, log_parse.mouse_other_events, log_parse.foreground_windows, log_parse.inefan_exit_events)
+chart.log_plot(key_press_events, log_parse.mouse_click_events, log_parse.mouse_other_events, log_parse.foreground_windows, log_parse.inefan_exit_events, "res/all-chart.png")

@@ -173,7 +173,7 @@ std::future<bool> postAllNewLogfiles()
     auto postNewLogs = []() {
         using namespace std::tr2::sys;
         // read last logs sent time
-        RegistryHelper reg = RegistryHelper(HKEY_CURRENT_USER, _T("Software\\") _T(BRAND_COMPANYNAME) _T("\\") _T(BRAND_NAME));
+        RegistryHelper reg(HKEY_CURRENT_USER, _T("Software\\") _T(BRAND_COMPANYNAME) _T("\\") _T(BRAND_NAME));
         const time_t lastSentTime = std::stoull(std::wstring(L"0") + reg.readValue(_T("logsPostTime")));
         // get list of new files
         directory_iterator logDirIter(Logger::instance().logFilename().parent_path(), std::error_code());
