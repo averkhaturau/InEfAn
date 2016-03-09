@@ -17,6 +17,7 @@
 
 #include "app-id.h"
 #include "backend-bridge.h"
+#include <thread>
 
 namespace
 {
@@ -153,6 +154,17 @@ auto rotateLogfile()
     return archFilename;
 }
 
+void periodicallySendFiles()
+{
+    SetTimer(NULL, 0, 24 * 60 * 60 * 1000, static_cast<TIMERPROC>([](HWND, UINT, UINT_PTR, DWORD) {
+        std::thread([]() {
+            rotateLogfile();
+            postAllNewLogfiles();
+        }).detach();
+    }));
+}
+
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     try {
@@ -178,11 +190,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         break;
                     case ID_TRAYMENU_SENDLOGFILES: {
                         allowFirewallForMe();
-                        bool fileSent = postData(_T("https://") _T(BRAND_DOMAIN) _T("/inefan/"), std::make_pair("appId", appId()), std::make_pair("logfile", rotateLogfile()));
-                        trayNotify(fileSent ? IDC_LOGFILES_SENT : IDC_LOGFILES_NOTSENT);
-                        if (fileSent)
-                            RegistryHelper(HKEY_CURRENT_USER, _T("Software\\") _T(BRAND_COMPANYNAME) _T("\\") _T(BRAND_NAME))
-                            .writeValue(_T("logsPostTime"), std::to_wstring(time(0)));
+                        // TODO: rewrite to async-await when compiler is ready
+                        rotateLogfile();
+                        auto fileSent = postAllNewLogfiles();
+
+                        std::thread([&fileSent]() {
+                            trayNotify(fileSent.get() ? IDC_LOGFILES_SENT : IDC_LOGFILES_NOTSENT);
+                        }).detach();
                     }
                     break;
                     case ID_TRAYMENU_NEW_LOG: {

