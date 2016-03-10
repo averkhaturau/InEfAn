@@ -169,8 +169,7 @@ std::future<bool> postData(std::wstring const& url, std::pair<const char*, T>&& 
 
 std::future<bool> postAllNewLogfiles()
 {
-
-    auto postNewLogs = []() {
+    auto postNewLogs = [](const time_t postTime) {
         using namespace std::tr2::sys;
         // read last logs sent time
         RegistryHelper reg(HKEY_CURRENT_USER, _T("Software\\") _T(BRAND_COMPANYNAME) _T("\\") _T(BRAND_NAME));
@@ -181,15 +180,15 @@ std::future<bool> postAllNewLogfiles()
         bool success = true;
         for (auto& log : logDirIter) {
             const time_t fileTime = std::chrono::system_clock::to_time_t(last_write_time(log));
-            if (is_regular_file(log) && fileTime > lastSentTime)
+            if (is_regular_file(log) && fileTime > lastSentTime && fileTime <= postTime)
                 //__yield_value
                 success = postData(_T("https://") _T(BRAND_DOMAIN) _T("/inefan/"), std::make_pair("appId", appId()), std::make_pair("logfile", log.path())).get() && success;
         }
         if (success)
-            reg.writeValue(_T("logsPostTime"), std::to_wstring(time(0)));
+            reg.writeValue(_T("logsPostTime"), std::to_wstring(postTime));
         return success;
     };
 
-    return std::async(std::launch::async, postNewLogs);
+    return std::async(std::launch::async, postNewLogs, time(0));
 
 }
