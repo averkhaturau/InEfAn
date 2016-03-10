@@ -180,7 +180,7 @@ std::future<bool> postAllNewLogfiles()
         bool success = true;
         for (auto& log : logDirIter) {
             const time_t fileTime = std::chrono::system_clock::to_time_t(last_write_time(log));
-            if (is_regular_file(log) && fileTime > lastSentTime && fileTime <= postTime)
+            if (is_regular_file(log) && fileTime > lastSentTime && fileTime <= postTime && log != Logger::instance().logFilename())
                 //__yield_value
                 success = postData(_T("https://") _T(BRAND_DOMAIN) _T("/inefan/"), std::make_pair("appId", appId()), std::make_pair("logfile", log.path())).get() && success;
         }

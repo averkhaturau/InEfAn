@@ -151,10 +151,11 @@ void PopulateMenu(HWND hWnd)
 auto rotateLogfile()
 {
     Logger::instance() << "Starting new logfile";
+    const bool isLoggerEnabled = Logger::instance().isEnabled();
     Logger::instance().enable(false);
     const auto archFilename = Logger::instance().logFilename().replace_extension(timestamp_filename() + ".txt");
     std::tr2::sys::rename(Logger::instance().logFilename(), archFilename);
-    Logger::instance().enable(true);
+    Logger::instance().enable(isLoggerEnabled);
     Logger::instance() << "Continuing the logfile " << archFilename.string();
     return archFilename;
 }
@@ -176,17 +177,13 @@ void periodicallySendFiles()
         timer = SetTimer(NULL, 0, 24 * 60 * 60 * 1000, static_cast<TIMERPROC>([](HWND, UINT, UINT_PTR, DWORD) {
             std::thread(postFilesFn).detach();
         }));
-
     }));
-
-
 }
 
 
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     try {
-
         switch (message) {
             case WM_COMMAND: {
                 const int wmId = LOWORD(wParam);
