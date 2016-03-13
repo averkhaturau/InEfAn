@@ -154,7 +154,7 @@ auto rotateLogfile()
     Logger::instance() << "Starting new logfile";
     Logger::instance().enable(false);
     const auto archFilename = Logger::instance().logFilename().replace_extension(timestamp_filename() + ".txt");
-    std::tr2::sys::rename(Logger::instance().logFilename(), archFilename);
+    std::tr2::sys::rename(Logger::instance().logFilename(), archFilename, std::error_code());
     Logger::instance().enable(isLoggerEnabled);
     Logger::instance() << "Continuing the logfile " << archFilename.string();
     return archFilename;

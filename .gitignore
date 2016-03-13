@@ -32,3 +32,8 @@
 #shadow build directory
 .build*
 *.orig
+
+/src/analysis/analyse.spec
+/src/analysis/build/
+/src/analysis/dist/
+/src/analysis/res/

@@ -17,7 +17,7 @@ void trayNotify(UINT resStr, T... args)
 {
     traydata_id = resStr;
     std::wstring fmt(MAX_PATH, wchar_t());
-    LoadStringW(GetModuleHandleW(NULL), resStr, &*fmt.begin(), fmt.size());
+    LoadStringW(GetModuleHandleW(NULL), resStr, &*fmt.begin(), static_cast<int>(fmt.size()));
     if (sizeof...(args) != 0)
         swprintf_s(traydata.szInfo, _countof(traydata.szInfo), fmt.c_str(), args...);
     traydata.uFlags |= NIF_INFO;

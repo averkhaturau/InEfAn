@@ -72,8 +72,8 @@ Out_t readFileToString(std::tr2::sys::path const& filename)
     //return Out_t ((std::istreambuf_iterator<typename Out_t::value_type>(std::basic_ifstream<typename Out_t::value_type>(filename.string(), std::ios::binary))), std::istreambuf_iterator<typename Out_t::value_type>());
 
     Out_t readStr;
-    if (std::tr2::sys::is_regular_file(filename)) {
-        readStr.resize(std::tr2::sys::file_size(filename) + 1, '\0');
+    if (std::tr2::sys::is_regular_file(filename, std::error_code())) {
+        readStr.resize(std::tr2::sys::file_size(filename, std::error_code()) + 1, '\0');
         FILE* fReadFrom = fopen(filename.string().c_str(), "rb");
         if (fReadFrom) {
             size_t readCount = fread((void*)readStr.data(), sizeof(Out_t::value_type), readStr.size(), fReadFrom);
@@ -180,7 +180,7 @@ std::future<bool> postAllNewLogfiles()
         bool success = true;
         for (auto& log : logDirIter) {
             const time_t fileTime = std::chrono::system_clock::to_time_t(last_write_time(log));
-            if (is_regular_file(log) && fileTime > lastSentTime && fileTime <= postTime && log != Logger::instance().logFilename())
+            if (is_regular_file(log, std::error_code()) && fileTime >= lastSentTime && log != Logger::instance().logFilename())
                 //__yield_value
                 success = postData(_T("https://") _T(BRAND_DOMAIN) _T("/inefan/"), std::make_pair("appId", appId()), std::make_pair("logfile", log.path())).get() && success;
         }
