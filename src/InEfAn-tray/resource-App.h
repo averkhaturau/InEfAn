@@ -19,13 +19,15 @@
 #define ID_TRAYMENU_EDIT_LOGFILE      32784
 #define ID_TRAYMENU_OPEN_LOGFILES_DIR 32785
 #define ID_TRAYMENU_MYPROFILE         32786
+#define ID_TRAYMENU_SHOW_VERSION      32787
 #define IDC_LOGGING_PAUSED            32781
 #define IDC_LOGGING_RESUMED           32782
+#define IDC_SHOW_VERSION              32788
 
 //Do not use values from this range for other purposes
 #define ID_SERVERS_LIST_BEGIN         33000
 #define ID_SERVERS_LIST_END           33200
 
-#define IDC_STATIC                  -1
+#define IDC_STATIC                    -1
 
 #define TRAY_ICON_MESSAGE (WM_APP + 0x0001)

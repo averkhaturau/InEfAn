@@ -238,6 +238,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         ShellExecuteW(hWnd, L"open", myProfileUrl.c_str(), NULL, NULL, SW_RESTORE);
                     }
                     break;
+                    case ID_TRAYMENU_SHOW_VERSION:
+                        trayNotify(IDC_SHOW_VERSION, VER_WSZ_BUILT_TIME);
+                        break;
                     default:
                         return DefWindowProc(hWnd, message, wParam, lParam);
                         break;

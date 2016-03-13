@@ -107,7 +107,7 @@ Log2File::~Log2File()
 void Log2File::writeLogHeader()
 {
     logfile << "========================================\n"
-            "InEfAn version " << VER_SZ_PRODUCTVERSION << " built " << __TIMESTAMP__
+            << "InEfAn version " << VER_SZ_PRODUCTVERSION << " built " __TIMESTAMP__
             << "\nis running on " << pcType() << " powered by " << osName() << " " << osVer()
             << "\n========================================\n";
 }

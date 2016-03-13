@@ -25,7 +25,8 @@ IDR_MENU1 MENU
 BEGIN
     POPUP "Tray Menu"
     BEGIN
-		MENUITEM "О InEfAn...",        ID_TRAYMENU_ABOUT
+		MENUITEM "Об Инефане...",        ID_TRAYMENU_ABOUT
+		MENUITEM "Показать версию Инефана", ID_TRAYMENU_SHOW_VERSION
 		MENUITEM "Личный кабинет", ID_TRAYMENU_MYPROFILE
 		MENUITEM SEPARATOR
 		MENUITEM "Приостановить логгирование", ID_TRAYMENU_PAUSE
@@ -36,7 +37,7 @@ BEGIN
 		MENUITEM "Открыть папку с логами", ID_TRAYMENU_OPEN_LOGFILES_DIR
 		MENUITEM "Отправить лог разработчикам", ID_TRAYMENU_SENDLOGFILES
 		MENUITEM SEPARATOR
-		MENUITEM "Выйти",                        ID_TRAYMENU_EXIT
+		MENUITEM "Выйти", ID_TRAYMENU_EXIT
     END
 END
 
@@ -47,6 +48,7 @@ BEGIN
     IDC_LOGFILES_NOTSENT                         "Логфайлы не были отправлены разработчикам."
     IDC_LOGGING_PAUSED                           "Инефан приостановлен"
     IDC_LOGGING_RESUMED                          "Инефан продолжил работу"
+    IDC_SHOW_VERSION                             "Плезир Инефан вер. " VER_SZ_PRODUCTVERSION " сборка %s"
 END
 
 #endif    // Russian (Russia) resources
@@ -63,7 +65,8 @@ IDR_MENU1 MENU
 BEGIN
     POPUP "Tray Menu"
     BEGIN
-		MENUITEM "About InEfAn...",    ID_TRAYMENU_ABOUT
+		MENUITEM "About InEfAn...", ID_TRAYMENU_ABOUT
+		MENUITEM "Show InEfAn version", ID_TRAYMENU_SHOW_VERSION
 		MENUITEM "My Profile", ID_TRAYMENU_MYPROFILE
 		MENUITEM SEPARATOR
 		MENUITEM "Pause logging", ID_TRAYMENU_PAUSE
@@ -74,7 +77,7 @@ BEGIN
 		MENUITEM "Open logfiles folder", ID_TRAYMENU_OPEN_LOGFILES_DIR
 		MENUITEM "Send report to developers", ID_TRAYMENU_SENDLOGFILES
 		MENUITEM SEPARATOR
-		MENUITEM "Exit",                         ID_TRAYMENU_EXIT
+		MENUITEM "Exit", ID_TRAYMENU_EXIT
     END
 END
 
@@ -84,6 +87,7 @@ BEGIN
     IDC_LOGFILES_NOTSENT                         "Your log files were not sent to the developers."
     IDC_LOGGING_PAUSED                           "InEfAn paused"
     IDC_LOGGING_RESUMED                          "InEfAn resumed"
+    IDC_SHOW_VERSION                             "Pleasier InEfAn ver." VER_SZ_PRODUCTVERSION " built %s"
 END
 
 #endif  // English US resources
@@ -100,6 +104,7 @@ BEGIN
     POPUP "Tray Menu"
     BEGIN
 		MENUITEM "Аб Iнэфане...",    ID_TRAYMENU_ABOUT
+		MENUITEM "Паказаць версiю InEfAn", ID_TRAYMENU_SHOW_VERSION
 		MENUITEM "Мой Профiль", ID_TRAYMENU_MYPROFILE
 		MENUITEM SEPARATOR
 		MENUITEM "Прыпынiць лагiраванне", ID_TRAYMENU_PAUSE
@@ -110,7 +115,7 @@ BEGIN
 		MENUITEM "Адчынiць папку з логамi", ID_TRAYMENU_OPEN_LOGFILES_DIR
 		MENUITEM "Адправiць справасдачу распрацоўнiкам", ID_TRAYMENU_SENDLOGFILES
 		MENUITEM SEPARATOR
-		MENUITEM "Выйсцi",                         ID_TRAYMENU_EXIT
+		MENUITEM "Выйсцi", ID_TRAYMENU_EXIT
     END
 END
 
@@ -120,6 +125,7 @@ BEGIN
     IDC_LOGFILES_NOTSENT                         "Логфайлы не былi адправлены распрацоўнiкам"
     IDC_LOGGING_PAUSED                           "Iнефан прыпынен"
     IDC_LOGGING_RESUMED                          "Iнефан працягвае сваю працу"
+    IDC_SHOW_VERSION                             "Плезир Iнефан вер." VER_SZ_PRODUCTVERSION " сабрана %s"
 END
 
 #endif  // English US resources
