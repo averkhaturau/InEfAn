@@ -150,8 +150,8 @@ void PopulateMenu(HWND hWnd)
 // saves current logfile with timestamp and create new logfile. return old logfile name.
 auto rotateLogfile()
 {
-    Logger::instance() << "Starting new logfile";
     const bool isLoggerEnabled = Logger::instance().isEnabled();
+    Logger::instance() << "Starting new logfile";
     Logger::instance().enable(false);
     const auto archFilename = Logger::instance().logFilename().replace_extension(timestamp_filename() + ".txt");
     std::tr2::sys::rename(Logger::instance().logFilename(), archFilename);
@@ -196,11 +196,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         ShellExecuteW(NULL, L"open", L"http://" _T(BRAND_DOMAIN) L"/", NULL, NULL, SW_SHOWNORMAL);
                         break;
                     case ID_TRAYMENU_PAUSE:
+                        InputHooker::instance().stopHook();
                         Logger::instance().enable(false);
                         trayIconUpdate(IDI_MAINICONPAUSED, IDC_LOGGING_PAUSED);
                         break;
                     case ID_TRAYMENU_RESUME:
                         Logger::instance().enable(true);
+                        InputHooker::instance().startHook();
                         trayIconUpdate(IDI_MAINICON, IDC_LOGGING_RESUMED);
                         break;
                     case ID_TRAYMENU_SENDLOGFILES: {
