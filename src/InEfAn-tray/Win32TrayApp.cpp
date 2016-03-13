@@ -46,9 +46,8 @@ int APIENTRY _tWinMain(
 
     try {
 
-        if (siLock.IsAnotherInstanceRunning()) {
+        if (siLock.IsAnotherInstanceRunning())
             return 1;
-        }
 
         Logger::instance() << "Starting InEfAn";
         initEventsListening();
@@ -59,9 +58,9 @@ int APIENTRY _tWinMain(
                         szWindowClass, NULL, WS_OVERLAPPEDWINDOW,
                         CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, NULL, NULL, hInstance, NULL);
 
-        if (!hWnd) {
-            return FALSE;
-        }
+        if (!hWnd)
+            return 2;
+
 
         UpdateWindow(hWnd);
 
@@ -114,13 +113,13 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     return RegisterClassExW(&wcex);
 }
 
+
 void PopulateMenu(HWND hWnd)
 {
     SetForegroundWindow(hWnd);
 
-    if (!hContext) {
+    if (!hContext)
         hContext = LoadMenuW(GetModuleHandleW(NULL), MAKEINTRESOURCEW(IDR_MENU1));
-    }
     HMENU contextMenu = GetSubMenu(hContext, 0);
 
 
@@ -147,6 +146,7 @@ void PopulateMenu(HWND hWnd)
     );
 }
 
+
 // saves current logfile with timestamp and create new logfile. return old logfile name.
 auto rotateLogfile()
 {
@@ -160,21 +160,23 @@ auto rotateLogfile()
     return archFilename;
 }
 
+
 void periodicallySendFiles()
 {
     static auto postFilesFn = []() {
         rotateLogfile();
         postAllNewLogfiles();
     };
+    static const unsigned int msInDay = 24 * 60 * 60 * 1000;
     const time_t nextPostTime =
         std::stoll(std::wstring(L"0") + RegistryHelper(HKEY_CURRENT_USER, _T("Software\\") _T(BRAND_COMPANYNAME) _T("\\") _T(BRAND_NAME)).readValue(_T("logsPostTime"))) +
-        24 * 60 * 60;
-    const UINT timerInterval = static_cast<UINT>(std::max(nextPostTime - time(0), time_t(10)) * 1000);
+        msInDay;
+    const UINT timerInterval = static_cast<UINT>(std::max(nextPostTime - time(0), time_t(10000)));
     static UINT_PTR timer = SetTimer(NULL, 0, timerInterval, static_cast<TIMERPROC>([](HWND, UINT, UINT_PTR, DWORD) {
         KillTimer(NULL, timer);
         allowFirewallForMe();
         std::thread(postFilesFn).detach();
-        timer = SetTimer(NULL, 0, 24 * 60 * 60 * 1000, static_cast<TIMERPROC>([](HWND, UINT, UINT_PTR, DWORD) {
+        timer = SetTimer(NULL, 0, msInDay, static_cast<TIMERPROC>([](HWND, UINT, UINT_PTR, DWORD) {
             std::thread(postFilesFn).detach();
         }));
     }));
