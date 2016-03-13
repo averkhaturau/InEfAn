@@ -178,17 +178,23 @@ std::future<bool> postAllNewLogfiles()
         directory_iterator logDirIter(Logger::instance().logFilename().parent_path(), std::error_code());
 
         bool success = true;
-        for (auto& log : logDirIter) {
-            const time_t fileTime = std::chrono::system_clock::to_time_t(last_write_time(log));
-            if (is_regular_file(log, std::error_code()) && fileTime >= lastSentTime && log != Logger::instance().logFilename())
-                //__yield_value
-                success = postData(_T("https://") _T(BRAND_DOMAIN) _T("/inefan/"), std::make_pair("appId", appId()), std::make_pair("logfile", log.path())).get() && success;
-        }
+        for (auto& log : logDirIter)
+            if (log != Logger::instance().logFilename()) {
+                const time_t fileTime = std::chrono::system_clock::to_time_t(last_write_time(log));
+
+                if (is_regular_file(log, std::error_code()) && fileTime >= lastSentTime) {
+                    //__yield_value
+                    const bool local_success = postData(_T("https://") _T(BRAND_DOMAIN) _T("/inefan/"), std::make_pair("appId", appId()), std::make_pair("logfile", log.path())).get();
+                    success = success && local_success;
+                    if (local_success)
+                        remove(log, std::error_code());
+                } else
+                    remove(log, std::error_code());
+            }
         if (success)
             reg.writeValue(_T("logsPostTime"), std::to_wstring(postTime));
         return success;
     };
 
     return std::async(std::launch::async, postNewLogs, time(0));
-
 }
