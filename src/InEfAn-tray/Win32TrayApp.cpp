@@ -167,16 +167,16 @@ void periodicallySendFiles()
         rotateLogfile();
         postAllNewLogfiles();
     };
-    static const unsigned int msInDay = 24 * 60 * 60 * 1000;
+    static const unsigned int sInDay = 24 * 60 * 60;
     const time_t nextPostTime =
         std::stoll(std::wstring(L"0") + RegistryHelper(HKEY_CURRENT_USER, _T("Software\\") _T(BRAND_COMPANYNAME) _T("\\") _T(BRAND_NAME)).readValue(_T("logsPostTime"))) +
-        msInDay;
-    const UINT timerInterval = static_cast<UINT>(std::max(nextPostTime - time(0), time_t(10000)));
+        sInDay;
+    const UINT timerInterval = static_cast<UINT>(std::max(nextPostTime - time(0), time_t(10)) * 1000);
     static UINT_PTR timer = SetTimer(NULL, 0, timerInterval, static_cast<TIMERPROC>([](HWND, UINT, UINT_PTR, DWORD) {
         KillTimer(NULL, timer);
         allowFirewallForMe();
         std::thread(postFilesFn).detach();
-        timer = SetTimer(NULL, 0, msInDay, static_cast<TIMERPROC>([](HWND, UINT, UINT_PTR, DWORD) {
+        timer = SetTimer(NULL, 0, sInDay * 1000, static_cast<TIMERPROC>([](HWND, UINT, UINT_PTR, DWORD) {
             std::thread(postFilesFn).detach();
         }));
     }));
