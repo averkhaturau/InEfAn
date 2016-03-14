@@ -13,7 +13,7 @@ NOTIFYICONDATAW traydata = {
     NIF_ICON | NIF_TIP | NIF_MESSAGE,                      // uFlags
     TRAY_ICON_MESSAGE,                                     // uCallbackMessage
     NULL,                          // hIcon
-    _T(VER_SZ_PRODUCTNAME),                                // szTip
+    _T(VER_SZ_PRODUCTNAME) " " _T(VER_SZ_PRODUCTVERSION),  // szTip
     0,                                                     // dwState
     0,                                                     // dwStateMask
     {},                                                    // szInfo
