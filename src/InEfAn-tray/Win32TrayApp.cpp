@@ -67,7 +67,7 @@ int APIENTRY _tWinMain(
         traydata.hWnd = hWnd;
         traydata.hIcon = LoadIconW(hInstance, MAKEINTRESOURCE(IDI_MAINICON));
 
-        BOOL bSuccess = Shell_NotifyIconW(NIM_ADD, &traydata);
+        Shell_NotifyIconW(NIM_ADD, &traydata);
 
 
         periodicallySendFiles();
@@ -165,7 +165,7 @@ void periodicallySendFiles()
 {
     static auto postFilesFn = []() {
         rotateLogfile();
-        postAllNewLogfiles();
+        return postAllNewLogfiles();
     };
     static const unsigned int sInDay = 24 * 60 * 60;
     const time_t nextPostTime =

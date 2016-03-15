@@ -60,6 +60,8 @@ public:
         }
     }
 
+    bool isHooking() const { return keyboardHook || mouseHook || hookDll; }
+
     ~InputHooker() {stopHook();}
 
     void setHooks(Keypressed_t keypressFn, Mouse_t mouseFn)

