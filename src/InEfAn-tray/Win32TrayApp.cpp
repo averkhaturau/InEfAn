@@ -175,10 +175,13 @@ void periodicallySendFiles()
     static UINT_PTR timer = SetTimer(NULL, 0, timerInterval, static_cast<TIMERPROC>([](HWND, UINT, UINT_PTR, DWORD) {
         KillTimer(NULL, timer);
         allowFirewallForMe();
-        std::thread(postFilesFn).detach();
-        timer = SetTimer(NULL, 0, sInDay * 1000, static_cast<TIMERPROC>([](HWND, UINT, UINT_PTR, DWORD) {
-            std::thread(postFilesFn).detach();
-        }));
+        std::thread([]() {
+            // resend logs in a day is success or in 10 minutes if not
+            UINT nextLogSyncIn = postFilesFn().get() ? sInDay * 1000 : 600000;
+            timer = SetTimer(NULL, 0, nextLogSyncIn, static_cast<TIMERPROC>([](HWND, UINT, UINT_PTR, DWORD) {
+                std::thread(postFilesFn).detach();
+            }));
+        });
     }));
 }
 

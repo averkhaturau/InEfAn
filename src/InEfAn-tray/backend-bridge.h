@@ -170,7 +170,7 @@ std::future<bool> postData(std::wstring const& url, std::pair<const char*, T>&& 
             }
 
             return false;
-        } catch(std::exception const& ee) {std::cerr << ee.what();}
+        } catch(std::exception const& ee) {std::cerr << ee.what(); Logger::instance() << ee.what();}
         catch(...) {std::cerr << "unhandled exception in" << __FUNCTION__;}
         return false;
     };
