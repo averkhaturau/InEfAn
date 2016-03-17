@@ -50,26 +50,14 @@ list(APPEND INSTALLER_COMPONENTS ${INSTALLER_COMPONENT})
 set(INSTALLER_COMPONENTS ${INSTALLER_COMPONENTS} PARENT_SCOPE)
 
 set(INSTALLER_${INSTALLER_COMPONENT}_EXTRA_INSTALL_COMMANDS "
-;\\\${If} \\\${RunningX64}
-	SetRegView 64
-	WriteRegStr HKCU \\\"SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\" \\\"${BRAND_NAME}\\\" \\\"\\\$INSTDIR\\\\${INSTALLER_COMPONENT}.exe\\\"
-;\\\${Else}
-;	SetRegView 32
-;	WriteRegStr HKCU \\\"SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\" \\\"${BRAND_NAME}\\\" \\\"\\\$INSTDIR\\\\${INSTALLER_COMPONENT}.exe\\\"
-;\\\${EndIf}
+WriteRegStr HKCU \\\"SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\" \\\"${BRAND_NAME}\\\" \\\"\\\$INSTDIR\\\\${INSTALLER_COMPONENT}.exe\\\"
 Exec \\\"\\\$INSTDIR\\\\${INSTALLER_COMPONENT}.exe\\\"
 " PARENT_SCOPE)
 
 #set(CPACK_NSIS_MUI_FINISHPAGE_RUN \\\"\\\$INSTDIR\\\\${INSTALLER_COMPONENT}.exe\\\")
 
 set(INSTALLER_${INSTALLER_COMPONENT}_EXTRA_UNINSTALL_COMMANDS "
-;\\\${If} \\\${RunningX64}
-	SetRegView 64
-	DeleteRegValue  HKCU \\\"SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\" \\\"${BRAND_NAME}\\\"
-;\\\${Else}
-;	SetRegView 32
-;	DeleteRegValue  HKCU \\\"SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\" \\\"${BRAND_NAME}\\\"
-;\\\${EndIf}
+DeleteRegValue  HKCU \\\"SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run\\\" \\\"${BRAND_NAME}\\\"
 ;Push \\\"${BRAND_NAME}TRAYAGENT\\\"
 ;Call un.CloseProgramGracefully
 ExecWait \\\"taskkill /S localhost /IM ${INSTALLER_COMPONENT}.exe\\\"

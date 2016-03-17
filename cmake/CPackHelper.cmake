@@ -63,20 +63,20 @@ macro(INIT_INSTALLER GENERATOR INSTALLER_COMPONENTS)
 	if(CMAKE_CL_64)
 		set(CPACK_NSIS_INSTALL_ROOT "$PROGRAMFILES64")
 		set(CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS "
-\\\\\${If} \\\\\${RunningX64}
+\\\${If} \\\${RunningX64}
 			SetRegView 64
-\\\\\${Else}
-			MessageBox MB_OK \"You try to install 64 bit version to Windows 32 bit. Please download and install 32 bit version.\"
+\\\${Else}
+			MessageBox MB_OK \\\"You try to install 64 bit version to Windows 32 bit. Please download and install 32 bit version.\\\"
 			Quit
-\\\\\${EndIf}")
+\\\${EndIf}")
 	else()
 		set(CPACK_NSIS_EXTRA_PREINSTALL_COMMANDS "
-\\\\\${If} \\\\\${RunningX64}
-			MessageBox MB_OK \"You try to install 32 bit version to Windows 64 bit. Please download and install 64 bit version.\"
+\\\${If} \\\${RunningX64}
+			MessageBox MB_OK \\\"You try to install 32 bit version to Windows 64 bit. Please download and install 64 bit version.\\\"
 			Quit
-\\\\\${Else}
+\\\${Else}
 			SetRegView 32
-\\\\\${EndIf}")
+\\\${EndIf}")
 	endif()
 
 endmacro(INIT_INSTALLER GENERATOR)
