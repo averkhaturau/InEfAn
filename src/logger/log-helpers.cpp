@@ -13,12 +13,16 @@ std::string toUtf8(std::wstring arg)
 
 std::string toUtf8(const wchar_t* arg)
 {
-    return toUtf8(std::wstring(arg));
+    if (arg && arg[0])
+        return toUtf8(std::wstring(arg));
+    return std::string();
 }
 
 std::string toUtf8(wchar_t* arg)
 {
-    return toUtf8(std::wstring(arg));
+    if (arg && arg[0])
+        return toUtf8(std::wstring(arg));
+    return std::string();
 }
 
 using std::chrono::system_clock;

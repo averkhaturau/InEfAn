@@ -11,13 +11,14 @@
 #include "logger/logger.h"
 #include <tchar.h>
 #include <time.h>
+#include <thread>
 
 #include "input-hooker/input-hooker.h"
 #include "events-logging.h"
 
 #include "app-id.h"
 #include "backend-bridge.h"
-#include <thread>
+
 #include "win-reg.h"
 
 namespace
@@ -163,26 +164,30 @@ auto rotateLogfile()
 
 void periodicallySendFiles()
 {
+    static const unsigned int sInDay = 24 * 60 * 60;
+
     static auto postFilesFn = []() {
         rotateLogfile();
         return postAllNewLogfiles();
     };
-    static const unsigned int sInDay = 24 * 60 * 60;
+    static UINT_PTR timer = 0;
+    static auto actionOnTimer = [](TIMERPROC callOnNextTimer) {
+        UINT timerInterval = postFilesFn().get() ? sInDay * 1000 : 60000;
+        timer = SetTimer(NULL, 0, timerInterval, callOnNextTimer);
+    };
+
+    static TIMERPROC onTimer = [](HWND, UINT, UINT_PTR, DWORD) {
+        if (timer)
+            KillTimer(NULL, timer);
+        std::thread(actionOnTimer, onTimer).detach();
+    };
+
     const time_t nextPostTime =
         std::stoll(std::wstring(L"0") + RegistryHelper(HKEY_CURRENT_USER, _T("Software\\") _T(BRAND_COMPANYNAME) _T("\\") _T(BRAND_NAME)).readValue(_T("logsPostTime"))) +
         sInDay;
     const UINT timerInterval = static_cast<UINT>(std::max(nextPostTime - time(0), time_t(10)) * 1000);
-    static UINT_PTR timer = SetTimer(NULL, 0, timerInterval, static_cast<TIMERPROC>([](HWND, UINT, UINT_PTR, DWORD) {
-        KillTimer(NULL, timer);
-        allowFirewallForMe();
-        std::thread([]() {
-            // resend logs in a day is success or in 10 minutes if not
-            UINT nextLogSyncIn = postFilesFn().get() ? sInDay * 1000 : 600000;
-            timer = SetTimer(NULL, 0, nextLogSyncIn, static_cast<TIMERPROC>([](HWND, UINT, UINT_PTR, DWORD) {
-                std::thread(postFilesFn).detach();
-            }));
-        });
-    }));
+
+    timer = SetTimer(NULL, 0, timerInterval, static_cast<TIMERPROC>(onTimer));
 }
 
 

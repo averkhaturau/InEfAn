@@ -20,6 +20,7 @@ add_library(${DLL_NAME} SHARED input-hooker-dll.cpp input-hooker-dll.h win.rc)
 add_library(${DLL_NAME}_ STATIC ${SRC})
 
 add_executable(${PROJECT_NAME}_test hooker-test.cpp)
+add_dependencies(${PROJECT_NAME}_test ${PROJECT_NAME}_)
 target_link_libraries(${PROJECT_NAME}_test ${PROJECT_NAME}_)
 
 set(VERS_CONF ${CMAKE_CURRENT_SOURCE_DIR}/../InEfAn-tray/Version.inl.conf)

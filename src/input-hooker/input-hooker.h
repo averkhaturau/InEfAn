@@ -5,6 +5,8 @@
 #include <stdexcept>
 #include <string>
 #include <iostream>
+#include <mutex>
+
 #include "input-hooker-dll.h"
 
 
@@ -14,6 +16,8 @@ class InputHooker
 public:
     void startHook()
     {
+        assert(myThread == std::this_thread::get_id());
+
         stopHook();
 
         std::cout << "starting hook" << std::endl;
@@ -46,6 +50,8 @@ public:
     }
     void stopHook()
     {
+        assert(myThread == std::this_thread::get_id());
+
         if(keyboardHook) {
             UnhookWindowsHookEx(keyboardHook);
             keyboardHook = NULL;
@@ -89,6 +95,8 @@ private:
 
     Keypressed_t onKeypressed;
     Mouse_t onMouse;
+
+    const std::thread::id myThread = std::this_thread::get_id();
 
     static const char* InputHooker::dllName;
 };

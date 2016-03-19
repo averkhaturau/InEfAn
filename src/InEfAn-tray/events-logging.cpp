@@ -28,11 +28,36 @@ Logger::LogRecord logEvent(InputDeviceEvent const& ie)
     }
 }
 
+class LanguageChangeListener
+{
+public:
+    void checkChange()
+    {
+        WCHAR currentLang[KL_NAMELENGTH] = {};
+
+        if (callback && FALSE != GetKeyboardLayoutNameW(currentLang) && lang != currentLang) {
+            lang = currentLang;
+            callback(lang);
+        }
+    }
+
+    void setCallback(std::function<void(std::wstring const&)> fn) { callback = fn; };
+private:
+    std::wstring lang;
+    std::function<void(std::wstring const&)> callback;
+};
+
+
 void initEventsListening()
 {
+    static LanguageChangeListener lnHooker;
+    lnHooker.setCallback([](std::wstring const & lang) {
+        Logger::instance() << "Keyboard language changed to " << lang;
+    });
+
     // Start listen to input devices
     InputHooker::instance().setHooks(
-    [](WPARAM wparam, KBDLLHOOKSTRUCT kbsrtuct) {EventPreanalyser<KeyboardEvent>(KeyboardEvent(wparam, kbsrtuct))(); },
+    [](WPARAM wparam, KBDLLHOOKSTRUCT kbsrtuct) {EventPreanalyser<KeyboardEvent>(KeyboardEvent(wparam, kbsrtuct))(); if (kbsrtuct.vkCode == VK_CONTROL || kbsrtuct.vkCode == VK_MENU) lnHooker.checkChange(); },
     [](WPARAM wparam, MSLLHOOKSTRUCT mstruct) {EventPreanalyser<MouseAnyEvent>(MouseAnyEvent(wparam, mstruct))(); });
     InputHooker::instance().startHook();
 
