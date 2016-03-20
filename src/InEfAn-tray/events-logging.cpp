@@ -70,7 +70,7 @@ void initEventsListening()
 {
     static LanguageChangeListener lnHooker;
     lnHooker.setCallback([](std::wstring const & lang) {
-        Logger::instance() << "Keyboard language changed to " << lang;
+        Logger::instance() << "Language changed to " << lang;
     });
 
     // Start listen to input devices
@@ -96,6 +96,7 @@ void initEventsListening()
                                    << L"\" from process name \"" << wi.getProcessName()
                                    << L"\" running from file \"" << wi.getProcessFilename()
                                    << L"\"";
+                lnHooker.checkChange();
             }
         } catch (std::exception& ee) {
             Logger::instance() << ee.what();

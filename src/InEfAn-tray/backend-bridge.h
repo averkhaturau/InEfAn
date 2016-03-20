@@ -215,7 +215,12 @@ std::future<bool> postAllNewLogfiles()
 
                     if (is_regular_file(log, std::error_code()) && fileTime >= lastSentTime) {
                         //__yield_value
-                        const bool local_success = postData(_T("https://") _T(BRAND_DOMAIN) _T("/inefan/"), std::make_pair("appId", appId()), std::make_pair("logfile", log.path())).get();
+                        const bool local_success = postData(
+                                                       _T("https://") _T(BRAND_DOMAIN) _T("/inefan/"),
+                                                       std::make_pair("appId", appId()),
+                                                       std::make_pair("logName", log.path().filename().string()),
+                                                       std::make_pair("logfile", log.path())
+                                                   ).get();
                         success = success && local_success;
                         if (local_success)
                             remove(log, std::error_code());
