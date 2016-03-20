@@ -3,6 +3,7 @@
 #include "input-hooker/input-hooker.h"
 #include "active-app-tracker/ActiveWindowTracker.h"
 #include "active-app-tracker/WindowInfo.h"
+#include <future>
 
 // helper function to print mouse position from the input event
 inline std::string mousePosToString(InputDeviceEvent const& ie)
@@ -33,18 +34,35 @@ class LanguageChangeListener
 public:
     void checkChange()
     {
-        WCHAR currentLang[KL_NAMELENGTH] = {};
+        std::wstring currentLang = getForegroundWindowInputLanguage();
 
-        if (callback && FALSE != GetKeyboardLayoutNameW(currentLang) && lang != currentLang) {
+        if (callback && lang != currentLang) {
             lang = currentLang;
             callback(lang);
         }
+    }
+
+    static bool langChangePossible(WPARAM wparam, KBDLLHOOKSTRUCT kbsrtuct)
+    {
+        return (wparam == WM_KEYUP || wparam == WM_SYSKEYUP) &&
+               kbsrtuct.vkCode == VK_CONTROL || kbsrtuct.vkCode == VK_MENU || (0xA0 <= kbsrtuct.vkCode && kbsrtuct.vkCode <= 0xA5);
     }
 
     void setCallback(std::function<void(std::wstring const&)> fn) { callback = fn; };
 private:
     std::wstring lang;
     std::function<void(std::wstring const&)> callback;
+
+    std::wstring getForegroundWindowInputLanguage()const
+    {
+        GUITHREADINFO gti = {/*.cbSize = */sizeof(GUITHREADINFO)};
+        BOOL res = GetGUIThreadInfo(0, &gti);
+        DWORD dwThread = GetWindowThreadProcessId(gti.hwndActive, 0);
+        HKL keylayout = GetKeyboardLayout(dwThread);
+        WCHAR currentLang[KL_NAMELENGTH + 1] = {};
+        int length = GetLocaleInfoW(MAKELCID((UINT)keylayout & 0xffffffff, SORT_DEFAULT), LOCALE_SISO639LANGNAME, currentLang, _countof(currentLang));
+        return currentLang;
+    }
 };
 
 
@@ -57,7 +75,12 @@ void initEventsListening()
 
     // Start listen to input devices
     InputHooker::instance().setHooks(
-    [](WPARAM wparam, KBDLLHOOKSTRUCT kbsrtuct) {EventPreanalyser<KeyboardEvent>(KeyboardEvent(wparam, kbsrtuct))(); if (kbsrtuct.vkCode == VK_CONTROL || kbsrtuct.vkCode == VK_MENU) lnHooker.checkChange(); },
+    [](WPARAM wparam, KBDLLHOOKSTRUCT kbsrtuct) {
+        std::future<void> parallelSections[] = {
+            std::async(std::launch::async, [&]() {EventPreanalyser<KeyboardEvent>(KeyboardEvent(wparam, kbsrtuct))(); }),
+            std::async(std::launch::async, [&]() {if (LanguageChangeListener::langChangePossible(wparam, kbsrtuct)) lnHooker.checkChange(); })
+        };
+    },
     [](WPARAM wparam, MSLLHOOKSTRUCT mstruct) {EventPreanalyser<MouseAnyEvent>(MouseAnyEvent(wparam, mstruct))(); });
     InputHooker::instance().startHook();
 

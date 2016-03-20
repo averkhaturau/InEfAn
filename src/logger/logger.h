@@ -23,7 +23,7 @@ public:
     class LogRecord
     {
     public:
-        explicit LogRecord(Log2File& l2f) : my_l2f(l2f) { my_l2f << timestamp(std::chrono::system_clock::now()); };
+        explicit LogRecord(Log2File& l2f) : my_l2f(l2f) { allowOnlyOneRecord.lock(); my_l2f << timestamp(std::chrono::system_clock::now()); };
         LogRecord(LogRecord&& a) : my_l2f(a.my_l2f) { a.shouldFlush = false; };
         template <class Arg_t>
         LogRecord&& operator<<(Arg_t&& mess)
@@ -31,10 +31,18 @@ public:
             my_l2f << mess;
             return std::move(*this);
         }
-        ~LogRecord() { if (shouldFlush) { my_l2f << "\n"; my_l2f.flush(); } }
+        ~LogRecord()
+        {
+            if (shouldFlush) {
+                my_l2f << "\n"; my_l2f.flush();
+                allowOnlyOneRecord.unlock();
+            }
+        }
     private:
         LogRecord() = delete;
         LogRecord(LogRecord const&) = delete;
+
+        static std::mutex allowOnlyOneRecord;
 
         Log2File& my_l2f;
         bool shouldFlush = true;
@@ -52,3 +60,5 @@ private:
     Logger(Logger&&) = delete;
     Logger() = delete;
 };
+
+__declspec(selectany) std::mutex Logger::LogRecord::allowOnlyOneRecord;
