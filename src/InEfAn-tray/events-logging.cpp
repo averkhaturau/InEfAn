@@ -78,7 +78,7 @@ void initEventsListening()
     [](WPARAM wparam, KBDLLHOOKSTRUCT kbsrtuct) {
         std::future<void> parallelSections[] = {
             std::async(std::launch::async, [&]() {EventPreanalyser<KeyboardEvent>(KeyboardEvent(wparam, kbsrtuct))(); }),
-            std::async(std::launch::async, [&]() {if (LanguageChangeListener::langChangePossible(wparam, kbsrtuct)) lnHooker.checkChange(); })
+            std::async(std::launch::async, [&]() {if (LanguageChangeListener::langChangePossible(wparam, kbsrtuct)) { std::this_thread::yield(); lnHooker.checkChange(); }})
         };
     },
     [](WPARAM wparam, MSLLHOOKSTRUCT mstruct) {EventPreanalyser<MouseAnyEvent>(MouseAnyEvent(wparam, mstruct))(); });

@@ -216,14 +216,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         trayIconUpdate(IDI_MAINICON, IDC_LOGGING_RESUMED);
                         break;
                     case ID_TRAYMENU_SENDLOGFILES: {
-                        allowFirewallForMe();
-                        // TODO: rewrite to async-await when compiler is ready
-                        rotateLogfile();
-                        auto fileSent = postAllNewLogfiles();
+                        static volatile bool isSendingFiles = false;
+                        if (!isSendingFiles) {
+                            isSendingFiles = true;
+                            allowFirewallForMe();
+                            // TODO: rewrite to async-await when compiler is ready
+                            rotateLogfile();
+                            auto fileSent = postAllNewLogfiles();
 
-                        std::thread([&fileSent]() {
-                            trayNotify(fileSent.get() ? IDC_LOGFILES_SENT : IDC_LOGFILES_NOTSENT);
-                        }).detach();
+                            std::thread([&fileSent]() {
+                                trayNotify(fileSent.get() ? IDC_LOGFILES_SENT : IDC_LOGFILES_NOTSENT);
+                                isSendingFiles = false;
+                            }).detach();
+                        }
                     }
                     break;
                     case ID_TRAYMENU_NEW_LOG: {

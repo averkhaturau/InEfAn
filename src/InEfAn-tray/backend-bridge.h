@@ -100,7 +100,7 @@ std::wstring paramsToString(std::pair<const char*, T1>&& first, std::pair<const 
 template<>
 std::wstring paramsToString(std::pair<const char*, std::tr2::sys::path>&& a)
 {
-    return std::wstring(a.first, a.first + strlen(a.first)) + _T("=") + encodeToBase64<std::wstring>(readFileToString<std::string>(a.second));
+    return std::wstring(a.first, a.first + strlen(a.first)) + _T("=") + encodeToBase64<std::wstring>(readFileToString<std::string>(a.second) + "\0");
 }
 
 inline void debugTrace(std::wstring const& logMsg)
