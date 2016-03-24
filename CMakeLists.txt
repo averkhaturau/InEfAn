@@ -35,6 +35,8 @@ add_subdirectory(src/active-app-tracker)
 add_subdirectory(src/logger)
 add_subdirectory(src/InEfAn-tray)
 
+add_subdirectory(src/test)
+
 include(cmake/CPackHelper.cmake)
 if(WIN32)
 	install(FILES resources/mainIcon.ico DESTINATION . COMPONENT mainIcon)

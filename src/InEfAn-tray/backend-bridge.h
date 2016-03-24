@@ -18,6 +18,12 @@
 
 #include <experimental/resumable>
 #include <future>
+#include <filesystem>
+#include "logger/log-helpers.h"
+#include "logger/logger.h"
+#include "input-hooker/input-hooker.h"
+#include "win-reg.h"
+#include "app-id.h"
 
 namespace
 {
@@ -31,7 +37,7 @@ Out_t encodeToBase64(In_t const& text)
     using base64_text = insert_linebreaks<base64_from_binary<transform_width<typename In_t::const_iterator, 6, sizeof(In_t::value_type) * 8> >, 72 >;
 
     Out_t encodedStr;
-    encodedStr.reserve(text.size() * 2);
+    encodedStr.reserve((text.size() / 3 + 1) * 4 + (text.size() / 72) * 2 + 1); // a byte for each 6 bits + line-breaks
     std::copy(
         base64_text(text.begin()),
         base64_text(text.end()),
@@ -48,16 +54,17 @@ Out_t decodeFromBase64(In_t base64Str)
     using unbase64_text = transform_width<binary_from_base64<remove_whitespace<typename In_t::const_iterator>>, sizeof(Out_t::value_type) * 8, 6>;
 
     size_t strSize = base64Str.find_last_not_of('=');
-
+    if (strSize == In_t::npos)
+        strSize = base64Str.size();
     Out_t decodedStr;
-    decodedStr.reserve(strSize + 1);
-    if (strSize != 0)
+    if (strSize != 0) {
+        decodedStr.reserve(strSize / 4 * 3 + 4);
         std::copy(
             unbase64_text(base64Str.begin()),
             unbase64_text(base64Str.begin() + strSize + 1),
             std::back_inserter(decodedStr)
         );
-
+    }
     return decodedStr;
 }
 

@@ -1,0 +1,1 @@
+2016-03-21 09:41:50.944 Foreground window title is "Сегодня Apple представит новые устройства - Технологии onliner.by - Google Chrome" from process name "chrome.exe" running from file "C:\Program Files (x86)\Google\Chrome\Application\chrome.exe"

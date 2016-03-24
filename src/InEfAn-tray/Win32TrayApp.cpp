@@ -167,6 +167,7 @@ void periodicallySendFiles()
     static const unsigned int sInDay = 24 * 60 * 60;
 
     static auto postFilesFn = []() {
+        Logger::instance() << "Auto-posting logs to the server";
         rotateLogfile();
         return postAllNewLogfiles();
     };
@@ -220,6 +221,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         if (!isSendingFiles) {
                             isSendingFiles = true;
                             allowFirewallForMe();
+                            Logger::instance() << "User asks to post logs to the server, posting";
                             // TODO: rewrite to async-await when compiler is ready
                             rotateLogfile();
                             auto fileSent = postAllNewLogfiles();

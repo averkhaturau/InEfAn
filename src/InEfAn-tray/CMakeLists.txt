@@ -22,8 +22,6 @@ set(SRCS
 	tray-helpers.h
 	win-firewall.cpp
 	win-firewall.h
-	Win32TrayApp.cpp
-	Win32TrayApp.rc
 	win-reg.cpp
 	win-reg.h
 
@@ -31,9 +29,11 @@ set(SRCS
 	${VERS_FILE}
 )
 
-add_executable(${PROJECT_NAME} WIN32 ${SRCS})
 
-target_link_libraries(${PROJECT_NAME} ${ADDITIONAL_LIBS} logger ActiveAppTracker InputHooker_ Rpcrt4.lib)
+add_library(libInEfAn ${SRCS})
+add_executable(${PROJECT_NAME} WIN32 Win32TrayApp.cpp Win32TrayApp.rc)
+
+target_link_libraries(${PROJECT_NAME} libInEfAn ${ADDITIONAL_LIBS} logger ActiveAppTracker InputHooker_ Rpcrt4.lib)
 
 VersionConf(${PROJECT_NAME} ${VERS_CONF} ${VERS_FILE})
 
