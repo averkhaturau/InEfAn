@@ -204,7 +204,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         PostQuitMessage(0);
                         break;
                     case ID_TRAYMENU_ABOUT:
-                        ShellExecuteW(NULL, L"open", L"http://" _T(BRAND_DOMAIN) L"/", NULL, NULL, SW_SHOWNORMAL);
+                        ShellExecuteW(NULL, L"open", L"https://" _T(BRAND_DOMAIN) L"/", NULL, NULL, SW_SHOWNORMAL);
                         break;
                     case ID_TRAYMENU_PAUSE:
                         InputHooker::instance().stopHook();
@@ -251,7 +251,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     }
                     break;
                     case ID_TRAYMENU_MYPROFILE: {
-                        const std::wstring myProfileUrl = std::wstring(_T("https://") _T(BRAND_DOMAIN) _T("/inefan/?appId=")) + appId();
+                        const std::wstring myProfileUrl = std::wstring(_T("https://") _T(BRAND_DOMAIN) _T("/user-dashboard/?appId=")) + appId();
                         ShellExecuteW(hWnd, L"open", myProfileUrl.c_str(), NULL, NULL, SW_RESTORE);
                     }
                     break;

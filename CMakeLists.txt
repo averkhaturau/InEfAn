@@ -8,7 +8,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set(BRAND_NAME "${PROJECT_NAME}" CACHE STRING "Utility name")
 set(BRAND_COMPANYNAME "Pleasier" CACHE STRING "Company name")
 set(BRAND_FULLNAME "${BRAND_COMPANYNAME} ${PROJECT_NAME}" CACHE STRING "Full name of the product")
-set(BRAND_DOMAIN "52.29.2.208" CACHE STRING "Company site url")
+set(BRAND_DOMAIN "inefan.pleasier.com" CACHE STRING "Company site url")
 
 set(BRAND_ICON_FILE ${CMAKE_SOURCE_DIR}/resources/mainIcon.ico)
 
