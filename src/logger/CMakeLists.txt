@@ -11,3 +11,4 @@ set(SRC
 )
 
 add_library(${PROJECT_NAME} ${SRC})
+set_property(TARGET ${PROJECT_NAME} PROPERTY FOLDER "libs")

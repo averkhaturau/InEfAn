@@ -29,9 +29,10 @@ set(SRCS
 	${VERS_FILE}
 )
 
-
 add_library(libInEfAn ${SRCS})
 add_executable(${PROJECT_NAME} WIN32 Win32TrayApp.cpp Win32TrayApp.rc)
+set_property(TARGET libInEfAn PROPERTY FOLDER "main")
+set_property(TARGET ${PROJECT_NAME} PROPERTY FOLDER "main")
 
 target_link_libraries(${PROJECT_NAME} libInEfAn ${ADDITIONAL_LIBS} logger ActiveAppTracker InputHooker_ Rpcrt4.lib)
 

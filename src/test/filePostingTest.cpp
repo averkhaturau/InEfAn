@@ -28,18 +28,22 @@ int main()
     const path tempFile = temp_directory_path() / "inefan-test" / "test.txt";
     createTestFile(tempFile);
     const std::string readStr = readTestFile(tempFile);
-    assert(readStr == testString);
+    if (readStr != testString)
+        return 1;
 
     const path issueFile = temp_directory_path() / "inefan-test" / "filePostingTest.txt";
 
     auto str = readFileToString<std::string>(issueFile);
     auto based = encodeToBase64<std::wstring>(str);
     auto debased = decodeFromBase64<std::string>(based);
+
+    if(str != debased)
+        return 1;
+
     std::ofstream(path(issueFile).replace_extension(".copy.txt"), std::ios::binary) << debased;
 
     std::ofstream(path(issueFile).replace_extension(".copy.txt")) <<
             decodeFromBase64<std::string>(encodeToBase64<std::wstring>(readFileToString<std::string>(issueFile)));
 
-
-
+    return 0;
 }

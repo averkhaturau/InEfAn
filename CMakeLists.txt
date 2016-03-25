@@ -35,7 +35,12 @@ add_subdirectory(src/active-app-tracker)
 add_subdirectory(src/logger)
 add_subdirectory(src/InEfAn-tray)
 
-add_subdirectory(src/test)
+option(DEVELOPER_TESTS ON)
+if(DEVELOPER_TESTS)
+	enable_testing()
+	include(CTest)
+	add_subdirectory(src/test)
+endif(DEVELOPER_TESTS)
 
 include(cmake/CPackHelper.cmake)
 if(WIN32)
