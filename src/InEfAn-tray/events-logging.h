@@ -1,6 +1,6 @@
 #pragma once
 
-#include "logger/logger.h"
+#include "logger.h"
 #include "input-hooker/input-event.h"
 
 Logger::LogRecord logEvent(InputDeviceEvent const& ie);

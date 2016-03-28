@@ -8,7 +8,7 @@
 
 #include <windows.h>
 #include <filesystem>
-#include "logger/logger.h"
+#include "logger.h"
 #include <tchar.h>
 #include <time.h>
 #include <thread>
@@ -49,6 +49,14 @@ int APIENTRY _tWinMain(
 
         if (siLock.IsAnotherInstanceRunning())
             return 1;
+
+        Logger::instance().setLogHeaderProvider([]() {
+            return std::string(BRAND_NAME
+                               " version " VER_SZ_PRODUCTVERSION " built " __TIMESTAMP__
+                               "\nis running on ") + pcType() + " powered by " + osName() + " " + osVer()
+                   ;
+
+        });
 
         Logger::instance() << "Starting InEfAn";
         initEventsListening();

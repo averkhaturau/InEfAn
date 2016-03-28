@@ -19,8 +19,8 @@
 #include <experimental/resumable>
 #include <future>
 #include <filesystem>
-#include "logger/log-helpers.h"
-#include "logger/logger.h"
+#include "log-helpers.h"
+#include "logger.h"
 #include "input-hooker/input-hooker.h"
 #include "win-reg.h"
 #include "app-id.h"

@@ -27,12 +27,19 @@ unique_input_events = []
 
 analysis_begin = datetime.datetime(1917,11,7)
 analysis_end = datetime.datetime.now()
+analysis_current = analysis_begin # to avoid double parsing of the continued files
 
 inefan_exit_events = []
 last_parsed_time = None
 
 keys_and_scrolls = []
 
+
+class NeedParsePrevFile(Exception):
+    pass
+#    def __init__(self, filename):
+#        Exception.__init__(self, filename)
+#        self.filename = filename
 
 is_ctrl_key_down = False
 is_alt_key_down = False
@@ -84,11 +91,20 @@ def parse_log_line(line):
             last_parsed_time = None
         return
     event_time = datetime.datetime.strptime(line_word[0] + " " + line_word[1], "%Y-%m-%d %H:%M:%S.%f")
+
+    global analysis_current
+
+    if " ".join(line_word[2:5]) == "Continuing the logfile" and analysis_current < event_time:
+        print(line)
+        raise NeedParsePrevFile(" ".join(line_word[5:]).split('\\')[-1], event_time)
+
     last_parsed_time = event_time
     # print(event_time, line_word[2:])
 
     if not (analysis_begin < event_time < analysis_end):
         return
+
+    analysis_current = event_time
 
     if line_word[2] == "mouse":
         on_mouse_event(event_time, line_word)
