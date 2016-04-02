@@ -115,6 +115,10 @@ def app_intervals(fw):
     return by_app
 
 
+def sum_intervals(list_of_intervals):
+    intervals_length = [i[1]-i[0] for i in list_of_intervals if i and len(i)==2]
+    return sum(intervals_length, datetime.timedelta())
+
 
 def cross_interval(i1, i2):
     if i1[0] <= i2[1] and i1[1] >= i2[0]:

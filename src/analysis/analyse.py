@@ -40,39 +40,40 @@ def parse_log():
             passed_time_interval = datetime.datetime.strptime(sys.argv[3], "%H:%M")
             log_parse.analysis_begin = datetime.datetime.now() - datetime.timedelta(hours=passed_time_interval.hour, minutes=passed_time_interval.minute)
 
-        print("Analysing logs from {} to {}".format(str(log_parse.analysis_begin), str(log_parse.analysis_end)))                
+        print("Analysing logs from {} to {}".format(str(log_parse.analysis_begin), str(log_parse.analysis_end)))
 
     log_dir = '\\'.join(sys.argv[1].split('\\')[:-1])
     files_to_parse = [sys.argv[1].split('\\')[-1]]
 
     last_log_time = log_parse.analysis_current
+    log_start_time = {}
     while files_to_parse:
         try:
             with fopen_func(log_dir + '\\' + files_to_parse[0]) as logfile:
+                print("parsing " + files_to_parse[0])
                 for line in logfile:
-#                    try:
                         log_parse.handle_log_line(line)
-#                    except NeedParsePrevFile as nppf:
-#                        files_to_parse = [nfpp.message]  + files_to_parse
-#                       print(files_to_parse)
-#            except IOError as ee:
-#                print("I/O error({0}): {1}".format(ee.errno, ee.strerror))
-#            except ValueError as ee:
-#                print("ValueError: {}\non parsing '{}'".format(str(ee), line))
-#            except:
-#                print("Unexpected error {} on parsing line '{}'".format(sys.exc_info()[0], line.encode(sys.stdout.encoding, errors='replace')))
+            if files_to_parse[0] in log_start_time:
+                log_parse.analysis_current = log_start_time[files_to_parse[0]]
             files_to_parse = files_to_parse[1:]
         except log_parse.NeedParsePrevFile as nppf:
+            log_start_time.update({nppf.args[0]: nppf.args[1]})
             files_to_parse = [nppf.args[0]] + files_to_parse
             last_log_time = nppf.args[1]
-            print("Parsing {}".format(files_to_parse))
+            # print("Parsing {}".format(files_to_parse))
         except FileNotFoundError:
             log_parse.analysis_current = last_log_time
+            print("File {} not found".format(files_to_parse[0]))
+            files_to_parse = files_to_parse[1:]
+            print("Parsing {}".format(files_to_parse))
             pass
 
 
 parse_log()
 
+
+apps_usage = characteristics.appsStatistics(log_parse.foreground_windows)
+print("Most user apps are: {}".format(apps_usage[:6]))
 
 
 app_intrvls = utils.app_intervals(log_parse.foreground_windows)
@@ -95,7 +96,7 @@ for procname in app_intrvls:
     if not app_stat:
         continue
     local_foreground = [(app_stat["mouse_to_kb"][0][0], {"title": procname, "procname": procname, "filename": ""})]
-    chart.plot_transitions(app_stat["kb_to_mouse"], app_stat["mouse_to_kb"], local_foreground, "res/" + procname + "-plot.png")
+    #chart.plot_transitions(app_stat["kb_to_mouse"], app_stat["mouse_to_kb"], local_foreground, "res/" + procname + "-plot.png")
     chart.log_plot(app_stat["key_press_events"], app_mouse_click_events, app_mouse_other_events, local_foreground, log_parse.inefan_exit_events, "res/" + procname + "-graph.png")
 
 
@@ -107,6 +108,6 @@ mouse_to_kb      = main_stat["mouse_to_kb"]
 kb_to_mouse      = main_stat["kb_to_mouse"]
 
 
-chart.plot_transitions(kb_to_mouse, mouse_to_kb, log_parse.foreground_windows, "res/all-plot.png")
+#chart.plot_transitions(kb_to_mouse, mouse_to_kb, log_parse.foreground_windows, "res/all-plot.png")
 
 chart.log_plot(key_press_events, log_parse.mouse_click_events, log_parse.mouse_other_events, log_parse.foreground_windows, log_parse.inefan_exit_events, "res/all-chart.png")

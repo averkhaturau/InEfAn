@@ -37,9 +37,7 @@ keys_and_scrolls = []
 
 class NeedParsePrevFile(Exception):
     pass
-#    def __init__(self, filename):
-#        Exception.__init__(self, filename)
-#        self.filename = filename
+
 
 is_ctrl_key_down = False
 is_alt_key_down = False

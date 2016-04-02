@@ -86,17 +86,19 @@ def print_characteristics(activity_periods, inactivity_interval, key_press_event
     #    transitionsFile.write('kb_to_mouse='+str(kb_to_mouse)+'\n')
     #    transitionsFile.write('mouse_to_kb='+str(mouse_to_kb)+'\n\n')
 
-
-    typing_speed_variance = math.sqrt(sum(map(lambda s_i: (calc_typing_speed(s_i[0], s_i[1]) - mean_typing_speed) ** 2, typing_keypresses_intervals)) / len(typing_keypresses_intervals))
+    if typing_keypresses_intervals:
+        typing_speed_variance = math.sqrt(sum(map(lambda s_i: (calc_typing_speed(s_i[0], s_i[1]) - mean_typing_speed) ** 2, typing_keypresses_intervals)) / len(typing_keypresses_intervals))
 
     print("Mean Typing speed is {:1.1f}, variance is {}".format(mean_typing_speed, typing_speed_variance))
 
     mean_mouse_to_kb = calc_mean_trastition_time(mouse_to_kb)
-    mouse_to_kb_variance = math.sqrt(sum(map(lambda s_f: (timedelta2Minutes(s_f[1] - s_f[0] - mean_mouse_to_kb) * 60) ** 2, mouse_to_kb)) / len(mouse_to_kb))
-    print("Mean time to transit hand from mouse to keyboard = {}, variance = {} seconds.".format(mean_mouse_to_kb, mouse_to_kb_variance))
+    if mouse_to_kb:
+        mouse_to_kb_variance = math.sqrt(sum(map(lambda s_f: (timedelta2Minutes(s_f[1] - s_f[0] - mean_mouse_to_kb) * 60) ** 2, mouse_to_kb)) / len(mouse_to_kb))
+        print("Mean time to transit hand from mouse to keyboard = {}, variance = {} seconds.".format(mean_mouse_to_kb, mouse_to_kb_variance))
     mean_kb_to_mouse = calc_mean_trastition_time(kb_to_mouse)
-    kb_to_mouse_variance = math.sqrt(sum(map(lambda s_f: (timedelta2Minutes(s_f[1] - s_f[0] - mean_kb_to_mouse) * 60) ** 2, kb_to_mouse)) / len(kb_to_mouse))
-    print("Mean time to transit hand from keyboard to mouse = {}, variance = {} seconds.".format(mean_kb_to_mouse, kb_to_mouse_variance))
+    if kb_to_mouse:
+        kb_to_mouse_variance = math.sqrt(sum(map(lambda s_f: (timedelta2Minutes(s_f[1] - s_f[0] - mean_kb_to_mouse) * 60) ** 2, kb_to_mouse)) / len(kb_to_mouse))
+        print("Mean time to transit hand from keyboard to mouse = {}, variance = {} seconds.".format(mean_kb_to_mouse, kb_to_mouse_variance))
     hand_moving_time = calc_total_trastition_time(mouse_to_kb + kb_to_mouse)
     print("During the observation you moved your hand total {}.".format(hand_moving_time))
 
@@ -136,3 +138,11 @@ def print_characteristics(activity_periods, inactivity_interval, key_press_event
         "key_press_events":key_press_events,
         "mouse_to_kb": mouse_to_kb,
         "kb_to_mouse": kb_to_mouse}
+
+
+def appsStatistics(foreground_windows):
+    app_intrvls = app_intervals(foreground_windows)
+    apps_usage = [(sum_intervals(v),k) for k, v in app_intrvls.items() if k]
+    apps_usage.sort(reverse=True)
+    return apps_usage
+
