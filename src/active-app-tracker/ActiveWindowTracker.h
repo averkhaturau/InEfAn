@@ -14,10 +14,11 @@ public:
     void setCallback(OnWindowChanged_t const& callback);
 private:
     HWND activeHWND = NULL;
-    std::wstring lastWindowTitle;
+    // Window title is considered private info
+    // std::wstring lastWindowTitle;
     OnWindowChanged_t callback;
     UINT_PTR timerHandle;
-    static ActiveWindowTracker* _this; // to pass to timer proc
+    static ActiveWindowTracker* _this; // workaround to pass me to timer proc
 
     // should be called on timer
     void checkChanges();

@@ -1,8 +1,13 @@
 #include "ActiveWindowTracker.h"
 #include "WindowInfo.h"
 
+#include <assert.h>
+
+ActiveWindowTracker* ActiveWindowTracker::_this = nullptr;
+
 ActiveWindowTracker::ActiveWindowTracker()
 {
+    assert(!_this && "Allow only one instance of me");
     _this = this;
     timerHandle = SetTimer(NULL, 0, 1000/*1 second*/, timerProc);
 }
@@ -18,17 +23,16 @@ void ActiveWindowTracker::setCallback(OnWindowChanged_t const& callback)
     this->callback = callback;
 }
 
-ActiveWindowTracker* ActiveWindowTracker::_this = nullptr;
-
 void ActiveWindowTracker::checkChanges()
 {
     try {
         const HWND currentFW = GetForegroundWindow();
-        const std::wstring currentTitle = WindowInfo(currentFW).getTitle();
+        // Window title is considered private info
+        // const std::wstring currentTitle = WindowInfo(currentFW).getTitle();
         // track window changes and title changes
-        if (activeHWND != currentFW || lastWindowTitle != currentTitle) {
+        if (activeHWND != currentFW /*|| lastWindowTitle != currentTitle*/) {
             activeHWND = currentFW;
-            lastWindowTitle = currentTitle;
+            // lastWindowTitle = currentTitle;
             if (callback)
                 callback(currentFW);
         }

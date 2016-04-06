@@ -29,7 +29,8 @@ inline std::wstring readProcessSomething(HWND hwnd, Fn_t fn)
 
 std::wstring WindowInfo::getTitle() const
 {
-    return readFromFuncAndResizeIfNeeded([this](std::wstring & s) {return static_cast<size_t>(GetWindowTextW(myHWND, (LPWSTR)s.data(), static_cast<int>(s.size())));});
+    // return readFromFuncAndResizeIfNeeded([this](std::wstring & s) {return static_cast<size_t>(GetWindowTextW(myHWND, (LPWSTR)s.data(), static_cast<int>(s.size())));});
+    return L"[sensitive]";
 }
 
 std::wstring WindowInfo::getProcessName() const
