@@ -6,6 +6,8 @@ import log_parse
 import chart
 import characteristics
 import utils
+import os
+import glob
 
 # for pyinstaller
 try:
@@ -27,9 +29,15 @@ def parse_log():
     else:
         fopen_func = lambda filename: open(filename, encoding='utf8')
 
-    if len(sys.argv) < 2:
+    if len(sys.argv) < 2 or not os.path.exists(sys.argv[1]):
         print("Usage:\n\t>" + sys.argv[0] + " inefan.log [-begin <analysis start time> -end <analysis end time>]")
         exit(-1)
+
+    if os.path.isdir(sys.argv[1]):
+        # find the last file
+        logfile = max(glob.iglob(sys.argv[1] + '/log*.txt'), key=os.path.basename)
+    else:
+        logfile = sys.argv[1]
 
     if len(sys.argv) > 3:
         if sys.argv[2] == "-begin":
@@ -42,15 +50,15 @@ def parse_log():
 
         print("Analysing logs from {} to {}".format(str(log_parse.analysis_begin), str(log_parse.analysis_end)))
 
-    log_dir = '\\'.join(sys.argv[1].split('\\')[:-1])
-    files_to_parse = [sys.argv[1].split('\\')[-1]]
+    log_dir = '\\'.join(logfile.split('\\')[:-1])
+    files_to_parse = [logfile.split('\\')[-1]]
 
     last_log_time = log_parse.analysis_current
     log_start_time = {}
     while files_to_parse:
         try:
             with fopen_func(log_dir + '\\' + files_to_parse[0]) as logfile:
-                print("parsing " + files_to_parse[0])
+                #print("parsing " + files_to_parse[0])
                 for line in logfile:
                         log_parse.handle_log_line(line)
             if files_to_parse[0] in log_start_time:
