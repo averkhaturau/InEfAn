@@ -18,6 +18,10 @@ def print_characteristics(activity_periods, inactivity_interval, key_press_event
     isolated_mouse_events = [[]]
     typing_keypresses_intervals = []
 
+    # generalized unique_input_events
+    device_usages_mouse = []
+    device_usages_keyboard = []
+
     for period in activity_periods:
         period_len = period[1] - period[0]
         if period_len < inactivity_interval:
@@ -38,13 +42,35 @@ def print_characteristics(activity_periods, inactivity_interval, key_press_event
         typing_keypresses_intervals += list(map(lambda g: (len(g), g[-1] - g[0]), key_presses_in_period))
 
         events_scope = list(filter(lambda eType_eTime: period[0] <= eType_eTime[1] <= period[1], unique_input_events))
+        if not events_scope:
+            continue
 
-        # calcuate mouse-to-keyboard switch time
+        # calcuate mouse-to-keyboard switch time and mouse and kb usage time
+        device_usages_mouse_scope = []
+        device_usages_keyboard_scope = []
+
         for (e1,e2) in pairwise(events_scope):
             if e1[0] == "mouse stopped" and e2[0] == "keyboard started":
                 mouse_to_kb.append((e1[1],e2[1]))
+                if device_usages_mouse_scope:
+                    device_usages_mouse_scope[-1][1] = e1[1]
+                device_usages_keyboard_scope.append([e2[1],e2[1]])
             elif e1[0] == "keyboard stopped" and e2[0] == "mouse started":
                 kb_to_mouse.append((e1[1],e2[1]))
+                if device_usages_keyboard_scope:
+                    device_usages_keyboard_scope[-1][1] = e1[1]
+                device_usages_mouse_scope.append([e2[1],e2[1]])
+            elif e1[0] == "keyboard started" and not device_usages_keyboard_scope:
+                device_usages_keyboard_scope.append([e1[1],e1[1]])
+            elif e1[0] == "mouse started" and not device_usages_mouse_scope:
+                device_usages_mouse_scope.append([e1[1],e1[1]])
+        if (events_scope[-1][0] == "mouse stopped" or events_scope[-1][0] == "mouse started") and device_usages_mouse_scope:
+            device_usages_mouse_scope[-1][1] = events_scope[-1][1]
+        elif (events_scope[-1][0] == "keyboard stopped" or events_scope[-1][0] == "keyboard started") and device_usages_keyboard_scope: 
+            device_usages_keyboard_scope[-1][1] = events_scope[-1][1]
+        device_usages_keyboard += device_usages_keyboard_scope
+        device_usages_mouse += device_usages_mouse_scope
+
 
         # calc isolated mouse usages, e.g.  time on mouse in activity periods,
         # between key presses
@@ -77,19 +103,31 @@ def print_characteristics(activity_periods, inactivity_interval, key_press_event
         sum(map(lambda s_i: s_i[0], typing_keypresses_intervals)), \
         sum(map(lambda s_i: s_i[1], typing_keypresses_intervals), datetime.timedelta()))
 
-    if not mean_typing_speed:
-        print("Not enough observation, please gather more statistics.")
-        return
-
     # save all hand transitions to a file
     #with open('res/all-transitions.txt', 'w') as transitionsFile:
     #    transitionsFile.write('kb_to_mouse='+str(kb_to_mouse)+'\n')
     #    transitionsFile.write('mouse_to_kb='+str(mouse_to_kb)+'\n\n')
 
+    observation_period = unique_input_events[-1][1] - unique_input_events[0][1]
+
+    if timedelta2Minutes(observation_period) < 1 or not mean_typing_speed:
+        print("Observation time is not enough for statistics...")
+
+    print("You were active {:1.1f} minutes during {:1.1f} observed, which is {:1.1f}%.".format(\
+        timedelta2Minutes(activity_time), timedelta2Minutes(observation_period), 100 * timedelta2Minutes(activity_time) / timedelta2Minutes(observation_period)))
+
+    if timedelta2Minutes(activity_time) < 1:
+        print("Active interval was less then a minute, which is not enough for statistics.")
+        return
+
+    # gater mouse and keyboard usage time
+    mouse_usage_time    = sum(map(lambda intvl: intvl[1]-intvl[0], device_usages_mouse), datetime.timedelta())
+    keyboard_usage_time = sum(map(lambda intvl: intvl[1]-intvl[0], device_usages_keyboard), datetime.timedelta())
+    print("During the observation period your mouse have being used {} and your keyboard - {}".format(mouse_usage_time, keyboard_usage_time))
+
     if typing_keypresses_intervals:
         typing_speed_variance = math.sqrt(sum(map(lambda s_i: (calc_typing_speed(s_i[0], s_i[1]) - mean_typing_speed) ** 2, typing_keypresses_intervals)) / len(typing_keypresses_intervals))
-
-    print("Mean Typing speed is {:1.1f}, variance is {}".format(mean_typing_speed, typing_speed_variance))
+        print("Mean Typing speed is {:1.1f}, variance is {}".format(mean_typing_speed, typing_speed_variance))
 
     mean_mouse_to_kb = calc_mean_trastition_time(mouse_to_kb)
     if mouse_to_kb:
@@ -101,22 +139,12 @@ def print_characteristics(activity_periods, inactivity_interval, key_press_event
         print("Mean time to transit hand from keyboard to mouse = {}, variance = {} seconds.".format(mean_kb_to_mouse, kb_to_mouse_variance))
     hand_moving_time = calc_total_trastition_time(mouse_to_kb + kb_to_mouse)
     print("During the observation you moved your hand total {}.".format(hand_moving_time))
-
-    observation_period = unique_input_events[-1][1] - unique_input_events[0][1]
     # extrapolate statistics to 1 year
     one_year_rate = 365.25 * 24 * 60 / timedelta2Minutes(observation_period)
     print("For 1 year you would spend {:1.0f} hours of you life to move you hand to mouse and back, if you use you PC like you do during the observed time."
         .format(timedelta2Minutes(hand_moving_time) * one_year_rate / 60))
 
 
-    if timedelta2Minutes(observation_period) < 1:
-        print("Observation time is not enough for statistics...")
-
-    print("You were active {:1.1f} minutes during {:1.1f} observed, which is {:1.1f}%.".format(\
-        timedelta2Minutes(activity_time), timedelta2Minutes(observation_period), 100 * timedelta2Minutes(activity_time) / timedelta2Minutes(observation_period)))
-
-    if timedelta2Minutes(activity_time) < 1:
-        print("Active interval was less then a minute, which is not enough for statistics.")
     hand_moves_per_hour = (len(mouse_to_kb) + len(kb_to_mouse)) * 60. / timedelta2Minutes(activity_time)
     hand_moving_percents = timedelta2Minutes(hand_moving_time) * 100 / timedelta2Minutes(activity_time)
     print("You have moved your hand from mouse to keyboard {} times and {} times back, you do it average {:1.1f} times per hour and this tooks you {:3.1f}% of your active time"

@@ -101,7 +101,7 @@ for procname in app_intrvls:
             app_key_press_event_groups.append(app_event_group)
     app_stat = characteristics.print_characteristics(app_activity_periods, log_parse.inactivity_interval, app_key_press_event_groups, app_input_events, app_keys_and_scrolls)
     #print("{} statistics is {}".format(procname, app_stat))
-    if not app_stat:
+    if not app_stat or not app_stat["mouse_to_kb"] or not app_stat["key_press_events"]:
         continue
     local_foreground = [(app_stat["mouse_to_kb"][0][0], {"title": procname, "procname": procname, "filename": ""})]
     #chart.plot_transitions(app_stat["kb_to_mouse"], app_stat["mouse_to_kb"], local_foreground, "res/" + procname + "-plot.png")

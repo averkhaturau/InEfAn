@@ -93,7 +93,6 @@ def parse_log_line(line):
     global analysis_current
 
     if " ".join(line_word[2:5]) == "Continuing the logfile" and analysis_current < event_time:
-        print(line)
         raise NeedParsePrevFile(" ".join(line_word[5:]).split('\\')[-1], event_time)
 
     last_parsed_time = event_time
@@ -143,7 +142,7 @@ def user_is_active_at(t):
     else:
         activity_periods[-1][1] = t
 
-		
+
 def on_mouse_event(event_time, line_word):
     global key_press_event_groups
 
@@ -169,8 +168,8 @@ def on_mouse_event(event_time, line_word):
     else:
         print("Mouse single event at " + str(event_time))
         mouse_other_events.append(event_time)
-        
-        
+
+
 def on_keyboard_event(event_time, line_word):
     global is_ctrl_key_down, is_alt_key_down, key_press_event_groups
 
