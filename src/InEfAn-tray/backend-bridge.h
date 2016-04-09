@@ -225,8 +225,8 @@ std::future<bool> postAllNewLogfiles()
                         const bool local_success = postData(
                                                        _T("https://") _T(BRAND_DOMAIN) _T("/inefan/"),
                                                        std::make_pair("appId", appId()),
-                                                       std::make_pair("logName", log.path().filename().string()),
-                                                       std::make_pair("logfile", log.path())
+                                                       std::make_pair("logfile", log.path()),
+                                                       std::make_pair("logName", log.path().filename().string())
                                                    ).get();
                         success = success && local_success;
                         if (local_success)
