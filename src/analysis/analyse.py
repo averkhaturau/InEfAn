@@ -69,12 +69,11 @@ def parse_log():
             files_to_parse = [nppf.args[0]] + files_to_parse
             last_log_time = nppf.args[1]
             # print("Parsing {}".format(files_to_parse))
-        except FileNotFoundError:
+        except (OSError, IOError):
             log_parse.analysis_current = last_log_time
             print("File {} not found".format(files_to_parse[0]))
             files_to_parse = files_to_parse[1:]
             print("Parsing {}".format(files_to_parse))
-            pass
 
 
 parse_log()
@@ -94,12 +93,14 @@ for procname in app_intrvls:
     app_keys_and_scrolls   = utils.cross_intervals(app_intrvls[procname], log_parse.keys_and_scrolls, lambda element: [element[1],element[1]], lambda orig,intrvl: (orig[0],intrvl[1]))
     app_mouse_click_events = utils.cross_intervals(app_intrvls[procname], log_parse.mouse_click_events, lambda element: [element,element], lambda orig,intrvl: intrvl[1])
     app_mouse_other_events = utils.cross_intervals(app_intrvls[procname], log_parse.mouse_other_events, lambda element: [element,element], lambda orig,intrvl: intrvl[1])
+    app_shortcut_events    = utils.cross_intervals(app_intrvls[procname], log_parse.shortcut_events, lambda element: [element,element], lambda orig,intrvl: intrvl[1])
+    app_addi_keys_events   = utils.cross_intervals(app_intrvls[procname], log_parse.addi_keys_events, lambda element: [element,element], lambda orig,intrvl: intrvl[1])
     app_key_press_event_groups = []
     for key_evt_group in log_parse.key_press_event_groups:
         app_event_group = utils.cross_intervals(app_intrvls[procname], key_evt_group, lambda element: [element,element], lambda orig,intrvl: intrvl[1])
         if app_event_group:
             app_key_press_event_groups.append(app_event_group)
-    app_stat = characteristics.print_characteristics(app_activity_periods, log_parse.inactivity_interval, app_key_press_event_groups, app_input_events, app_keys_and_scrolls)
+    app_stat = characteristics.print_characteristics(app_activity_periods, log_parse.inactivity_interval, app_key_press_event_groups, app_input_events, app_keys_and_scrolls, app_shortcut_events, app_addi_keys_events)
     #print("{} statistics is {}".format(procname, app_stat))
     if not app_stat or not app_stat["mouse_to_kb"] or not app_stat["key_press_events"]:
         continue
@@ -109,7 +110,7 @@ for procname in app_intrvls:
 
 
 print("\n\nGeneral statistics:")
-main_stat = characteristics.print_characteristics(log_parse.activity_periods, log_parse.inactivity_interval, log_parse.key_press_event_groups, log_parse.unique_input_events, log_parse.keys_and_scrolls)
+main_stat = characteristics.print_characteristics(log_parse.activity_periods, log_parse.inactivity_interval, log_parse.key_press_event_groups, log_parse.unique_input_events, log_parse.keys_and_scrolls, log_parse.shortcut_events, log_parse.addi_keys_events)
 
 key_press_events = main_stat["key_press_events"]
 mouse_to_kb      = main_stat["mouse_to_kb"]

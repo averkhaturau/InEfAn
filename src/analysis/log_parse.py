@@ -13,6 +13,8 @@ activity_periods = []
                                             
 # to estimate typing speed
 key_press_event_groups = [[]]
+shortcut_events = []  # ctrl or alt with any other key
+addi_keys_events = [] # pgup, pgdown, arrow keys, home, end, ins, del, ...
 
 # to counterpose mouse events to key presses
 mouse_click_events = []
@@ -186,8 +188,15 @@ def on_keyboard_event(event_time, line_word):
             unique_input_events.append(("keyboard stopped", event_time))
         else:
             unique_input_events[-1] = ("keyboard stopped", event_time)
-        if line_word[3] in ("letter", "digit", "SPACEBAR", "-","+",",",".", "\\") and not (is_ctrl_key_down or is_alt_key_down):
-            key_press_event_groups[-1].append(event_time)
+
+        if is_ctrl_key_down or is_alt_key_down:
+            shortcut_events.append(event_time)
+        else: # no ctrl / alt pushed
+            if line_word[3] in ("letter", "digit", "SPACEBAR", "-","+",",",".", "\\"):
+                key_press_event_groups[-1].append(event_time)
+            elif line_word[3] in ("PAGE", "UP", "DOWN", "LEFT", "RIGHT", "HOME", "END", "INS", "DEL", "PRINT", "PAUSE", "SCROLL", "NUM", "Add", "Subtract", "Multiply", "Divide"):
+                addi_keys_events.append(event_time)
+
     elif line_word[-1] == "down":
         if len(line_word) > 4:
             if line_word[4] == "CONTROL":

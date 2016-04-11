@@ -4,7 +4,7 @@ import datetime
 from utils import *
 
 
-def print_characteristics(activity_periods, inactivity_interval, key_press_event_groups, unique_input_events, keys_and_scrolls):
+def print_characteristics(activity_periods, inactivity_interval, key_press_event_groups, unique_input_events, keys_and_scrolls, shortcut_events, addi_keys_events):
 
     # output values
     key_press_events = []
@@ -22,6 +22,10 @@ def print_characteristics(activity_periods, inactivity_interval, key_press_event
     device_usages_mouse = []
     device_usages_keyboard = []
 
+    shortcuts_in_period = []
+    addikeys_in_period  = []
+
+
     for period in activity_periods:
         period_len = period[1] - period[0]
         if period_len < inactivity_interval:
@@ -35,6 +39,10 @@ def print_characteristics(activity_periods, inactivity_interval, key_press_event
             filtered_group = list(filter(lambda press_time: period[0] <= press_time <= period[1], group))
             if len(filtered_group) > 3:
                 key_presses_in_period.append(filtered_group)
+
+        shortcuts_in_period += [t for t in shortcut_events  if period[0] <= t <= period[1]]
+        addikeys_in_period  += [t for t in addi_keys_events if period[0] <= t <= period[1]]
+
 
         if key_presses_in_period:
             key_press_events += flattern(key_presses_in_period)
@@ -161,6 +169,7 @@ def print_characteristics(activity_periods, inactivity_interval, key_press_event
         print("You used mouse less then then 30 seconds between typing {} times during {}, mean isolated mouse usage time is {:2.1f} seconds"
             .format(len(isolated_mouse_times), isolated_mouse_sum, timedelta2Minutes(isolated_mouse_sum) * 60 / len(isolated_mouse_times)))
 
+    print("You have used shortcuts {} times and additional keyboard {} times".format(len(shortcuts_in_period), len(addikeys_in_period)))
 
     return {
         "key_press_events":key_press_events,
