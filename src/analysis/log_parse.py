@@ -180,8 +180,10 @@ def on_keyboard_event(event_time, line_word):
         if len(line_word) > 4:
             if line_word[4] == "CONTROL":
                 is_ctrl_key_down = False
+                return
             elif line_word[4] == "MENU":
                 is_alt_key_down = False
+                return
 
         #print("Keyboard using stopped at " + unicode(event_time))
         if (not unique_input_events or unique_input_events[-1][0] != "keyboard stopped"):
@@ -201,12 +203,13 @@ def on_keyboard_event(event_time, line_word):
         if len(line_word) > 4:
             if line_word[4] == "CONTROL":
                 is_ctrl_key_down = True
+                return
             elif line_word[4] == "MENU":
                 is_alt_key_down = True
+                return
 
         if not unique_input_events or unique_input_events[-1][0] != "keyboard started":
             unique_input_events.append(("keyboard started", event_time))
     else:
         print("Keyboard single event at " + str(event_time))
-        
 
