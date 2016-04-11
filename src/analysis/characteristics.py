@@ -149,7 +149,7 @@ def print_characteristics(activity_periods, inactivity_interval, key_press_event
     print("During the observation you moved your hand total {}.".format(hand_moving_time))
     # extrapolate statistics to 1 year
     one_year_rate = 365.25 * 24 * 60 / timedelta2Minutes(observation_period)
-    print("For 1 year you would spend {:1.0f} hours of you life to move you hand to mouse and back, if you use you PC like you do during the observed time."
+    print("For 1 year you would spend {:1.0f} hours of you life to move you hand to mouse and back, if you use your PC like you did during the observed time."
         .format(timedelta2Minutes(hand_moving_time) * one_year_rate / 60))
 
 
@@ -166,7 +166,7 @@ def print_characteristics(activity_periods, inactivity_interval, key_press_event
     isolated_mouse_times = [g[-1] - g[0] for g in isolated_mouse_events if g and g[-1] - g[0] < datetime.timedelta(seconds=30)]
     isolated_mouse_sum = sum(isolated_mouse_times, datetime.timedelta())
     if isolated_mouse_times:
-        print("You used mouse less then then 30 seconds between typing {} times during {}, mean isolated mouse usage time is {:2.1f} seconds"
+        print("You used mouse less then 30 seconds between typing {} times during {}, mean isolated mouse usage time is {:2.1f} seconds"
             .format(len(isolated_mouse_times), isolated_mouse_sum, timedelta2Minutes(isolated_mouse_sum) * 60 / len(isolated_mouse_times)))
 
     print("You have used shortcuts {} times and additional keyboard {} times".format(len(shortcuts_in_period), len(addikeys_in_period)))
