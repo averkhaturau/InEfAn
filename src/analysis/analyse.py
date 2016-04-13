@@ -9,6 +9,8 @@ import utils
 import os
 import glob
 
+import db_bridge
+
 # for pyinstaller
 try:
     # for Python2
@@ -50,14 +52,15 @@ def parse_log():
 
         print("Analysing logs from {} to {}".format(str(log_parse.analysis_begin), str(log_parse.analysis_end)))
 
-    log_dir = '\\'.join(logfile.split('\\')[:-1])
-    files_to_parse = [logfile.split('\\')[-1]]
+    path_steps = os.path.split(logfile)
+    log_dir = '/'.join(path_steps[:-1])
+    files_to_parse = [path_steps[-1]]
 
     last_log_time = log_parse.analysis_current
     log_start_time = {}
     while files_to_parse:
         try:
-            with fopen_func(log_dir + '\\' + files_to_parse[0]) as logfile:
+            with fopen_func(log_dir + '/' + files_to_parse[0]) as logfile:
                 #print("parsing " + files_to_parse[0])
                 for line in logfile:
                         log_parse.handle_log_line(line)
@@ -69,9 +72,9 @@ def parse_log():
             files_to_parse = [nppf.args[0]] + files_to_parse
             last_log_time = nppf.args[1]
             # print("Parsing {}".format(files_to_parse))
-        except (OSError, IOError):
+        except (OSError, IOError) as ee:
+            print(ee)
             log_parse.analysis_current = last_log_time
-            print("File {} not found".format(files_to_parse[0]))
             files_to_parse = files_to_parse[1:]
             print("Parsing {}".format(files_to_parse))
 
@@ -88,6 +91,7 @@ for procname in app_intrvls:
     if not procname:
         continue
     print("\n\nFor the '{}' we gathed the following statistics:".format(procname))
+    app_id = db_bridge.register_app(procname, None, None)
     app_activity_periods   = utils.cross_intervals(app_intrvls[procname], log_parse.activity_periods, lambda element: element, lambda orig,intrvl: intrvl)
     app_input_events       = utils.cross_intervals(app_intrvls[procname], log_parse.unique_input_events, lambda element: [element[1],element[1]], lambda orig,intrvl: (orig[0],intrvl[1]))
     app_keys_and_scrolls   = utils.cross_intervals(app_intrvls[procname], log_parse.keys_and_scrolls, lambda element: [element[1],element[1]], lambda orig,intrvl: (orig[0],intrvl[1]))
@@ -106,7 +110,7 @@ for procname in app_intrvls:
         continue
     local_foreground = [(app_stat["mouse_to_kb"][0][0], {"title": procname, "procname": procname, "filename": ""})]
     #chart.plot_transitions(app_stat["kb_to_mouse"], app_stat["mouse_to_kb"], local_foreground, "res/" + procname + "-plot.png")
-    chart.log_plot(app_stat["key_press_events"], app_mouse_click_events, app_mouse_other_events, local_foreground, log_parse.inefan_exit_events, "res/" + procname + "-graph.png")
+    #chart.log_plot(app_stat["key_press_events"], app_mouse_click_events, app_mouse_other_events, local_foreground, log_parse.inefan_exit_events, "res/" + procname + "-graph.png")
 
 
 print("\n\nGeneral statistics:")
@@ -119,4 +123,4 @@ kb_to_mouse      = main_stat["kb_to_mouse"]
 
 #chart.plot_transitions(kb_to_mouse, mouse_to_kb, log_parse.foreground_windows, "res/all-plot.png")
 
-chart.log_plot(key_press_events, log_parse.mouse_click_events, log_parse.mouse_other_events, log_parse.foreground_windows, log_parse.inefan_exit_events, "res/all-chart.png")
+#chart.log_plot(key_press_events, log_parse.mouse_click_events, log_parse.mouse_other_events, log_parse.foreground_windows, log_parse.inefan_exit_events, "res/all-chart.png")
