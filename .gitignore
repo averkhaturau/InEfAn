@@ -37,3 +37,5 @@
 /src/analysis/build/
 /src/analysis/dist/
 /src/analysis/res/
+
+src/analysis/db_secret.py
