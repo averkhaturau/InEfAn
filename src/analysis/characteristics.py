@@ -134,17 +134,17 @@ def print_characteristics(activity_periods, inactivity_interval, key_press_event
     print("During the observation period your mouse have being used {} and your keyboard - {}".format(mouse_usage_time, keyboard_usage_time))
 
     if typing_keypresses_intervals:
-        typing_speed_variance = math.sqrt(sum(map(lambda s_i: (calc_typing_speed(s_i[0], s_i[1]) - mean_typing_speed) ** 2, typing_keypresses_intervals)) / len(typing_keypresses_intervals))
-        print("Mean Typing speed is {:1.1f}, variance is {}".format(mean_typing_speed, typing_speed_variance))
+        typing_speed_deviation = math.sqrt(sum(map(lambda s_i: (calc_typing_speed(s_i[0], s_i[1]) - mean_typing_speed) ** 2, typing_keypresses_intervals)) / len(typing_keypresses_intervals))
+        print("Mean Typing speed is {:1.1f}, deviation is {}".format(mean_typing_speed, typing_speed_deviation))
 
     mean_mouse_to_kb = calc_mean_trastition_time(mouse_to_kb)
     if mouse_to_kb:
-        mouse_to_kb_variance = math.sqrt(sum(map(lambda s_f: (timedelta2Minutes(s_f[1] - s_f[0] - mean_mouse_to_kb) * 60) ** 2, mouse_to_kb)) / len(mouse_to_kb))
-        print("Mean time to transit hand from mouse to keyboard = {}, variance = {} seconds.".format(mean_mouse_to_kb, mouse_to_kb_variance))
+        mouse_to_kb_deviation = math.sqrt(sum(map(lambda s_f: (timedelta2Minutes(s_f[1] - s_f[0] - mean_mouse_to_kb) * 60) ** 2, mouse_to_kb)) / len(mouse_to_kb))
+        print("Mean time to transit hand from mouse to keyboard = {}, deviation = {} seconds.".format(mean_mouse_to_kb, mouse_to_kb_deviation))
     mean_kb_to_mouse = calc_mean_trastition_time(kb_to_mouse)
     if kb_to_mouse:
-        kb_to_mouse_variance = math.sqrt(sum(map(lambda s_f: (timedelta2Minutes(s_f[1] - s_f[0] - mean_kb_to_mouse) * 60) ** 2, kb_to_mouse)) / len(kb_to_mouse))
-        print("Mean time to transit hand from keyboard to mouse = {}, variance = {} seconds.".format(mean_kb_to_mouse, kb_to_mouse_variance))
+        kb_to_mouse_deviation = math.sqrt(sum(map(lambda s_f: (timedelta2Minutes(s_f[1] - s_f[0] - mean_kb_to_mouse) * 60) ** 2, kb_to_mouse)) / len(kb_to_mouse))
+        print("Mean time to transit hand from keyboard to mouse = {}, deviation = {} seconds.".format(mean_kb_to_mouse, kb_to_mouse_deviation))
     hand_moving_time = calc_total_trastition_time(mouse_to_kb + kb_to_mouse)
     print("During the observation you moved your hand total {}.".format(hand_moving_time))
     # extrapolate statistics to 1 year
