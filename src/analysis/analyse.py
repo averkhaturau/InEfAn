@@ -53,8 +53,13 @@ def parse_log():
         print("Analysing logs from {} to {}".format(str(log_parse.analysis_begin), str(log_parse.analysis_end)))
 
     path_steps = os.path.split(logfile)
-    log_dir = '/'.join(path_steps[:-1])
-    files_to_parse = [path_steps[-1]]
+    log_dir = path_steps[0]
+    files_to_parse = [path_steps[1]]
+
+    global machine_id
+    machine_id = os.path.split(path_steps[0])[1]
+    print("machine_id is "+ machine_id)
+
 
     last_log_time = log_parse.analysis_current
     log_start_time = {}
@@ -92,6 +97,7 @@ for procname in app_intrvls:
         continue
     print("\n\nFor the '{}' we gathed the following statistics:".format(procname))
     app_id = db_bridge.register_app(procname, None, None)
+    print("app {} has id {}".format(procname, app_id))
     app_activity_periods   = utils.cross_intervals(app_intrvls[procname], log_parse.activity_periods, lambda element: element, lambda orig,intrvl: intrvl)
     app_input_events       = utils.cross_intervals(app_intrvls[procname], log_parse.unique_input_events, lambda element: [element[1],element[1]], lambda orig,intrvl: (orig[0],intrvl[1]))
     app_keys_and_scrolls   = utils.cross_intervals(app_intrvls[procname], log_parse.keys_and_scrolls, lambda element: [element[1],element[1]], lambda orig,intrvl: (orig[0],intrvl[1]))
@@ -106,11 +112,23 @@ for procname in app_intrvls:
             app_key_press_event_groups.append(app_event_group)
     app_stat = characteristics.print_characteristics(app_activity_periods, log_parse.inactivity_interval, app_key_press_event_groups, app_input_events, app_keys_and_scrolls, app_shortcut_events, app_addi_keys_events)
     #print("{} statistics is {}".format(procname, app_stat))
-    if not app_stat or not app_stat["mouse_to_kb"] or not app_stat["key_press_events"]:
-        continue
-    local_foreground = [(app_stat["mouse_to_kb"][0][0], {"title": procname, "procname": procname, "filename": ""})]
+    #if not app_stat or not app_stat["mouse_to_kb"] or not app_stat["key_press_events"]:
+    #    continue
+    #local_foreground = [(app_stat["mouse_to_kb"][0][0], {"title": procname, "procname": procname, "filename": ""})]
     #chart.plot_transitions(app_stat["kb_to_mouse"], app_stat["mouse_to_kb"], local_foreground, "res/" + procname + "-plot.png")
     #chart.log_plot(app_stat["key_press_events"], app_mouse_click_events, app_mouse_other_events, local_foreground, log_parse.inefan_exit_events, "res/" + procname + "-graph.png")
+
+    # write statistics to database
+    if app_mouse_click_events:
+        stat_type_id = db_bridge.register_stat_type("mouse_clicks")
+        start_time = app_mouse_click_events[0].replace(minute=0, second=0, microsecond=0)
+        mouse_click_stat = utils.norm_events_stat_to_hist(
+            app_mouse_click_events,
+            start_time,
+            (app_mouse_click_events[-1]+datetime.timedelta(hours=1)).replace(minute=0, second=0, microsecond=0),
+            datetime.timedelta(hours=1))
+        print("mouse clicks for {} are {}".format(app_id, mouse_click_stat))
+        db_bridge.add_stat(stat_type_id, app_id, machine_id, start_time, mouse_click_stat)
 
 
 print("\n\nGeneral statistics:")
@@ -122,5 +140,15 @@ kb_to_mouse      = main_stat["kb_to_mouse"]
 
 
 #chart.plot_transitions(kb_to_mouse, mouse_to_kb, log_parse.foreground_windows, "res/all-plot.png")
-
 #chart.log_plot(key_press_events, log_parse.mouse_click_events, log_parse.mouse_other_events, log_parse.foreground_windows, log_parse.inefan_exit_events, "res/all-chart.png")
+
+# write statistics to database
+if log_parse.mouse_click_events:
+    stat_type_id = db_bridge.register_stat_type("mouse_clicks")
+    start_time = log_parse.mouse_click_events[0].replace(minute=0, second=0, microsecond=0)
+    mouse_click_stat = utils.norm_events_stat_to_hist(
+        app_mouse_click_events,
+        start_time,
+        (log_parse.mouse_click_events[-1]+datetime.timedelta(hours=1)).replace(minute=0, second=0, microsecond=0),
+        datetime.timedelta(hours=1))
+    db_bridge.add_stat(stat_type_id, "NULL", machine_id, start_time, mouse_click_stat)

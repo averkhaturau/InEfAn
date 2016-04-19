@@ -32,7 +32,7 @@ def print_characteristics(activity_periods, inactivity_interval, key_press_event
             continue
 
         activity_time += period_len
-        
+
         # calculate typing speed
         key_presses_in_period = []
         for group in key_press_event_groups:
