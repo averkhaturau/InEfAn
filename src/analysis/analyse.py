@@ -138,7 +138,7 @@ kb_to_mouse      = main_stat["kb_to_mouse"]
 #chart.log_plot(key_press_events, log_parse.mouse_click_events, log_parse.mouse_other_events, log_parse.foreground_windows, log_parse.inefan_exit_events, "res/all-chart.png")
 
 # write statistics to database
-app_id = "NULL"
+app_id = 0
 db_bridge.save_events_to_db("mouse_clicks", app_id, machine_id, app_mouse_click_events)
 db_bridge.save_events_to_db("shortcuts", app_id, machine_id, app_shortcut_events)
 if app_stat and "key_press_events" in app_stat and app_stat["key_press_events"]:

@@ -60,7 +60,8 @@ def add_stat(stat_type_id, app_id, machine_id, start_time, value):
             query = (
             ''' insert into stats (stat_type_id, app_id, machine_id, stat_time, {})
             values({}, {}, "{}", "{}", "{}")
-            '''.format(val_column, stat_type_id, app_id, machine_id, time, v)
+            ON DUPLICATE KEY UPDATE {}={}
+            '''.format(val_column, stat_type_id, app_id, machine_id, time, v, val_column, v)
             )
             time += interval
             if v:
