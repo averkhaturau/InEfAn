@@ -1,4 +1,6 @@
 import datetime
+import stat_settings
+import utils
 
 no_db = False
 
@@ -51,7 +53,7 @@ def add_stat(stat_type_id, app_id, machine_id, start_time, value):
         val_column = "value_ts"
 
     time = start_time
-    interval = datetime.timedelta(hours=1)
+    interval = stat_settings.stat_interval
 
     with MySQLdb.connect(*db_secret.db_connect_params) as cursor:
         for v in val:
@@ -63,3 +65,17 @@ def add_stat(stat_type_id, app_id, machine_id, start_time, value):
             time += interval
             if v:
                 cursor.execute(query)
+
+
+def save_events_to_db(stat_name, app_id, machine_id, events_list):
+    if events_list:
+        stat_type_id = register_stat_type(stat_name)
+        start_time = stat_settings.to_start(events_list[0])
+        events_hist = utils.norm_events_stat_to_hist(
+            events_list,
+            start_time,
+            stat_settings.to_finish(events_list[-1]),
+            stat_settings.stat_interval)
+        add_stat(stat_type_id, app_id, machine_id, start_time, events_hist)
+
+

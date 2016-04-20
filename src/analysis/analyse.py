@@ -10,6 +10,7 @@ import os
 import glob
 
 import db_bridge
+import stat_settings
 
 # for pyinstaller
 try:
@@ -119,35 +120,10 @@ for procname in app_intrvls:
     #chart.log_plot(app_stat["key_press_events"], app_mouse_click_events, app_mouse_other_events, local_foreground, log_parse.inefan_exit_events, "res/" + procname + "-graph.png")
 
     # write statistics to database
-    if app_mouse_click_events:
-        stat_type_id = db_bridge.register_stat_type("mouse_clicks")
-        start_time = app_mouse_click_events[0].replace(minute=0, second=0, microsecond=0)
-        mouse_click_stat = utils.norm_events_stat_to_hist(
-            app_mouse_click_events,
-            start_time,
-            (app_mouse_click_events[-1]+datetime.timedelta(hours=1)).replace(minute=0, second=0, microsecond=0),
-            datetime.timedelta(hours=1))
-        db_bridge.add_stat(stat_type_id, app_id, machine_id, start_time, mouse_click_stat)
-
-    if app_shortcut_events:
-        stat_type_id = db_bridge.register_stat_type("shortcuts")
-        start_time = app_shortcut_events[0].replace(minute=0, second=0, microsecond=0)
-        shortcuts_stat = utils.norm_events_stat_to_hist(
-            app_shortcut_events,
-            start_time,
-            (app_shortcut_events[-1]+datetime.timedelta(hours=1)).replace(minute=0, second=0, microsecond=0),
-            datetime.timedelta(hours=1))
-        db_bridge.add_stat(stat_type_id, app_id, machine_id, start_time, shortcuts_stat)
-
+    db_bridge.save_events_to_db("mouse_clicks", app_id, machine_id, app_mouse_click_events)
+    db_bridge.save_events_to_db("shortcuts", app_id, machine_id, app_shortcut_events)
     if app_stat and "key_press_events" in app_stat and app_stat["key_press_events"]:
-        stat_type_id = db_bridge.register_stat_type("keypresses")
-        start_time = app_stat["key_press_events"][0].replace(minute=0, second=0, microsecond=0)
-        keypress_stat = utils.norm_events_stat_to_hist(
-            app_stat["key_press_events"],
-            start_time,
-            (app_stat["key_press_events"][-1]+datetime.timedelta(hours=1)).replace(minute=0, second=0, microsecond=0),
-            datetime.timedelta(hours=1))
-        db_bridge.add_stat(stat_type_id, app_id, machine_id, start_time, keypress_stat)
+        db_bridge.save_events_to_db("keypresses", app_id, machine_id, app_stat["key_press_events"])
 
 
 print("\n\nGeneral statistics:")
@@ -162,33 +138,8 @@ kb_to_mouse      = main_stat["kb_to_mouse"]
 #chart.log_plot(key_press_events, log_parse.mouse_click_events, log_parse.mouse_other_events, log_parse.foreground_windows, log_parse.inefan_exit_events, "res/all-chart.png")
 
 # write statistics to database
-if log_parse.mouse_click_events:
-    stat_type_id = db_bridge.register_stat_type("mouse_clicks")
-    start_time = log_parse.mouse_click_events[0].replace(minute=0, second=0, microsecond=0)
-    mouse_click_stat = utils.norm_events_stat_to_hist(
-        app_mouse_click_events,
-        start_time,
-        (log_parse.mouse_click_events[-1]+datetime.timedelta(hours=1)).replace(minute=0, second=0, microsecond=0),
-        datetime.timedelta(hours=1))
-    db_bridge.add_stat(stat_type_id, "NULL", machine_id, start_time, mouse_click_stat)
-
-if log_parse.shortcut_events:
-    stat_type_id = db_bridge.register_stat_type("shortcuts")
-    start_time = log_parse.shortcut_events[0].replace(minute=0, second=0, microsecond=0)
-    shortcuts_stat = utils.norm_events_stat_to_hist(
-        log_parse.shortcut_events,
-        start_time,
-        (log_parse.shortcut_events[-1]+datetime.timedelta(hours=1)).replace(minute=0, second=0, microsecond=0),
-        datetime.timedelta(hours=1))
-    db_bridge.add_stat(stat_type_id, "NULL", machine_id, start_time, shortcuts_stat)
-
-
-if main_stat["key_press_events"]:
-    stat_type_id = db_bridge.register_stat_type("keypresses")
-    start_time = app_stat["key_press_events"][0].replace(minute=0, second=0, microsecond=0)
-    keypress_stat = utils.norm_events_stat_to_hist(
-        main_stat["key_press_events"],
-        start_time,
-        (main_stat["key_press_events"][-1]+datetime.timedelta(hours=1)).replace(minute=0, second=0, microsecond=0),
-        datetime.timedelta(hours=1))
-    db_bridge.add_stat(stat_type_id, "NULL", machine_id, start_time, keypress_stat)
+app_id = "NULL"
+db_bridge.save_events_to_db("mouse_clicks", app_id, machine_id, app_mouse_click_events)
+db_bridge.save_events_to_db("shortcuts", app_id, machine_id, app_shortcut_events)
+if app_stat and "key_press_events" in app_stat and app_stat["key_press_events"]:
+    db_bridge.save_events_to_db("keypresses", app_id, machine_id, app_stat["key_press_events"])

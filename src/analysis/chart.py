@@ -3,6 +3,7 @@ import matplotlib.dates as mdates
 import numpy as np
 import datetime
 import random
+import stat_settings
 
 #local
 from utils import *
@@ -15,12 +16,9 @@ def log_plot(key_press_events, mouse_click_events, mouse_other_events, foregroun
 
     with plt.xkcd():
         #try:
-            hist_delta = datetime.timedelta(hours=1)
-            start = min(key_press_events[0], mouse_click_events[0], mouse_other_events[0]).replace(minute=0,
-                second=0,microsecond=0)
-            finish = max(key_press_events[-1], mouse_click_events[-1], mouse_other_events[-1]).replace(minute=0,
-                second=0,microsecond=0) + hist_delta
-
+            hist_delta = stat_settings.stat_interval
+            start = stat_settings.to_start(min(key_press_events[0], mouse_click_events[0], mouse_other_events[0]))
+            finish = stat_settings.to_finish(max(key_press_events[-1], mouse_click_events[-1], mouse_other_events[-1]))
             keypress_hist = norm_events_stat_to_hist(key_press_events, start, finish, hist_delta)
             m_click_hist = norm_events_stat_to_hist(mouse_click_events, start, finish, hist_delta)
             m_other_hist = norm_events_stat_to_hist(mouse_other_events, start, finish, hist_delta)
