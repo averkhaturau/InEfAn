@@ -127,8 +127,27 @@ for procname in app_intrvls:
             start_time,
             (app_mouse_click_events[-1]+datetime.timedelta(hours=1)).replace(minute=0, second=0, microsecond=0),
             datetime.timedelta(hours=1))
-        print("mouse clicks for {} are {}".format(app_id, mouse_click_stat))
         db_bridge.add_stat(stat_type_id, app_id, machine_id, start_time, mouse_click_stat)
+
+    if app_shortcut_events:
+        stat_type_id = db_bridge.register_stat_type("shortcuts")
+        start_time = app_shortcut_events[0].replace(minute=0, second=0, microsecond=0)
+        shortcuts_stat = utils.norm_events_stat_to_hist(
+            app_shortcut_events,
+            start_time,
+            (app_shortcut_events[-1]+datetime.timedelta(hours=1)).replace(minute=0, second=0, microsecond=0),
+            datetime.timedelta(hours=1))
+        db_bridge.add_stat(stat_type_id, app_id, machine_id, start_time, shortcuts_stat)
+
+    if app_stat and "key_press_events" in app_stat and app_stat["key_press_events"]:
+        stat_type_id = db_bridge.register_stat_type("keypresses")
+        start_time = app_stat["key_press_events"][0].replace(minute=0, second=0, microsecond=0)
+        keypress_stat = utils.norm_events_stat_to_hist(
+            app_stat["key_press_events"],
+            start_time,
+            (app_stat["key_press_events"][-1]+datetime.timedelta(hours=1)).replace(minute=0, second=0, microsecond=0),
+            datetime.timedelta(hours=1))
+        db_bridge.add_stat(stat_type_id, app_id, machine_id, start_time, keypress_stat)
 
 
 print("\n\nGeneral statistics:")
@@ -152,3 +171,24 @@ if log_parse.mouse_click_events:
         (log_parse.mouse_click_events[-1]+datetime.timedelta(hours=1)).replace(minute=0, second=0, microsecond=0),
         datetime.timedelta(hours=1))
     db_bridge.add_stat(stat_type_id, "NULL", machine_id, start_time, mouse_click_stat)
+
+if log_parse.shortcut_events:
+    stat_type_id = db_bridge.register_stat_type("shortcuts")
+    start_time = log_parse.shortcut_events[0].replace(minute=0, second=0, microsecond=0)
+    shortcuts_stat = utils.norm_events_stat_to_hist(
+        log_parse.shortcut_events,
+        start_time,
+        (log_parse.shortcut_events[-1]+datetime.timedelta(hours=1)).replace(minute=0, second=0, microsecond=0),
+        datetime.timedelta(hours=1))
+    db_bridge.add_stat(stat_type_id, "NULL", machine_id, start_time, shortcuts_stat)
+
+
+if main_stat["key_press_events"]:
+    stat_type_id = db_bridge.register_stat_type("keypresses")
+    start_time = app_stat["key_press_events"][0].replace(minute=0, second=0, microsecond=0)
+    keypress_stat = utils.norm_events_stat_to_hist(
+        main_stat["key_press_events"],
+        start_time,
+        (main_stat["key_press_events"][-1]+datetime.timedelta(hours=1)).replace(minute=0, second=0, microsecond=0),
+        datetime.timedelta(hours=1))
+    db_bridge.add_stat(stat_type_id, "NULL", machine_id, start_time, keypress_stat)
