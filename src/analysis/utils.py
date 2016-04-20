@@ -52,15 +52,29 @@ def group_by_intervals(events, start, finish, interval):
                 hist.append([])
             hist[-1].append(evt)
 
-    desired_out_length = timedelta2Minutes(finish - start + interval) / timedelta2Minutes(interval)
-    while len(hist) < desired_out_length:
-        hist.append([])
-
     return hist
 
 
+def group_intervals_by_intervals(events, start, finish, interval):
+    period_start, period_end = start, start + interval
+    hist = [[]] # array of arrays
+    for evt in events:
+        if period_start <= evt[0] < period_end:
+            hist[-1].append(evt)
+        else:
+            while evt[0] > period_end:
+                period_start, period_end = period_end, period_end + interval
+                hist.append([])
+            hist[-1].append(evt)
+
+    return hist
+
 def norm_events_stat_to_hist(events, start, finish, interval):
     return list(map(lambda a: len(a), group_by_intervals(events, start, finish, interval)))
+
+
+def intervals_to_hist(events, start, finish, interval):
+    return list(map(lambda a: sum([i[1]-i[0] for i in a], datetime.timedelta()), group_intervals_by_intervals(events, start, finish, interval)))
 
 
 def apps_usage_stat(foreground_windows, start, hist_delta):

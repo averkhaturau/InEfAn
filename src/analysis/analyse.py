@@ -102,6 +102,7 @@ for procname in app_intrvls:
     app_activity_periods   = utils.cross_intervals(app_intrvls[procname], log_parse.activity_periods, lambda element: element, lambda orig,intrvl: intrvl)
     app_input_events       = utils.cross_intervals(app_intrvls[procname], log_parse.unique_input_events, lambda element: [element[1],element[1]], lambda orig,intrvl: (orig[0],intrvl[1]))
     app_keys_and_scrolls   = utils.cross_intervals(app_intrvls[procname], log_parse.keys_and_scrolls, lambda element: [element[1],element[1]], lambda orig,intrvl: (orig[0],intrvl[1]))
+    app_scroll_events      = utils.cross_intervals(app_intrvls[procname], log_parse.scroll_events, lambda element: element, lambda orig,intrvl: intrvl)
     app_mouse_click_events = utils.cross_intervals(app_intrvls[procname], log_parse.mouse_click_events, lambda element: [element,element], lambda orig,intrvl: intrvl[1])
     app_mouse_other_events = utils.cross_intervals(app_intrvls[procname], log_parse.mouse_other_events, lambda element: [element,element], lambda orig,intrvl: intrvl[1])
     app_shortcut_events    = utils.cross_intervals(app_intrvls[procname], log_parse.shortcut_events, lambda element: [element,element], lambda orig,intrvl: intrvl[1])
@@ -125,6 +126,7 @@ for procname in app_intrvls:
     if app_stat and "key_press_events" in app_stat and app_stat["key_press_events"]:
         db_bridge.save_events_to_db("keypresses", app_id, machine_id, app_stat["key_press_events"])
     db_bridge.save_events_to_db("addikeypresses", app_id, machine_id, app_addi_keys_events)
+    db_bridge.save_intervals_to_db("scroll_length", app_id, machine_id,  app_scroll_events)
 
 
 print("\n\nGeneral statistics:")
@@ -140,9 +142,9 @@ kb_to_mouse      = main_stat["kb_to_mouse"]
 
 # write statistics to database
 app_id = 0
-db_bridge.save_events_to_db("mouse_clicks", app_id, machine_id, app_mouse_click_events)
-db_bridge.save_events_to_db("shortcuts", app_id, machine_id, app_shortcut_events)
-if app_stat and "key_press_events" in app_stat and app_stat["key_press_events"]:
-    db_bridge.save_events_to_db("keypresses", app_id, machine_id, app_stat["key_press_events"])
-db_bridge.save_events_to_db("addikeypresses", app_id, machine_id, app_addi_keys_events)
-
+db_bridge.save_events_to_db("mouse_clicks", app_id, machine_id, log_parse.mouse_click_events)
+db_bridge.save_events_to_db("shortcuts", app_id, machine_id, log_parse.shortcut_events)
+if main_stat and "key_press_events" in main_stat and main_stat["key_press_events"]:
+    db_bridge.save_events_to_db("keypresses", app_id, machine_id, main_stat["key_press_events"])
+db_bridge.save_events_to_db("addikeypresses", app_id, machine_id, log_parse.addi_keys_events)
+db_bridge.save_intervals_to_db("scroll_length", app_id, machine_id,  log_parse.scroll_events)

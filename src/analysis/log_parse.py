@@ -19,6 +19,7 @@ addi_keys_events = [] # pgup, pgdown, arrow keys, home, end, ins, del, ...
 # to counterpose mouse events to key presses
 mouse_click_events = []
 mouse_other_events = []
+scroll_events = []
 
 inactivity_interval = datetime.timedelta(seconds=4) # if no events during this time span, consider user inactive
 
@@ -150,6 +151,10 @@ def on_mouse_event(event_time, line_word):
 
     if line_word[3] in ("wheel","h-wheel"):
         keys_and_scrolls.append(("scroll " + line_word[-1], event_time))
+        if line_word[-1] == "started" and (not scroll_events or len(scroll_events[-1]) != 1):
+            scroll_events.append([event_time])
+        elif line_word[-1] == "finished" and scroll_events and len(scroll_events[-1]) == 1:
+            scroll_events[-1].append(event_time)
 
     if line_word[-1] == "up" or line_word[-1] == "finished":
         #print("Mouse using stopped at " + str(event_time))

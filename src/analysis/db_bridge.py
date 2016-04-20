@@ -60,9 +60,10 @@ def add_stat(stat_type_id, app_id, machine_id, start_time, value):
             query = (
             ''' insert into stats (stat_type_id, app_id, machine_id, stat_time, {})
             values({}, {}, "{}", "{}", "{}")
-            ON DUPLICATE KEY UPDATE {}={}
+            ON DUPLICATE KEY UPDATE {}="{}"
             '''.format(val_column, stat_type_id, app_id, machine_id, time, v, val_column, v)
             )
+            # print(query)
             time += interval
             if v:
                 cursor.execute(query)
@@ -80,3 +81,13 @@ def save_events_to_db(stat_name, app_id, machine_id, events_list):
         add_stat(stat_type_id, app_id, machine_id, start_time, events_hist)
 
 
+def save_intervals_to_db(stat_name, app_id, machine_id, intervals):
+    if intervals:
+        stat_type_id = register_stat_type(stat_name)
+        start_time = stat_settings.to_start(intervals[0][0])
+        events_hist = utils.intervals_to_hist(
+            intervals,
+            start_time,
+            stat_settings.to_finish(intervals[-1][-1]),
+            stat_settings.stat_interval)
+        add_stat(stat_type_id, app_id, machine_id, start_time, events_hist)
