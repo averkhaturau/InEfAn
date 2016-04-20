@@ -124,6 +124,7 @@ for procname in app_intrvls:
     db_bridge.save_events_to_db("shortcuts", app_id, machine_id, app_shortcut_events)
     if app_stat and "key_press_events" in app_stat and app_stat["key_press_events"]:
         db_bridge.save_events_to_db("keypresses", app_id, machine_id, app_stat["key_press_events"])
+    db_bridge.save_events_to_db("addikeypresses", app_id, machine_id, app_addi_keys_events)
 
 
 print("\n\nGeneral statistics:")
@@ -143,3 +144,5 @@ db_bridge.save_events_to_db("mouse_clicks", app_id, machine_id, app_mouse_click_
 db_bridge.save_events_to_db("shortcuts", app_id, machine_id, app_shortcut_events)
 if app_stat and "key_press_events" in app_stat and app_stat["key_press_events"]:
     db_bridge.save_events_to_db("keypresses", app_id, machine_id, app_stat["key_press_events"])
+db_bridge.save_events_to_db("addikeypresses", app_id, machine_id, app_addi_keys_events)
+
