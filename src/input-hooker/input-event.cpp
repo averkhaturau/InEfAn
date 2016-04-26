@@ -1,5 +1,7 @@
 #include "input-event.h"
+#include "keycodes.h"
 #include "keycodes-anonimized.h"
+
 
 MouseAnyEvent::MouseAnyEvent(WPARAM wp, MSLLHOOKSTRUCT const& me)
 {
@@ -70,8 +72,10 @@ DWORD KeyboardEvent::time() const
 std::string KeyboardEvent::description() const
 {
     return std::string() +
-           vKeyCodesAnonimized[eventData.vkCode % _countof(vKeyCodesAnonimized)] + " " +
-           (wparam == WM_KEYDOWN || wparam == WM_SYSKEYDOWN ? "down " : "up ");
+           (anonimized ?
+            vKeyCodesAnonimized[eventData.vkCode % _countof(vKeyCodesAnonimized)] :
+            vKeyCodes[eventData.vkCode % _countof(vKeyCodes)]) +
+           " " + (wparam == WM_KEYDOWN || wparam == WM_SYSKEYDOWN ? "down " : "up ");
 }
 
 std::string KeyboardEvent::inputDevice() const

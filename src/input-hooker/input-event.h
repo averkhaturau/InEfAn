@@ -43,7 +43,10 @@ public:
     virtual std::string description()const override;
     virtual std::string inputDevice()const override;
 
+    KeyboardEvent const deanonimized(bool showKeyCode = false) {anonimized = !showKeyCode; return *this;} // for shortcuts de-anonimization
+
     bool isRepeatable()const override;
 private:
     KBDLLHOOKSTRUCT eventData;
+    bool anonimized = true;
 };

@@ -66,6 +66,26 @@ private:
 };
 
 
+class KeycodeDeanonimizer
+{
+public:
+    bool shouldDeanonimize() {return isShortCut;}
+
+    void updateState(WPARAM wparam, KBDLLHOOKSTRUCT kbsrtuct)
+    {
+        if (kbsrtuct.vkCode == VK_CONTROL || kbsrtuct.vkCode == VK_RCONTROL || kbsrtuct.vkCode == VK_LCONTROL ||
+            kbsrtuct.vkCode == VK_MENU    || kbsrtuct.vkCode == VK_RMENU    || kbsrtuct.vkCode == VK_LMENU ||
+            kbsrtuct.vkCode == VK_RWIN || kbsrtuct.vkCode == VK_LWIN)
+            if (wparam == WM_KEYUP || wparam == WM_SYSKEYUP)
+                isShortCut = false;
+            else
+                isShortCut = true;
+    }
+private:
+    bool isShortCut = false;
+};
+
+
 void initEventsListening()
 {
     static LanguageChangeListener lnHooker;
@@ -73,12 +93,15 @@ void initEventsListening()
         Logger::instance() << "Language changed to " << lang;
     });
 
+    static KeycodeDeanonimizer kcDeanonimizer;
+
     // Start listen to input devices
     InputHooker::instance().setHooks(
-    [](WPARAM wparam, KBDLLHOOKSTRUCT kbsrtuct) {
+    [](WPARAM wparam, KBDLLHOOKSTRUCT kbstruct) {
         std::future<void> parallelSections[] = {
-            std::async(std::launch::async, [&]() {EventPreanalyser<KeyboardEvent>(KeyboardEvent(wparam, kbsrtuct))(); }),
-            std::async(std::launch::async, [&]() {if (LanguageChangeListener::langChangePossible(wparam, kbsrtuct)) { std::this_thread::yield(); lnHooker.checkChange(); }})
+            std::async(std::launch::async, [&]() {EventPreanalyser<KeyboardEvent>(KeyboardEvent(wparam, kbstruct).deanonimized(kcDeanonimizer.shouldDeanonimize()))(); }),
+            std::async(std::launch::async, [&]() {if (LanguageChangeListener::langChangePossible(wparam, kbstruct)) { std::this_thread::yield(); lnHooker.checkChange(); }}),
+            std::async(std::launch::async, [&]() {kcDeanonimizer.updateState(wparam, kbstruct); }),
         };
     },
     [](WPARAM wparam, MSLLHOOKSTRUCT mstruct) {EventPreanalyser<MouseAnyEvent>(MouseAnyEvent(wparam, mstruct))(); });

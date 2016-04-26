@@ -13,7 +13,7 @@ class EventPreanalyser
     EventPreanalyser(EventPreanalyser const&) = delete;
     EventPreanalyser(EventPreanalyser&&) = delete;
 public:
-    explicit EventPreanalyser(Ev_t&& ev) : ie(ev) {}
+    explicit EventPreanalyser(Ev_t const& ev) : ie(ev) {}
     void operator()()
     {
         logEvent(ie);
