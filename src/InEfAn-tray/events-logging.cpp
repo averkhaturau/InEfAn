@@ -3,6 +3,9 @@
 #include "input-hooker/input-hooker.h"
 #include "active-app-tracker/ActiveWindowTracker.h"
 #include "active-app-tracker/WindowInfo.h"
+#include "language-change-listener.h"
+#include "keycode-deanonimizer.h"
+
 #include <future>
 
 // helper function to print mouse position from the input event
@@ -28,62 +31,6 @@ Logger::LogRecord logEvent(InputDeviceEvent const& ie)
         return Logger::instance() << "Unknown exception raised";
     }
 }
-
-class LanguageChangeListener
-{
-public:
-    void checkChange()
-    {
-        std::wstring currentLang = getForegroundWindowInputLanguage();
-
-        if (callback && lang != currentLang) {
-            lang = currentLang;
-            callback(lang);
-        }
-    }
-
-    static bool langChangePossible(WPARAM wparam, KBDLLHOOKSTRUCT kbsrtuct)
-    {
-        return (wparam == WM_KEYUP || wparam == WM_SYSKEYUP) &&
-               kbsrtuct.vkCode == VK_CONTROL || kbsrtuct.vkCode == VK_MENU || (0xA0 <= kbsrtuct.vkCode && kbsrtuct.vkCode <= 0xA5);
-    }
-
-    void setCallback(std::function<void(std::wstring const&)> fn) { callback = fn; };
-private:
-    std::wstring lang;
-    std::function<void(std::wstring const&)> callback;
-
-    std::wstring getForegroundWindowInputLanguage()const
-    {
-        GUITHREADINFO gti = {/*.cbSize = */sizeof(GUITHREADINFO)};
-        BOOL res = GetGUIThreadInfo(0, &gti);
-        DWORD dwThread = GetWindowThreadProcessId(gti.hwndActive, 0);
-        HKL keylayout = GetKeyboardLayout(dwThread);
-        WCHAR currentLang[KL_NAMELENGTH + 1] = {};
-        int length = GetLocaleInfoW(MAKELCID((UINT)keylayout & 0xffffffff, SORT_DEFAULT), LOCALE_SISO639LANGNAME, currentLang, _countof(currentLang));
-        return currentLang;
-    }
-};
-
-
-class KeycodeDeanonimizer
-{
-public:
-    bool shouldDeanonimize() {return isShortCut;}
-
-    void updateState(WPARAM wparam, KBDLLHOOKSTRUCT kbsrtuct)
-    {
-        if (kbsrtuct.vkCode == VK_CONTROL || kbsrtuct.vkCode == VK_RCONTROL || kbsrtuct.vkCode == VK_LCONTROL ||
-            kbsrtuct.vkCode == VK_MENU    || kbsrtuct.vkCode == VK_RMENU    || kbsrtuct.vkCode == VK_LMENU ||
-            kbsrtuct.vkCode == VK_RWIN || kbsrtuct.vkCode == VK_LWIN)
-            if (wparam == WM_KEYUP || wparam == WM_SYSKEYUP)
-                isShortCut = false;
-            else
-                isShortCut = true;
-    }
-private:
-    bool isShortCut = false;
-};
 
 
 void initEventsListening()

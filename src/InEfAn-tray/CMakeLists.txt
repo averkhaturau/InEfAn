@@ -25,6 +25,10 @@ set(SRCS
 	win-reg.cpp
 	win-reg.h
 
+	language-change-listener.cpp
+	language-change-listener.h
+	keycode-deanonimizer.h
+
 	${VERS_CONF}
 	${VERS_FILE}
 )
