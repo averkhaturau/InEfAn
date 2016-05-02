@@ -34,6 +34,7 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 
 void periodicallySendFiles();
 
+
 int APIENTRY _tWinMain(
     _In_ HINSTANCE hInstance,
     _In_opt_ HINSTANCE hPrevInstance,
@@ -181,7 +182,10 @@ void periodicallySendFiles()
     };
     static UINT_PTR timer = 0;
     static auto actionOnTimer = [](TIMERPROC callOnNextTimer) {
+        const bool isHooking = InputHooker::instance().isHooking();
+        InputHooker::instance().stopHook();
         UINT timerInterval = postFilesFn().get() ? sInDay * 1000 : 60000;
+        if (isHooking) PostMessage(traydata.hWnd, RESUME_LOGGING_MESSAGE, 0, 0);
         timer = SetTimer(NULL, 0, timerInterval, callOnNextTimer);
     };
 
@@ -225,7 +229,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         trayIconUpdate(IDI_MAINICON, IDC_LOGGING_RESUMED);
                         break;
                     case ID_TRAYMENU_SENDLOGFILES: {
-                        static volatile bool isSendingFiles = false;
+                        static std::atomic<bool> isSendingFiles = false;
                         if (!isSendingFiles) {
                             isSendingFiles = true;
                             allowFirewallForMe();
@@ -233,7 +237,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                             // TODO: rewrite to async-await when compiler is ready
                             rotateLogfile();
                             auto fileSent = postAllNewLogfiles();
-
                             std::thread([&fileSent]() {
                                 trayNotify(fileSent.get() ? IDC_LOGFILES_SENT : IDC_LOGFILES_NOTSENT);
                                 isSendingFiles = false;
@@ -283,6 +286,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 };
             }
             break;
+            case RESUME_LOGGING_MESSAGE:
+                // hooking start must be called from the main thread only
+                InputHooker::instance().startHook();
+                break;
             case WM_DESTROY:
                 PostQuitMessage(0);
                 break;
