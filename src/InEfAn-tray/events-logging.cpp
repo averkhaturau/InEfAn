@@ -4,6 +4,7 @@
 #include "active-app-tracker/ActiveWindowTracker.h"
 #include "active-app-tracker/WindowInfo.h"
 #include <future>
+#include <atomic>
 
 // helper function to print mouse position from the input event
 inline std::string mousePosToString(InputDeviceEvent const& ie)
@@ -82,7 +83,7 @@ public:
                 isShortCut = true;
     }
 private:
-    bool isShortCut = false;
+    std::atomic<bool> isShortCut = false;
 };
 
 
