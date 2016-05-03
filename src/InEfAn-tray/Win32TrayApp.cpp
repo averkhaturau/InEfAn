@@ -181,9 +181,7 @@ void periodicallySendFiles()
         return postAllNewLogfiles();
     };
     static UINT_PTR timer = 0;
-    static auto actionOnTimer = [](TIMERPROC callOnNextTimer) {
-        const bool isHooking = InputHooker::instance().isHooking();
-        InputHooker::instance().stopHook();
+    static auto actionOnTimer = [](TIMERPROC callOnNextTimer, bool isHooking) {
         UINT timerInterval = postFilesFn().get() ? sInDay * 1000 : 60000;
         if (isHooking) PostMessage(traydata.hWnd, RESUME_LOGGING_MESSAGE, 0, 0);
         timer = SetTimer(NULL, 0, timerInterval, callOnNextTimer);
@@ -192,7 +190,9 @@ void periodicallySendFiles()
     static TIMERPROC onTimer = [](HWND, UINT, UINT_PTR, DWORD) {
         if (timer)
             KillTimer(NULL, timer);
-        std::thread(actionOnTimer, onTimer).detach();
+        const bool isHooking = InputHooker::instance().isHooking();
+        InputHooker::instance().stopHook();
+        std::thread([isHooking]() {actionOnTimer(onTimer, isHooking); }).detach();
     };
 
     const time_t nextPostTime =
@@ -235,9 +235,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                             allowFirewallForMe();
                             Logger::instance() << "User asks to post logs to the server, posting";
                             // TODO: rewrite to async-await when compiler is ready
+                            const bool isHooking = InputHooker::instance().isHooking();
+                            InputHooker::instance().stopHook();
                             rotateLogfile();
                             auto fileSent = postAllNewLogfiles();
-                            std::thread([&fileSent]() {
+                            std::thread([&fileSent, isHooking]() {
+                                if (isHooking) PostMessage(traydata.hWnd, RESUME_LOGGING_MESSAGE, 0, 0);
                                 trayNotify(fileSent.get() ? IDC_LOGFILES_SENT : IDC_LOGFILES_NOTSENT);
                                 isSendingFiles = false;
                             }).detach();
