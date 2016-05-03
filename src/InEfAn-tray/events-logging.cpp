@@ -7,6 +7,7 @@
 #include "keycode-deanonimizer.h"
 
 #include <future>
+#include <atomic>
 
 // helper function to print mouse position from the input event
 inline std::string mousePosToString(InputDeviceEvent const& ie)

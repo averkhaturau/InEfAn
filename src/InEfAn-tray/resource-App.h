@@ -31,3 +31,4 @@
 #define IDC_STATIC                    -1
 
 #define TRAY_ICON_MESSAGE (WM_APP + 0x0001)
+#define RESUME_LOGGING_MESSAGE (WM_APP + 2)

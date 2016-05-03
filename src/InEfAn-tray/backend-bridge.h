@@ -196,16 +196,7 @@ void trySplitLog(std::tr2::sys::path const& logPath)
 std::future<bool> postAllNewLogfiles()
 {
     auto postNewLogs = [](const time_t postTime) {
-#ifdef _DEBUG
-        // disable hooking while sending
-        const bool isHooking = InputHooker::instance().isHooking();
-        InputHooker::instance().stopHook();
-        auto enableLogger = [isHooking](void*) {if(isHooking) InputHooker::instance().startHook(); };
-        std::unique_ptr<void, decltype(enableLogger)> onRet((void*)1/*must be not nullptr*/, enableLogger);
-#endif // _DEBUG
-
         try {
-
             using namespace std::tr2::sys;
             // read last logs sent time
             RegistryHelper reg(HKEY_CURRENT_USER, _T("Software\\") _T(BRAND_COMPANYNAME) _T("\\") _T(BRAND_NAME));
