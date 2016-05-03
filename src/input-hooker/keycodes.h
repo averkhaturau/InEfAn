@@ -92,9 +92,9 @@ const char* vKeyCodes[] = {
     "X key",
     "Y key",
     "Z key",
-    "Left Windows key(Natural keyboard)",
-    "Right Windows key(Natural keyboard)",
-    "Applications key(Natural keyboard)",
+    "Left Windows key",
+    "Right Windows key",
+    "Applications key",
     "Reserved",
     "Computer Sleep key",
     "Numeric keypad 0 key",
@@ -187,13 +187,13 @@ const char* vKeyCodes[] = {
     "Start Application 2 key",
     "Reserved", // 0xB8
     "Reserved", // 0xB9
-    "Used for miscellaneous characters; it can vary by keyboard\n" "For the US standard keyboard, the ';:' key",
-    "For any country / region, the '+' key",
-    "For any country / region, the ',' key",
-    "For any country / region, the '-' key",
-    "For any country / region, the '.' key",
-    "Used for miscellaneous characters; it can vary by keyboard\n" "For the US standard keyboard, the '/?' key",
-    "Used for miscellaneous characters; it can vary by keyboard\n" "For the US standard keyboard, the '`~' key",
+    ";: key",
+    "+ key",
+    ", key",
+    "- key",
+    ". key",
+    "/? key",
+    "`~ key",
     "Reserved", // 0xC1
     "Reserved", // 0xC2
     "Reserved", // 0xC3
@@ -220,11 +220,11 @@ const char* vKeyCodes[] = {
     "Unassigned", //0xD8
     "Unassigned", //0xD9
     "Unassigned", //0xDa
-    "Used for miscellaneous characters; it can vary by keyboard\n" "For the US standard keyboard, the '[{' key",
-    "Used for miscellaneous characters; it can vary by keyboard\n" "For the US standard keyboard, the '\\|' key",
-    "Used for miscellaneous characters; it can vary by keyboard\n" "For the US standard keyboard, the ']}' key",
-    "Used for miscellaneous characters; it can vary by keyboard\n" "For the US standard keyboard, the 'single-quote/double-quote' key",
-    "Used for miscellaneous characters; it can vary by keyboard.",
+    "'[{' key",
+    "'\\|' key",
+    "']}' key",
+    "'single-quote/double-quote' key",
+    "Unknown",
     "Reserved", // 0xE0
     "OEM specific", //0xE1
     "Either the angle bracket key or the backslash key on the RT 102 - key keyboard",
