@@ -27,7 +27,7 @@
 
 namespace
 {
-    const size_t fileSizeToSplit = 500000; // do not split log anymore if its size less then this
+    const size_t fileSizeToSplit = 512000; // do not split log anymore if its size less then this
 }
 
 template<class Out_t, class In_t>
@@ -182,15 +182,19 @@ void trySplitLog(std::tr2::sys::path const& logPath)
             {
                 std::ifstream orig(logPath, std::ios::binary);
                 std::ofstream part1(path(logPath).replace_extension("._0.txt"), std::ios::binary);
+                std::ofstream part2(path(logPath).replace_extension("._1.txt"), std::ios::binary);
 
                 std::copy_n(std::istreambuf_iterator<char>(orig), fileSize / 2, std::ostreambuf_iterator<char>(part1));
-                std::find_if(std::istreambuf_iterator<char>(orig), std::istreambuf_iterator<char>(), [&part1](char ch) { if (ch == '\n') return true; part1 << ch; return false; });
-                std::copy(std::istreambuf_iterator<char>(orig), std::istreambuf_iterator<char>(), std::ostreambuf_iterator<char>(std::ofstream(path(logPath).replace_extension("._1.txt"), std::ios::binary)));
+                std::find_if(++std::istreambuf_iterator<char>(orig), std::istreambuf_iterator<char>(), [&part1](char ch) { part1 << ch; return ch == '\n'; });
+                std::copy(++std::istreambuf_iterator<char>(orig), std::istreambuf_iterator<char>(), std::ostreambuf_iterator<char>(part2));
             }
             remove(logPath, std::error_code());
         }
-    } catch(std::exception const& ee) {std::cerr << ee.what();}
-    catch(...) {std::cerr << "unhandled exception in" << __FUNCTION__;}
+    } catch (std::exception const& ee) {
+        std::cerr << ee.what();
+    } catch (...) {
+        std::cerr << "unhandled exception in" << __FUNCTION__;
+    }
 }
 
 std::future<bool> postAllNewLogfiles()
