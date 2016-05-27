@@ -13,7 +13,7 @@
 #include <time.h>
 #include <thread>
 
-#include "input-hooker/input-hooker.h"
+#include "InputHooker/input-hooker.h"
 #include "events-logging.h"
 
 #include "app-id.h"

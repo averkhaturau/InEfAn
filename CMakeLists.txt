@@ -26,13 +26,13 @@ set(CMAKE_MODULE_PATH
 )
 
 
-include_directories(src src/logger/src)
+include_directories(src src/logger)
 
 INTEGRATE_BOOST()
 
-add_subdirectory(src/input-hooker)
+add_subdirectory(src/InputHooker)
 add_subdirectory(src/active-app-tracker)
-add_subdirectory(src/logger/src)
+add_subdirectory(src/Logger)
 add_subdirectory(src/InEfAn-tray)
 
 option(DEVELOPER_TESTS ON)

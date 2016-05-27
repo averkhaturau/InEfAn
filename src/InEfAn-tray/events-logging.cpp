@@ -1,6 +1,6 @@
 #include "events-logging.h"
 
-#include "input-hooker/input-hooker.h"
+#include "InputHooker/input-hooker.h"
 #include "active-app-tracker/ActiveWindowTracker.h"
 #include "active-app-tracker/WindowInfo.h"
 #include "language-change-listener.h"

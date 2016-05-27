@@ -21,7 +21,7 @@
 #include <filesystem>
 #include "log-helpers.h"
 #include "logger.h"
-#include "input-hooker/input-hooker.h"
+#include "InputHooker/input-hooker.h"
 #include "win-reg.h"
 #include "app-id.h"
 
