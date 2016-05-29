@@ -1,9 +1,6 @@
 [submodule "src/Logger"]
 	path = src/Logger
 	url = https://github.com/averkhaturau/Logger.git
-[submodule "src/analytics"]
-	path = src/analytics
-	url = https://bitbucket.org/pleasier/analytics.git
 [submodule "src/InputHooker"]
 	path = src/InputHooker
 	url = https://github.com/averkhaturau/InputHooker
