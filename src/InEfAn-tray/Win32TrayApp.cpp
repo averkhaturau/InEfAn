@@ -241,10 +241,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                             Logger::instance() << "User asks to post logs to the server, posting";
                             // TODO: rewrite to async-await when compiler is ready
                             rotateLogfile();
-                            auto fileSent = postAllNewLogfiles();
+                            std::future<bool> fileSent = postAllNewLogfiles(); // start posting files
                             std::thread([&fileSent, isHooking]() {
-                                if (isHooking) PostMessage(traydata.hWnd, RESUME_LOGGING_MESSAGE, 0, 0);
                                 trayNotify(fileSent.get() ? IDC_LOGFILES_SENT : IDC_LOGFILES_NOTSENT);
+                                if (isHooking) PostMessage(traydata.hWnd, RESUME_LOGGING_MESSAGE, 0, 0);
                                 isSendingFiles = false;
                             }).detach();
                         }
@@ -268,7 +268,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     }
                     break;
                     case ID_TRAYMENU_MYPROFILE: {
-                        const std::wstring myProfileUrl = std::wstring(_T("https://") _T(BRAND_DOMAIN) _T("/dashboard/?machine_id=")) + appId();
+                        const std::wstring myProfileUrl = std::wstring(_T("https://") _T(BRAND_DOMAIN) _T("/inefan/?machine_id=")) + appId();
                         ShellExecuteW(hWnd, L"open", myProfileUrl.c_str(), NULL, NULL, SW_RESTORE);
                     }
                     break;
