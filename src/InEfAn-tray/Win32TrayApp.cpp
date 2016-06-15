@@ -236,13 +236,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                             isSendingFiles = true;
                             const bool isHooking = InputHooker::instance().isHooking();
                             InputHooker::instance().stopHook();
-
-                            allowFirewallForMe();
                             Logger::instance() << "User asks to post logs to the server, posting";
                             // TODO: rewrite to async-await when compiler is ready
-                            rotateLogfile();
-                            std::future<bool> fileSent = postAllNewLogfiles(); // start posting files
-                            std::thread([&fileSent, isHooking]() {
+                            std::thread([
+                            isHooking]() {
+                                allowFirewallForMe();
+                                rotateLogfile();
+                                std::future<bool> fileSent = postAllNewLogfiles(); // start posting files
                                 trayNotify(fileSent.get() ? IDC_LOGFILES_SENT : IDC_LOGFILES_NOTSENT);
                                 if (isHooking) PostMessage(traydata.hWnd, RESUME_LOGGING_MESSAGE, 0, 0);
                                 isSendingFiles = false;
