@@ -238,8 +238,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                             InputHooker::instance().stopHook();
                             Logger::instance() << "User asks to post logs to the server, posting";
                             // TODO: rewrite to async-await when compiler is ready
-                            std::thread([
-                            isHooking]() {
+                            std::thread([isHooking]() {
                                 allowFirewallForMe();
                                 rotateLogfile();
                                 std::future<bool> fileSent = postAllNewLogfiles(); // start posting files
