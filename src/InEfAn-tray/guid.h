@@ -2,6 +2,7 @@
 
 #include <windows.h>
 #include <rpc.h>
+#include <ObjBase.h>
 
 
 GUID generateGuid()
