@@ -37,7 +37,7 @@ macro(DEFINE_DEFAULT_DEFINITIONS)
 	)
 
 	if(WIN32)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Zi")
+		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Zi /std:c++17")
 		set(CMAKE_EXE_LINKER_FLAGS_RELEASE 
 			"${CMAKE_EXE_LINKER_FLAGS_RELEASE} /DEBUG"
 		)
@@ -48,6 +48,7 @@ macro(DEFINE_DEFAULT_DEFINITIONS)
 	endif(WIN32)
 
 
+	if(OFF)
 	# support WindowsXP
 	if(MSVC OR MSVC_IDE)
 		if(MSVC_VERSION EQUAL 1700)  # VC11/VS2012
@@ -59,8 +60,12 @@ macro(DEFINE_DEFAULT_DEFINITIONS)
 		elseif(MSVC_VERSION EQUAL 1900) # VC14/VS2015
 			add_definitions(-D_USING_V140_SDK71_)
 			set(CMAKE_GENERATOR_TOOLSET "v140_xp" CACHE STRING "Platform Toolset" FORCE)
+		elseif(MSVC_VERSION EQUAL 1911) # VC14.1/VS2017
+			add_definitions(-D_USING_V141_SDK71_)
+			set(CMAKE_GENERATOR_TOOLSET "v141_xp" CACHE STRING "Platform Toolset" FORCE)
 		endif()
 	endif(MSVC OR MSVC_IDE)
+	endif(OFF)
 
 
 endmacro(DEFINE_DEFAULT_DEFINITIONS)
@@ -68,8 +73,9 @@ endmacro(DEFINE_DEFAULT_DEFINITIONS)
 macro(SETUP_COMPILER_SETTINGS IS_DYNAMIC)
 	set(IS_DYNAMIC ${IS_DYNAMIC})
 
-	string(REPLACE ";" " " cmake_cl_release_init_str "${ADDITIONAL_CL_OPTIMIZATION_OPTIONS} /D NDEBUG /EHsc")
-	string(REPLACE ";" " " cmake_linker_release_init_str "${ADDITIONAL_LINKER_OPTIMIZATION_OPTIONS}") # /opt:ref /OPT:ICF
+	string(REPLACE ";" " " cmake_cl_release_init_str "${ADDITIONAL_CL_OPTIMIZATION_OPTIONS} /D NDEBUG /EHsc /W4 /Ox /Ot /GL /GF /Gy /Qpar /GR /FR ")
+#	string(REPLACE ";" " " cmake_linker_release_init_str "${ADDITIONAL_LINKER_OPTIMIZATION_OPTIONS} /opt:ref /OPT:ICF /DEBUG")
+	string(REPLACE ";" " " cmake_linker_release_init_str "${ADDITIONAL_LINKER_OPTIMIZATION_OPTIONS} /opt:ref /DEBUG")
 		
 	if(IS_DYNAMIC)
 
@@ -77,19 +83,19 @@ macro(SETUP_COMPILER_SETTINGS IS_DYNAMIC)
 
 			if(WIN32)
 
-				set(CMAKE_C_FLAGS_DEBUG_INIT 		\"/D_DEBUG /MDd /Zi /Ob0 /Od /RTC1\")
-				set(CMAKE_C_FLAGS_MINSIZEREL_INIT     	\"/MD /O1 /Ob1 /D NDEBUG\")
-				set(CMAKE_C_FLAGS_RELEASE_INIT       	\"/MD /O2 /Ob2 /D NDEBUG\")
-				set(CMAKE_C_FLAGS_RELWITHDEBINFO_INIT 	\"/MD /Zi /O2 /Ob1 /D NDEBUG\")
+				set(CMAKE_C_FLAGS_DEBUG_INIT           \"/D_DEBUG /MDd /Zi /Ob0 /Od /RTC1\")
+				set(CMAKE_C_FLAGS_MINSIZEREL_INIT      \"/MD /O1 /Ob1 /D NDEBUG\")
+				set(CMAKE_C_FLAGS_RELEASE_INIT         \"/MD /O2 /Ob2 /D NDEBUG\")
+				set(CMAKE_C_FLAGS_RELWITHDEBINFO_INIT  \"/MD /Zi /O2 /Ob1 /D NDEBUG\")
 
-				set(CMAKE_CXX_FLAGS_DEBUG_INIT 			\"/D_DEBUG /MDd /Zi /Ob0 /Od /EHsc /RTC1\")
+				set(CMAKE_CXX_FLAGS_DEBUG_INIT          \"/D_DEBUG /MDd /Zi /Ob0 /Od /EHsc /RTC1\")
 				set(CMAKE_CXX_FLAGS_MINSIZEREL_INIT     \"/MD /O1 ${cmake_cl_release_init_str}\")
 				set(CMAKE_CXX_FLAGS_RELEASE_INIT        \"/MD /O2 ${cmake_cl_release_init_str}\")
 				set(CMAKE_CXX_FLAGS_RELWITHDEBINFO_INIT \"/MD /Zi /O2 /Ob1 /D NDEBUG /EHsc\")
 
-				set(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL_INIT	\"${cmake_linker_release_init_str}\")
-				set(CMAKE_EXE_LINKER_FLAGS_RELEASE_INIT		\"${cmake_linker_release_init_str}\")
-				set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO_INIT	\"${cmake_linker_release_init_str}\")
+				set(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL_INIT     \"${cmake_linker_release_init_str}\")
+				set(CMAKE_EXE_LINKER_FLAGS_RELEASE_INIT        \"${cmake_linker_release_init_str}\")
+				set(CMAKE_EXE_LINKER_FLAGS_RELWITHDEBINFO_INIT \"${cmake_linker_release_init_str}\")
 
 			endif(WIN32)
 
@@ -171,7 +177,7 @@ macro(SETUP_COMPILER_SETTINGS IS_DYNAMIC)
 	endif()
 
 	if(MSVC)
-		set(DEVELOPER_NUM_BUILD_PROCS 5 CACHE STRING "Parameter for /MP option")
+		set(DEVELOPER_NUM_BUILD_PROCS 3 CACHE STRING "Parameter for /MP option")
 		if(${DEVELOPER_NUM_BUILD_PROCS} GREATER 1)
 			string(REGEX REPLACE "/MP([0-9]+)" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 			set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP${DEVELOPER_NUM_BUILD_PROCS}")
